@@ -6,7 +6,7 @@ from flask import (Blueprint, render_template, request, redirect,
                    url_for, flash, session, jsonify)
 from core.auth import require_admin
 from core.persistence import (
-    load_turnos, save_turnos, get_turno_by_id, upsert_turno,
+    load_turnos, get_turno_by_id, upsert_turno,
     load_config, save_config, load_clientes,
     get_cliente_by_id, upsert_cliente
 )
