@@ -2,17 +2,33 @@ import os
 import firebase_admin
 from firebase_admin import credentials, firestore
 
+import json
+
 # Inicializar Firebase si aún no se inicializó
-# Buscamos el archivo de credenciales en el directorio principal
 CRED_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "firebase-credentials.json")
 
 if not firebase_admin._apps:
     try:
-        cred = credentials.Certificate(CRED_PATH)
-        firebase_admin.initialize_app(cred)
-    except FileNotFoundError:
-        print(f"⚠️ ADVERTENCIA: No se encontró el archivo de credenciales de Firebase en: {CRED_PATH}")
-        print("El sistema podría fallar al intentar conectar con la base de datos.")
+        # 1. Intentar leer desde variable de entorno (Vercel)
+        if "FIREBASE_CREDENTIALS" in os.environ:
+            raw_env = os.environ["FIREBASE_CREDENTIALS"]
+            # Vercel a veces escapa los saltos de línea en el private_key
+            cred_dict = json.loads(raw_env)
+            if "private_key" in cred_dict:
+                cred_dict["private_key"] = cred_dict["private_key"].replace('\\n', '\n')
+            
+            cred = credentials.Certificate(cred_dict)
+            firebase_admin.initialize_app(cred)
+        # 2. Intentar leer desde archivo local (Desarrollo)
+        elif os.path.exists(CRED_PATH):
+            cred = credentials.Certificate(CRED_PATH)
+            firebase_admin.initialize_app(cred)
+        else:
+            print(f"⚠️ ADVERTENCIA: No se encontró credenciales de Firebase ni en entorno ni en {CRED_PATH}")
+    except json.JSONDecodeError as e:
+        print(f"⚠️ ERROR de formato JSON en la variable de entorno FIREBASE_CREDENTIALS: {e}")
+    except Exception as e:
+        print(f"⚠️ ERROR al inicializar Firebase: {e}")
 
 # Referencia a Firestore
 def get_db():
