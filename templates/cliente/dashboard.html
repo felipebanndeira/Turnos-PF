@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block title %}Inicio{% endblock %}
+
+{% block extra_css %}
+<style>
+.welcome-banner {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 2rem;
+  margin-bottom: 2rem;
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  flex-wrap: wrap;
+}
+.welcome-text h2 { font-size: 1.5rem; font-weight: 500; margin-bottom: .25rem; display:flex; align-items:center; gap:.5rem; }
+.welcome-text p  { color: var(--text-muted); font-size: .9rem; }
+
+.quick-actions { display: flex; gap: .75rem; flex-wrap: wrap; }
+
+.turno-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  transition: border-color var(--transition);
+}
+.turno-card:hover { border-color: var(--accent-muted); }
+.turno-info-left  { display: flex; align-items: center; gap: 1rem; }
+.turno-date-box {
+  background: var(--bg-input); border-radius: var(--radius);
+  padding: .5rem .75rem; text-align: center; min-width: 60px;
+}
+.turno-date-box .day  { font-size: 1.4rem; font-weight: 600; line-height: 1; }
+.turno-date-box .month{ font-size: .7rem; color: var(--text-muted); text-transform: uppercase; margin-top: .25rem; }
+.turno-details h4     { font-size: .95rem; font-weight: 500; margin-bottom: .15rem; }
+.turno-details span   { color: var(--text-muted); font-size: .82rem; }
+.empty-state {
+  text-align: center; padding: 3rem 1rem;
+  color: var(--text-muted);
+}
+.empty-state svg { opacity: .3; margin-bottom: 1rem; }
+.empty-state p   { margin-bottom: 1.25rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+
+  <!-- Bienvenida -->
+  <div class="welcome-banner animate-up">
+    <div class="welcome-text">
+      <h2>Hola, {{ cliente.nombre.split()[0] }}</h2>
+      <p>{{ config.nombre }} — {{ config.rubro | capitalize }}</p>
+    </div>
+    <div class="quick-actions">
+      <a href="{{ url_for('cliente.solicitar_turno', url_id=url_id) }}" class="btn btn-primary">
+        <i data-lucide="plus" style="width:16px;"></i>
+        Pedir turno
+      </a>
+      <a href="{{ url_for('cliente.mis_turnos', url_id=url_id) }}" class="btn btn-ghost">Ver todos</a>
+    </div>
+  </div>
+
+  <!-- Próximos turnos -->
+  <div class="page-header">
+    <h2 class="page-title" style="font-size:1.15rem;">Próximos turnos</h2>
+  </div>
+
+  {% if proximos %}
+    <div style="display:flex; flex-direction:column; gap:.75rem;">
+      {% for t in proximos %}
+      {% set parts = t.fecha.split('-') %}
+      <div class="turno-card">
+        <div class="turno-info-left">
+          <div class="turno-date-box">
+            <div class="day">{{ parts[2] }}</div>
+            <div class="month">{{ t.fecha | fecha_es | truncate(3,true,'') }}</div>
+          </div>
+          <div class="turno-details">
+            <h4>{{ t.servicio_nombre }}</h4>
+            <span>{{ t.fecha | dia_semana }} · {{ t.hora_inicio }} – {{ t.hora_fin }}</span>
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:.75rem; flex-wrap:wrap;">
+          <span class="badge badge-{{ t.estado }}">{{ t.estado }}</span>
+          {% if t.estado != 'cancelado' %}
+          <form method="POST" action="{{ url_for('cliente.cancelar', turno_id=t.id) }}" onsubmit="return confirm('¿Cancelar este turno?')">
+            <button type="submit" class="btn btn-ghost btn-sm">Cancelar</button>
+          </form>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+  {% else %}
+    <div class="empty-state card">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/>
+        <line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+      </svg>
+      <p>No tenés turnos próximos.</p>
+      <a href="{{ url_for('cliente.solicitar_turno', url_id=url_id) }}" class="btn btn-primary">Reservar un turno</a>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

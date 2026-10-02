@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}Agenda — Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+.agenda-toolbar {
+  display: flex; justify-content: space-between; align-items: center;
+  background: var(--bg-card); padding: 1rem; border-radius: var(--radius);
+  border: 1px solid var(--border-soft); margin-bottom: 1.5rem;
+  flex-wrap: wrap; gap: 1rem;
+}
+.timeline-container {
+  background: var(--bg-card);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+}
+.timeline-item {
+  display: flex; gap: 1.5rem;
+  padding: 1rem 0;
+  border-bottom: 1px dashed var(--border-soft);
+}
+.timeline-item:last-child { border-bottom: none; }
+.time-col {
+  width: 70px; flex-shrink: 0; text-align: right;
+}
+.time-col .start { font-weight: 700; font-family: 'Space Grotesk'; font-size: 1.1rem; }
+.time-col .end { font-size: .75rem; color: var(--text-muted); }
+
+.turno-box {
+  flex: 1;
+  background: var(--bg-input);
+  border-left: 3px solid var(--border);
+  padding: 1rem; border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  display: flex; justify-content: space-between; align-items: flex-start;
+  transition: all .2s;
+}
+.turno-box:hover { background: var(--bg); }
+.turno-box.pendiente { border-left-color: var(--amber); }
+.turno-box.confirmado { border-left-color: var(--emerald); }
+.turno-box.cancelado { border-left-color: var(--border-soft); opacity: 0.6; }
+
+.turno-main h4 { font-size: 1rem; margin-bottom: .25rem; }
+.turno-client { font-size: .875rem; color: var(--text-muted); display: flex; align-items: center; gap: .5rem; }
+.turno-actions { display: flex; gap: .5rem; }
+
+@media (max-width: 600px) {
+  .timeline-item { flex-direction: column; gap: .5rem; }
+  .time-col { text-align: left; display: flex; align-items: baseline; gap: .5rem; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+  
+  <div class="page-header">
+    <h1 class="page-title">Agenda general</h1>
+    <p class="page-subtitle">Visualización diaria de turnos</p>
+  </div>
+
+  <div class="agenda-toolbar">
+    <form method="GET" action="{{ url_for('admin.agenda') }}" style="display:flex; align-items:center; gap:1rem;">
+      <label class="form-label" style="margin:0;">Seleccionar fecha:</label>
+      <input type="date" name="fecha" value="{{ fecha }}" class="form-control" style="width: auto;" onchange="this.form.submit()" />
+    </form>
+    
+    <div>
+      <span style="font-size:.9rem; color:var(--text-muted);">Turnos para el día: </span>
+      <strong style="color:var(--text);">{{ fecha | fecha_es }}</strong>
+    </div>
+  </div>
+
+  <div class="timeline-container">
+    {% if turnos %}
+      {% for t in turnos %}
+      <div class="timeline-item">
+        <div class="time-col">
+          <div class="start">{{ t.hora_inicio }}</div>
+          <div class="end">{{ t.hora_fin }}</div>
+        </div>
+        <div class="turno-box {{ t.estado }}">
+          <div class="card animate-up" style="margin-bottom:.5rem; padding:1rem; border-left:4px solid var(--accent); animation-delay: {{ loop.index * 0.05 }}s; width: 100%;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+              <div>
+                <h4 style="margin:0; font-size:1rem;">{{ t.servicio_nombre }}</h4>
+                <div style="font-size:.85rem; color:var(--text-muted); margin-top:.25rem;">
+                  <i data-lucide="user" style="width:14px; display:inline-block; vertical-align:text-bottom;"></i> {{ t.cliente.nombre }}
+                  {% if t.cliente.telefono %}
+                   <span style="margin-left:.5rem;"><i data-lucide="phone" style="width:14px; display:inline-block; vertical-align:text-bottom;"></i> {{ t.cliente.telefono }}</span>
+                  {% endif %}
+                </div>
+              </div>
+              <div style="text-align:right;">
+                <span class="badge badge-{{ t.estado }}" style="margin-bottom:.5rem;">{{ t.estado }}</span>
+                <br>
+                <a href="{{ url_for('admin.detalle_turno', turno_id=t.id) }}" class="btn btn-ghost btn-sm" style="font-size:.75rem; padding:.25rem .5rem;">Gestionar</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="text-center text-muted" style="padding: 3rem 0;">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:.3; margin-bottom:1rem;">
+          <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+        <p>No hay turnos agendados para este día.</p>
+      </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

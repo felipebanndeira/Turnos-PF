@@ -1,0 +1,370 @@
+{% extends "base.html" %}
+{% block title %}Configuración — Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+.section-title { font-size: 1.15rem; font-weight: 700; margin-bottom: 1rem; color: var(--text); padding-bottom: .5rem; border-bottom: 1px solid var(--border-soft); }
+.dynamic-row {
+  display: flex; gap: 1rem; align-items: flex-start;
+  background: var(--bg-input); padding: 1rem; border-radius: var(--radius-sm);
+  margin-bottom: .75rem; border: 1px solid var(--border);
+}
+.dynamic-row .form-group { margin-bottom: 0; flex: 1; }
+.btn-remove { margin-top: 1.5rem; }
+@media (max-width: 768px) {
+  .dynamic-row { flex-direction: column; }
+  .dynamic-row .form-group { width: 100%; }
+  .btn-remove { margin-top: 0; align-self: flex-end; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-wrapper" style="max-width:900px;">
+  
+  <div class="page-header">
+    <h1 class="page-title">Configuración del Negocio</h1>
+    <p class="page-subtitle">Ajustá los parámetros para adaptar el sistema a tu rubro.</p>
+  </div>
+
+  <form method="POST" action="{{ url_for('admin.configuracion') }}" enctype="multipart/form-data">
+    
+    <!-- 1. Datos Generales -->
+    <div class="card mb-3 animate-up">
+      <h2 class="section-title">1. Datos Generales</h2>
+      
+      <div class="form-group" style="margin-bottom:1.5rem; background:rgba(255,255,255,0.02); padding:1rem; border-radius:var(--radius); border:1px dashed var(--border);">
+        <label class="form-label">Logo del Negocio</label>
+        {% if config.logo_url %}
+          <div style="margin-bottom:1rem; display:flex; align-items:center; gap:1rem;">
+            <img src="{{ config.logo_url }}" alt="Logo" style="height:40px; border-radius:4px;" />
+            <label style="color:var(--danger); font-size:.8rem; cursor:pointer;">
+              <input type="checkbox" name="eliminar_logo" value="1" style="vertical-align:middle; margin-right:.25rem;"> Eliminar logo actual
+            </label>
+          </div>
+        {% endif %}
+        <input type="file" name="logo_file" class="form-control" accept="image/*" style="padding:.5rem;" />
+        <small class="text-muted">Se mostrará arriba a la izquierda. Formatos: PNG, JPG, WEBP.</small>
+      </div>
+
+      <div class="grid grid-2">
+        <div class="form-group">
+          <label class="form-label">Nombre del Negocio</label>
+          <input type="text" name="nombre" class="form-control" value="{{ config.nombre }}" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Rubro (Ej: Barbería, Consultorio)</label>
+          <input type="text" name="rubro" class="form-control" value="{{ config.rubro }}" required />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Descripción corta (opcional)</label>
+        <input type="text" name="descripcion" class="form-control" value="{{ config.descripcion }}" />
+      </div>
+      <div class="grid grid-2">
+        <div class="form-group">
+          <label class="form-label">Intervalo de turnos (minutos)</label>
+          <input type="number" name="intervalo_turno_min" class="form-control" value="{{ config.intervalo_turno_min }}" min="5" step="5" required />
+          <small class="text-muted">Frecuencia de los horarios (ej: 30 = 09:00, 09:30...)</small>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Anticipación para cancelar (horas)</label>
+          <input type="number" name="horas_cancelacion" class="form-control" value="{{ config.horas_cancelacion | default(24) }}" min="0" required />
+          <small class="text-muted">Tiempo límite para cancelar el turno online.</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Pagos y Señas -->
+    <div class="card mb-3 animate-up" style="animation-delay: 0.1s;">
+      <h2 class="section-title">2. Pagos y Señas</h2>
+      <div class="form-group" style="margin-bottom: 1rem;">
+        <label style="display:flex; align-items:center; gap:.5rem; cursor:pointer;">
+          <input type="checkbox" name="requiere_senia" value="1" {% if config.requiere_senia %}checked{% endif %} style="width:18px; height:18px; accent-color:var(--accent);" />
+          <span style="font-weight:500;">Exigir seña obligatoria para confirmar turnos</span>
+        </label>
+      </div>
+      
+      <div class="grid grid-2" style="gap:1.5rem;">
+        <div class="form-group">
+          <label class="form-label">Porcentaje de Seña (%)</label>
+          <input type="number" name="porcentaje_senia" class="form-control" value="{{ config.porcentaje_senia or 30 }}" min="1" max="100" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Titular de la Cuenta</label>
+          <input type="text" name="titular_pago" class="form-control" placeholder="Ej: Juan Perez" value="{{ config.titular_pago }}" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Datos Bancarios (Alias / CBU)</label>
+          <input type="text" name="datos_pago" class="form-control" placeholder="Ej: Alias: MINEGOCIO.MP" value="{{ config.datos_pago }}" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">WhatsApp para recibir comprobantes</label>
+          <input type="text" name="whatsapp_pago" class="form-control" placeholder="Ej: 3755802727" value="{{ config.whatsapp_pago }}" />
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Servicios -->
+    <div class="card mb-3 animate-up" style="animation-delay: 0.2s;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1px solid var(--border); padding-bottom:.5rem;">
+        <h2 class="section-title" style="margin:0; border:none; padding:0;">3. Servicios Ofrecidos</h2>
+        <button type="button" class="btn btn-primary btn-sm" onclick="addServicio()"><i data-lucide="plus" style="width:16px;"></i> Agregar servicio</button>
+      </div>
+      
+      <div id="servicios-container">
+        {% for s in config.servicios %}
+        <div class="dynamic-row">
+          <input type="hidden" name="servicio_id[]" value="{{ s.id }}" />
+          <div class="form-group" style="flex:2;">
+            <label class="form-label">Nombre del Servicio</label>
+            <input type="text" name="servicio_nombre[]" class="form-control" value="{{ s.nombre }}" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Duración (min)</label>
+            <input type="number" name="servicio_duracion[]" class="form-control" value="{{ s.duracion_min }}" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Precio ($)</label>
+            <input type="number" name="servicio_precio[]" class="form-control" value="{{ s.precio }}" />
+          </div>
+          <button type="button" class="btn btn-danger btn-remove" onclick="this.parentElement.remove()"><i data-lucide="x" style="width:16px;"></i></button>
+        </div>
+        {% endfor %}
+      </div>
+      <p id="no-servicios-msg" style="display:{% if config.servicios %}none{% else %}block{% endif %};" class="text-muted text-center mt-2">
+        No hay servicios configurados.
+      </p>
+    </div>
+
+    <!-- 4. Horarios -->
+    <div class="card mb-3 animate-up" style="animation-delay: 0.3s;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1px solid var(--border); padding-bottom:.5rem;">
+        <h2 class="section-title" style="margin:0; border:none; padding:0;">4. Horarios de Atención</h2>
+        <button type="button" class="btn btn-primary btn-sm" onclick="addHorario()"><i data-lucide="plus" style="width:16px;"></i> Agregar franja</button>
+      </div>
+
+      <div id="horarios-container">
+        {% for h in config.horarios_atencion %}
+        <div class="dynamic-row">
+          <div class="form-group">
+            <label class="form-label">Día de la semana</label>
+            <select name="horario_dia[]" class="form-control" required>
+              {% for d in dias_semana %}
+              <option value="{{ d }}" {% if h.dia == d %}selected{% endif %}>{{ d | capitalize }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Apertura</label>
+            <input type="time" name="horario_desde[]" class="form-control" value="{{ h.desde }}" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Cierre</label>
+            <input type="time" name="horario_hasta[]" class="form-control" value="{{ h.hasta }}" required />
+          </div>
+          <button type="button" class="btn btn-danger btn-remove" onclick="this.parentElement.remove()"><i data-lucide="x" style="width:16px;"></i></button>
+        </div>
+        {% endfor %}
+      </div>
+      <p id="no-horarios-msg" style="display:{% if config.horarios_atencion %}none{% else %}block{% endif %};" class="text-muted text-center mt-2">
+        No hay horarios configurados.
+      </p>
+    </div>
+
+    <!-- 5. Excepciones y Bloqueos -->
+    <div class="card mb-3 animate-up" style="animation-delay: 0.4s;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1px solid var(--border); padding-bottom:.5rem;">
+        <div>
+          <h2 class="section-title" style="margin:0; border:none; padding:0;">5. Excepciones y Bloqueos</h2>
+          <p style="font-size:.8rem; color:var(--text-muted); margin-top:.25rem;">Para bloquear un día entero, dejá las horas en blanco.</p>
+        </div>
+        <button type="button" class="btn btn-primary btn-sm" onclick="addBloqueo()"><i data-lucide="plus" style="width:16px;"></i> Añadir bloqueo</button>
+      </div>
+
+      <div id="bloqueos-container">
+        {% for b in config.bloqueos %}
+        <div class="dynamic-row">
+          <div class="form-group">
+            <label class="form-label">Fecha a bloquear</label>
+            <input type="date" name="bloqueo_fecha[]" class="form-control" value="{{ b.fecha }}" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Desde hora (Opcional)</label>
+            <input type="time" name="bloqueo_desde[]" class="form-control" value="{{ b.hora_desde }}" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Hasta hora (Opcional)</label>
+            <input type="time" name="bloqueo_hasta[]" class="form-control" value="{{ b.hora_hasta }}" />
+          </div>
+          <button type="button" class="btn btn-danger btn-remove" onclick="this.parentElement.remove()"><i data-lucide="x" style="width:16px;"></i></button>
+        </div>
+        {% endfor %}
+      </div>
+      <p id="no-bloqueos-msg" style="display:{% if config.bloqueos %}none{% else %}block{% endif %};" class="text-muted text-center mt-2">
+        No hay fechas bloqueadas.
+      </p>
+    </div>
+
+    <!-- 6. Bloqueos Fijos por Día (Almuerzos / Descansos) -->
+    <div class="card mb-3 animate-up" style="animation-delay: 0.5s;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1px solid var(--border); padding-bottom:.5rem;">
+        <div>
+          <h2 class="section-title" style="margin:0; border:none; padding:0;">6. Bloqueos Fijos (Almuerzos / Descansos)</h2>
+          <p style="font-size:.8rem; color:var(--text-muted); margin-top:.25rem;">Se bloquearán estas franjas horarias todos los días seleccionados.</p>
+        </div>
+        <button type="button" class="btn btn-primary btn-sm" onclick="addBloqueoRecurrente()"><i data-lucide="plus" style="width:16px;"></i> Añadir regla</button>
+      </div>
+
+      <div id="recurrentes-container">
+        {% for b in config.bloqueos_recurrentes %}
+        <div class="dynamic-row">
+          <div class="form-group">
+            <label class="form-label">Día de la semana</label>
+            <select name="br_dia[]" class="form-control" required>
+              {% for d in dias_semana %}
+              <option value="{{ d }}" {% if b.dia == d %}selected{% endif %}>{{ d | capitalize }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Desde hora</label>
+            <input type="time" name="br_desde[]" class="form-control" value="{{ b.hora_desde }}" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Hasta hora</label>
+            <input type="time" name="br_hasta[]" class="form-control" value="{{ b.hora_hasta }}" required />
+          </div>
+          <button type="button" class="btn btn-danger btn-remove" onclick="this.parentElement.remove()"><i data-lucide="x" style="width:16px;"></i></button>
+        </div>
+        {% endfor %}
+      </div>
+      <p id="no-recurrentes-msg" style="display:{% if config.bloqueos_recurrentes %}none{% else %}block{% endif %};" class="text-muted text-center mt-2">
+        No hay bloqueos fijos configurados.
+      </p>
+    </div>
+
+    <!-- Submit -->
+    <div class="animate-up" style="animation-delay: 0.6s; position:sticky; bottom:1rem; background:rgba(5,5,8,0.8); padding:1rem; border:1px solid var(--border); border-radius:var(--radius); backdrop-filter:blur(12px); display:flex; justify-content:flex-end; z-index:10;">
+      <button type="submit" class="btn btn-primary" style="font-size:1rem; padding:.75rem 2rem;">
+        <i data-lucide="save" style="width:18px;"></i> Guardar Configuración
+      </button>
+    </div>
+
+  </form>
+</div>
+
+<!-- Plantillas ocultas para JS -->
+<template id="tpl-servicio">
+  <div class="dynamic-row">
+    <input type="hidden" name="servicio_id[]" value="" />
+    <div class="form-group" style="flex:2;">
+      <label class="form-label">Nombre del Servicio</label>
+      <input type="text" name="servicio_nombre[]" class="form-control" required placeholder="Ej: Corte clásico" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Duración (min)</label>
+      <input type="number" name="servicio_duracion[]" class="form-control" value="30" required />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Precio ($)</label>
+      <input type="number" name="servicio_precio[]" class="form-control" value="0" />
+    </div>
+    <button type="button" class="btn btn-danger btn-remove" onclick="this.parentElement.remove()"><i data-lucide="x" style="width:16px;"></i></button>
+  </div>
+</template>
+
+<template id="tpl-horario">
+  <div class="dynamic-row">
+    <div class="form-group">
+      <label class="form-label">Día de la semana</label>
+      <select name="horario_dia[]" class="form-control" required>
+        {% for d in dias_semana %}
+        <option value="{{ d }}">{{ d | capitalize }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Apertura</label>
+      <input type="time" name="horario_desde[]" class="form-control" value="09:00" required />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Cierre</label>
+      <input type="time" name="horario_hasta[]" class="form-control" value="18:00" required />
+    </div>
+    <button type="button" class="btn btn-danger btn-remove" onclick="this.parentElement.remove()"><i data-lucide="x" style="width:16px;"></i></button>
+  </div>
+</template>
+
+<template id="tpl-bloqueo">
+  <div class="dynamic-row">
+    <div class="form-group">
+      <label class="form-label">Fecha a bloquear</label>
+      <input type="date" name="bloqueo_fecha[]" class="form-control" required />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Desde hora (Opcional)</label>
+      <input type="time" name="bloqueo_desde[]" class="form-control" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Hasta hora (Opcional)</label>
+      <input type="time" name="bloqueo_hasta[]" class="form-control" />
+    </div>
+    <button type="button" class="btn btn-danger btn-remove" onclick="this.parentElement.remove()"><i data-lucide="x" style="width:16px;"></i></button>
+  </div>
+</template>
+
+<template id="tpl-recurrente">
+  <div class="dynamic-row">
+    <div class="form-group">
+      <label class="form-label">Día de la semana</label>
+      <select name="br_dia[]" class="form-control" required>
+        {% for d in dias_semana %}
+        <option value="{{ d }}">{{ d | capitalize }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Desde hora</label>
+      <input type="time" name="br_desde[]" class="form-control" required />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Hasta hora</label>
+      <input type="time" name="br_hasta[]" class="form-control" required />
+    </div>
+    <button type="button" class="btn btn-danger btn-remove" onclick="this.parentElement.remove()"><i data-lucide="x" style="width:16px;"></i></button>
+  </div>
+</template>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function addServicio() {
+  const tpl = document.getElementById('tpl-servicio').content.cloneNode(true);
+  document.getElementById('servicios-container').appendChild(tpl);
+  document.getElementById('no-servicios-msg').style.display = 'none';
+  lucide.createIcons();
+}
+
+function addHorario() {
+  const tpl = document.getElementById('tpl-horario').content.cloneNode(true);
+  document.getElementById('horarios-container').appendChild(tpl);
+  document.getElementById('no-horarios-msg').style.display = 'none';
+  lucide.createIcons();
+}
+
+function addBloqueo() {
+  const tpl = document.getElementById('tpl-bloqueo').content.cloneNode(true);
+  document.getElementById('bloqueos-container').appendChild(tpl);
+  document.getElementById('no-bloqueos-msg').style.display = 'none';
+  lucide.createIcons();
+}
+
+function addBloqueoRecurrente() {
+  const tpl = document.getElementById('tpl-recurrente').content.cloneNode(true);
+  document.getElementById('recurrentes-container').appendChild(tpl);
+  document.getElementById('no-recurrentes-msg').style.display = 'none';
+  lucide.createIcons();
+}
+</script>
+{% endblock %}

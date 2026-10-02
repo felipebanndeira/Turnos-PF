@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+{% block title %}Gestionar Turno{% endblock %}
+
+{% block content %}
+<div class="page-wrapper" style="max-width:700px;">
+  
+  <div style="margin-bottom: 1.5rem;">
+    <a href="{{ url_for('admin.agenda') }}" class="btn btn-ghost btn-sm">← Volver a la agenda</a>
+  </div>
+
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.5rem;">
+      <h2 class="card-title" style="margin:0;">Detalle del Turno</h2>
+      <span class="badge badge-{{ turno.estado }}">{{ turno.estado }}</span>
+    </div>
+
+    <!-- Info del cliente -->
+    <div style="background:var(--bg-input); padding:1rem; border-radius:var(--radius-sm); margin-bottom:1.5rem; display:flex; gap:1rem; align-items:center;">
+      <div style="background:var(--indigo-glow); color:var(--indigo); width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold;">
+        {{ cliente.nombre[0]|upper if cliente.nombre else '?' }}
+      </div>
+      <div>
+        <div style="font-weight:600;">{{ cliente.nombre }}</div>
+        <div style="font-size:.85rem; color:var(--text-muted);">
+          {{ cliente.email }} {% if cliente.telefono %}· 📞 {{ cliente.telefono }}{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Detalles -->
+    <div class="grid grid-2" style="gap:1rem; margin-bottom:2rem;">
+      <div>
+        <div class="form-label">Servicio</div>
+        <div style="font-weight:500;">{{ turno.servicio_nombre }}</div>
+      </div>
+      <div>
+        <div class="form-label">Fecha</div>
+        <div style="font-weight:500;">{{ turno.fecha | dia_semana }}, {{ turno.fecha | fecha_es }}</div>
+      </div>
+      <div>
+        <div class="form-label">Horario</div>
+        <div style="font-weight:500;">{{ turno.hora_inicio }} – {{ turno.hora_fin }}</div>
+      </div>
+      <div>
+        <div class="form-label">Solicitado el</div>
+        <div style="font-weight:500;">{{ turno.creado_en.split('T')[0] | fecha_es }}</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="grid grid-2" style="gap:2rem;">
+      <!-- Columna 1: Acciones Administrativas y Comunicación -->
+      <div>
+        <h3 class="form-label" style="margin-bottom:1rem; font-size:.9rem;">Gestión y Comunicación</h3>
+        
+        <div style="display:flex; flex-direction:column; gap:.75rem;">
+          <!-- Enlace a WhatsApp -->
+          {% if cliente.telefono %}
+          {% set phone = cliente.telefono|replace(' ', '')|replace('-', '')|replace('+', '') %}
+          {% set msg = "Hola " ~ cliente.nombre ~ "! Te escribo de " ~ config.nombre ~ " para recordarte tu turno para " ~ turno.servicio_nombre ~ " el día " ~ turno.fecha|fecha_es ~ " a las " ~ turno.hora_inicio ~ "hs." %}
+          <a href="https://wa.me/{{ phone }}?text={{ msg|urlencode }}" target="_blank" class="btn btn-ghost" style="justify-content:flex-start; color:#10b981; border-color:#10b981;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21l1.65-3.8a9 9 0 1 1 3.4 2.9L3 21"/><path d="M9 10a.5.5 0 0 0 1 0V9a.5.5 0 0 0-1 0v1Z"/><path d="M14 14a.5.5 0 0 0 1 0v-1a.5.5 0 0 0-1 0v1Z"/><path d="M9.5 13.5c1.5 1.5 3 1.5 4 0"/></svg>
+            Recordatorio por WhatsApp
+          </a>
+          {% endif %}
+
+          {% if turno.estado == 'pendiente' %}
+          <form method="POST" action="{{ url_for('admin.confirmar', turno_id=turno.id) }}" style="width:100%;">
+            <button type="submit" class="btn btn-success" style="width:100%; justify-content:flex-start;">
+              <i data-lucide="check-circle" style="width:18px;"></i> Aprobar Turno
+            </button>
+          </form>
+          {% endif %}
+
+          {% if turno.estado != 'cancelado' %}
+          <button type="button" class="btn btn-primary" onclick="document.getElementById('reprogramar-form').style.display='block'" style="justify-content:flex-start;">
+            <i data-lucide="calendar-clock" style="width:18px;"></i> Reprogramar
+          </button>
+          
+          <form method="POST" action="{{ url_for('admin.cancelar', turno_id=turno.id) }}" onsubmit="return confirm('¿Seguro que querés cancelar este turno?');" style="width:100%;">
+            <button type="submit" class="btn btn-danger" style="width:100%; justify-content:flex-start;">
+              <i data-lucide="x-circle" style="width:18px;"></i> Cancelar Turno
+            </button>
+          </form>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Columna 2: Estado Financiero / Seña -->
+      <div>
+        <h3 class="form-label" style="margin-bottom:1rem; font-size:.9rem;">Estado Financiero</h3>
+        
+        <div style="background:var(--bg-input); padding:1rem; border-radius:var(--radius); border:1px solid var(--border);">
+          <div style="display:flex; justify-content:space-between; margin-bottom:.5rem;">
+            <span style="color:var(--text-muted); font-size:.875rem;">Total del Servicio:</span>
+            <span style="font-weight:600;">{{ turno.precio_total | pesos }}</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:.5rem;">
+            <span style="color:var(--text-muted); font-size:.875rem;">Seña Requerida:</span>
+            <span style="font-weight:600;">{{ turno.monto_senia | pesos }}</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:.75rem; padding-bottom:.75rem; border-bottom:1px dashed var(--border);">
+            <span style="color:var(--text-muted); font-size:.875rem;">Abonado a la fecha:</span>
+            <span style="font-weight:600; color:var(--success-text);">{{ turno.monto_abonado | pesos }}</span>
+          </div>
+          
+          <div style="display:flex; align-items:center; gap:.5rem; margin-bottom:1rem;">
+            <span class="badge badge-{{ turno.estado_pago }}">{{ turno.estado_pago|replace('_', ' ') }}</span>
+          </div>
+
+          <!-- Registrar nuevo pago -->
+          {% if turno.estado_pago != 'completado' and turno.estado != 'cancelado' %}
+          <form method="POST" action="{{ url_for('admin.pago', turno_id=turno.id) }}" style="display:flex; gap:.5rem; margin-top:1rem;">
+            <div class="form-group" style="margin:0; flex:1;">
+              <input type="number" name="monto" class="form-control" placeholder="Monto ej: 1000" required />
+            </div>
+            <button type="submit" class="btn btn-ghost" style="padding:0 .75rem;">Asentar cobro</button>
+          </form>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Formulario de reprogramación oculto -->
+    <div id="reprogramar-form" style="display:none; margin-top:2rem; background:var(--bg); padding:1.5rem; border:1px solid var(--border); border-radius:var(--radius-sm);">
+      <h4 style="margin-bottom:1rem; font-family:'Space Grotesk';">Reprogramar turno</h4>
+      <form method="POST" action="{{ url_for('admin.reprogramar', turno_id=turno.id) }}">
+        <div class="grid grid-2" style="gap:1rem;">
+          <div class="form-group">
+            <label class="form-label">Nueva Fecha</label>
+            <input type="date" name="nueva_fecha" id="rep-fecha" class="form-control" required onchange="fetchSlotsReprogramar()" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nuevo Horario</label>
+            <select name="nueva_hora" id="rep-hora" class="form-control" required disabled>
+              <option value="">Seleccioná fecha primero...</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:flex; gap:.5rem; justify-content:flex-end; margin-top:1rem;">
+          <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('reprogramar-form').style.display='none'">Cancelar</button>
+          <button type="submit" class="btn btn-primary btn-sm" id="btn-rep-submit" disabled>Guardar cambios</button>
+        </div>
+      </form>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function fetchSlotsReprogramar() {
+    const fecha = document.getElementById('rep-fecha').value;
+    const select = document.getElementById('rep-hora');
+    const btn = document.getElementById('btn-rep-submit');
+    const turnoId = "{{ turno.id }}";
+
+    if (!fecha) return;
+
+    select.innerHTML = '<option value="">Cargando...</option>';
+    select.disabled = true;
+    btn.disabled = true;
+
+    fetch(`/admin/horarios?fecha=${fecha}&turno_id=${turnoId}`)
+      .then(r => r.json())
+      .then(data => {
+        select.innerHTML = '';
+        if (data.slots && data.slots.length > 0) {
+          data.slots.forEach(slot => {
+            const opt = document.createElement('option');
+            opt.value = slot;
+            opt.textContent = slot;
+            select.appendChild(opt);
+          });
+          select.disabled = false;
+          btn.disabled = false;
+        } else {
+          select.innerHTML = '<option value="">Sin horarios disponibles</option>';
+        }
+      })
+      .catch(() => {
+        select.innerHTML = '<option value="">Error al cargar horarios</option>';
+      });
+  }
+</script>
+{% endblock %}

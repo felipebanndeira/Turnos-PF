@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Editar Cliente{% endblock %}
+
+{% block content %}
+<div class="page-wrapper" style="max-width:600px;">
+  
+  <div style="margin-bottom: 1.5rem;">
+    <a href="{{ url_for('admin.clientes') }}" class="btn btn-ghost btn-sm">← Volver a clientes</a>
+  </div>
+
+  <div class="card">
+    <h2 class="card-title">Editar Cliente</h2>
+
+    <form method="POST" action="{{ url_for('admin.editar_cliente', cliente_id=cliente.id) }}">
+      <div class="form-group">
+        <label class="form-label">Nombre completo</label>
+        <input type="text" name="nombre" class="form-control" value="{{ cliente.nombre }}" required />
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" name="email" class="form-control" value="{{ cliente.email }}" required />
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Teléfono</label>
+        <input type="text" name="telefono" class="form-control" value="{{ cliente.telefono }}" required />
+      </div>
+
+      <div class="form-group" style="margin-top:1.5rem;">
+        <label style="display:flex; align-items:center; gap:.5rem; cursor:pointer;">
+          <input type="checkbox" name="activo" value="1" {% if cliente.activo %}checked{% endif %} style="width:18px; height:18px; accent-color:var(--indigo);" />
+          <span style="font-weight:500;">Cuenta Activa</span>
+        </label>
+        <p style="font-size:.8rem; color:var(--text-muted); margin-top:.25rem; margin-left:1.75rem;">
+          Si desmarcás esta opción, el cliente no podrá iniciar sesión en el sistema.
+        </p>
+      </div>
+
+      <div class="divider"></div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <button type="submit" class="btn btn-primary">Guardar cambios</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card mt-3" style="border-color:var(--red-glow);">
+    <h3 class="card-title" style="color:var(--red); font-size:1rem;">Zona de Peligro</h3>
+    <p style="font-size:.85rem; color:var(--text-muted); margin-bottom:1rem;">
+      Eliminar un cliente borrará su acceso de forma permanente, aunque sus turnos pasados quedarán en el historial como referencia.
+    </p>
+    <form method="POST" action="{{ url_for('admin.eliminar_cliente', cliente_id=cliente.id) }}" onsubmit="return confirm('¿Estás COMPLETAMENTE seguro de eliminar este cliente?');">
+      <button type="submit" class="btn btn-danger btn-sm">Eliminar cliente</button>
+    </form>
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% block title %}Reportes — Admin{% endblock %}
+
+{% block extra_css %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+.chart-container {
+  background: var(--bg-card);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  height: 350px;
+}
+.chart-title {
+  font-family: 'Space Grotesk'; font-size: 1.1rem;
+  font-weight: 600; margin-bottom: 1rem; color: var(--text);
+  border-bottom: 1px solid var(--border-soft); padding-bottom: .5rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+  
+  <div class="page-header">
+    <h1 class="page-title">Reportes y Estadísticas</h1>
+    <p class="page-subtitle">Rendimiento general del negocio</p>
+  </div>
+
+  <div class="grid grid-4" style="margin-bottom: 2rem;">
+    <div class="card stat-card">
+      <div class="stat-value">{{ stats.total }}</div>
+      <div class="stat-label">Total Histórico</div>
+    </div>
+    <div class="card stat-card">
+      <div class="stat-value" style="color:var(--emerald);">{{ stats.confirmados }}</div>
+      <div class="stat-label">Confirmados</div>
+    </div>
+    <div class="card stat-card">
+      <div class="stat-value" style="color:var(--amber);">{{ stats.pendientes }}</div>
+      <div class="stat-label">Pendientes</div>
+    </div>
+    <div class="card stat-card">
+      <div class="stat-value" style="color:var(--red);">{{ stats.cancelados }}</div>
+      <div class="stat-label">Cancelados</div>
+    </div>
+  </div>
+
+  <div class="grid grid-2">
+    <!-- Gráfico: Turnos por día -->
+    <div class="chart-container">
+      <h3 class="chart-title">Evolución de Turnos por Día</h3>
+      <canvas id="chartDias"></canvas>
+    </div>
+
+    <!-- Gráfico: Servicios más pedidos -->
+    <div class="chart-container">
+      <h3 class="chart-title">Servicios más Solicitados</h3>
+      <canvas id="chartServicios"></canvas>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Configuración común de tema oscuro para Chart.js
+Chart.defaults.color = '#8892a4';
+Chart.defaults.borderColor = '#1e2334';
+Chart.defaults.font.family = 'Inter';
+
+// Datos de backend a JS
+const datosPorDia = {{ stats.por_dia | tojson }};
+const datosPorServicio = {{ dict(stats.por_servicio) | tojson }};
+
+// --- Gráfico de Líneas (Por Día) ---
+const ctxDias = document.getElementById('chartDias').getContext('2d');
+new Chart(ctxDias, {
+  type: 'line',
+  data: {
+    labels: Object.keys(datosPorDia).map(fecha => {
+      // Formato corto para etiquetas: dd/mm
+      const [y,m,d] = fecha.split('-'); return `${d}/${m}`;
+    }),
+    datasets: [{
+      label: 'Turnos (no cancelados)',
+      data: Object.values(datosPorDia),
+      borderColor: '#6366f1',
+      backgroundColor: 'rgba(99,102,241,0.2)',
+      borderWidth: 3,
+      tension: 0.3,
+      fill: true,
+      pointBackgroundColor: '#0f1117',
+      pointBorderColor: '#6366f1',
+      pointRadius: 4
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      y: { beginAtZero: true, ticks: { stepSize: 1 } }
+    }
+  }
+});
+
+// --- Gráfico de Barras (Servicios) ---
+const ctxServicios = document.getElementById('chartServicios').getContext('2d');
+new Chart(ctxServicios, {
+  type: 'bar',
+  data: {
+    labels: Object.keys(datosPorServicio),
+    datasets: [{
+      label: 'Cantidad',
+      data: Object.values(datosPorServicio),
+      backgroundColor: [
+        'rgba(16,185,129,0.8)',
+        'rgba(99,102,241,0.8)',
+        'rgba(245,158,11,0.8)',
+        'rgba(236,72,153,0.8)'
+      ],
+      borderRadius: 4
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      y: { beginAtZero: true, ticks: { stepSize: 1 } }
+    }
+  }
+});
+</script>
+{% endblock %}

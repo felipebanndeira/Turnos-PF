@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}Admin — Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+  
+  <div class="page-header animate-up" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
+    <div>
+      <h1 class="page-title">Panel de Control</h1>
+      <p class="page-subtitle">{{ config.nombre }}</p>
+    </div>
+    <div style="font-size:.9rem; color:var(--text-muted);">
+      Hoy: <strong style="color:var(--text);">{{ hoy | fecha_es }}</strong>
+    </div>
+  </div>
+
+  <!-- Stats rápidas -->
+  <div class="grid grid-4 animate-up" style="margin-bottom: 2rem; animation-delay: 0.1s;">
+    <div class="card stat-card">
+      <div class="stat-value" style="color:var(--text);">{{ stats.pendientes }}</div>
+      <div class="stat-label">Pendientes</div>
+    </div>
+    <div class="card stat-card">
+      <div class="stat-value" style="color:var(--success-text);">{{ stats.confirmados }}</div>
+      <div class="stat-label">Confirmados</div>
+    </div>
+    <div class="card stat-card">
+      <div class="stat-value" style="color:var(--warning-text);">{{ agenda_hoy|length }}</div>
+      <div class="stat-label">Turnos hoy</div>
+    </div>
+    <div class="card stat-card">
+      <div class="stat-value">{{ total_clientes }}</div>
+      <div class="stat-label">Clientes regs.</div>
+    </div>
+  </div>
+
+  <div class="grid grid-2 animate-up" style="align-items:start; animation-delay: 0.2s;">
+    <!-- Agenda de Hoy (Resumen) -->
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+        <h3 class="card-title" style="margin:0;">Agenda de hoy</h3>
+        <a href="{{ url_for('admin.agenda') }}" class="btn btn-ghost btn-sm">Ver completa <i data-lucide="arrow-right" style="width:14px;"></i></a>
+      </div>
+      
+      {% if agenda_hoy %}
+        <div style="display:flex; flex-direction:column; gap:.75rem;">
+          {% for t in agenda_hoy %}
+          <div style="display:flex; gap:1rem; padding-bottom:.75rem; border-bottom:1px solid var(--border);">
+            <div style="width:60px; text-align:right; font-weight:700; color:var(--text-muted);">
+              {{ t.hora_inicio }}
+            </div>
+            <div style="flex:1;">
+              <div style="font-weight:600; font-size:.95rem;">
+                <a href="{{ url_for('admin.detalle_turno', turno_id=t.id) }}" style="color:var(--text);">{{ t.servicio_nombre }}</a>
+              </div>
+              <div style="font-size:.8rem; color:var(--text-muted); display:flex; justify-content:space-between;">
+                <span>Ver detalles para gestionar</span>
+                <span class="badge badge-{{ t.estado }}" style="transform:scale(0.85); transform-origin:right;">{{ t.estado }}</span>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="text-center text-muted" style="padding:2rem 0;">
+          No hay turnos registrados para el día de hoy.
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Link Público -->
+    <div style="display:flex; flex-direction:column; gap:1.5rem;">
+      <div class="card" style="border-color:var(--accent);">
+        <h3 class="card-title" style="display:flex; align-items:center; gap:.5rem;"><i data-lucide="link" style="width:20px; color:var(--accent);"></i> Tu Link para Clientes</h3>
+        <p style="font-size:.85rem; color:var(--text-muted); margin-bottom:1rem;">Compartí este enlace en tus redes o WhatsApp para que tus clientes pidan turnos.</p>
+        
+        <div style="display:flex; gap:.5rem; align-items:center;">
+          <input type="text" id="public-link" class="form-control" readonly value="{{ url_for('cliente.solicitar_turno', url_id=session.get('negocio_id'), _external=True) }}" style="font-size:.85rem; color:var(--accent); background:rgba(255,0,60,0.05); border-color:var(--accent-glow);" />
+          <button class="btn btn-primary" onclick="copyLink()" style="padding:.5rem 1rem;" title="Copiar Link">
+            <i data-lucide="copy" style="width:18px;"></i>
+          </button>
+        </div>
+        <script>
+          function copyLink() {
+            var copyText = document.getElementById("public-link");
+            copyText.select();
+            copyText.setSelectionRange(0, 99999);
+            navigator.clipboard.writeText(copyText.value);
+            alert("¡Link copiado al portapapeles!");
+          }
+        </script>
+      </div>
+
+      <!-- Accesos Rápidos -->
+    <div class="card">
+      <h3 class="card-title">Accesos Rápidos</h3>
+      <div style="display:flex; flex-direction:column; gap:.5rem;">
+        <a href="{{ url_for('admin.agenda') }}" class="btn btn-ghost" style="justify-content:flex-start;">
+          <i data-lucide="calendar" style="width:18px;"></i> Gestionar agenda completa
+        </a>
+        <a href="{{ url_for('admin.clientes') }}" class="btn btn-ghost" style="justify-content:flex-start;">
+          <i data-lucide="users" style="width:18px;"></i> Administrar base de clientes
+        </a>
+        <a href="{{ url_for('admin.configuracion') }}" class="btn btn-ghost" style="justify-content:flex-start;">
+          <i data-lucide="settings-2" style="width:18px;"></i> Modificar servicios y horarios
+        </a>
+        <a href="{{ url_for('admin.reportes') }}" class="btn btn-ghost" style="justify-content:flex-start;">
+          <i data-lucide="bar-chart-3" style="width:18px;"></i> Ver reportes y estadísticas
+        </a>
+      </div>
+    </div>
+  </div> <!-- Fin de columna derecha -->
+</div> <!-- Fin grid-2 -->
+
+</div>
+{% endblock %}

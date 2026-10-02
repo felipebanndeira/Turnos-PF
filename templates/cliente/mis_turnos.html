@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Buscar Mis Turnos{% endblock %}
+
+{% block content %}
+<div class="page-wrapper" style="max-width:800px; padding-top:2rem;">
+  
+  <div class="page-header" style="text-align: center; margin-bottom: 2rem;">
+    <h1 class="page-title">Mis Reservas</h1>
+    <p class="page-subtitle">Ingresá tu número de teléfono para ver o cancelar tus turnos.</p>
+  </div>
+
+  <div class="card animate-up" style="max-width:400px; margin:0 auto 2rem auto;">
+    <form method="POST" action="{{ url_for('cliente.mis_turnos', url_id=url_id) }}">
+      <div class="form-group" style="margin-bottom:1rem;">
+        <label class="form-label">Número de Teléfono</label>
+        <input type="text" name="telefono" class="form-control" placeholder="Ej: +54 9 11 1234-5678" value="{{ telefono_buscado }}" required autofocus />
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;">
+        <i data-lucide="search" style="width:16px;"></i> Buscar Turnos
+      </button>
+    </form>
+  </div>
+
+  {% if turnos is not none %}
+    {% if turnos|length == 0 %}
+      <div class="card animate-up" style="text-align: center; animation-delay: 0.1s;">
+        <p style="color:var(--text-muted);">No tenés turnos registrados con este número.</p>
+      </div>
+    {% else %}
+      <div class="grid grid-2" style="gap:1rem;">
+        {% for t in turnos %}
+          <div class="card animate-up" style="animation-delay: {{ loop.index0 * 0.1 }}s; border-left: 4px solid {% if t.estado == 'pendiente' %}var(--warning-text){% elif t.estado == 'confirmado' %}var(--success-text){% else %}var(--danger){% endif %};">
+            <div style="display:flex; justify-content:space-between; margin-bottom:.5rem;">
+              <h3 style="font-size:1.1rem; font-weight:600;">{{ t.servicio_nombre }}</h3>
+              {% if t.estado == 'pendiente' %}
+                <span class="badge" style="background:rgba(255,193,7,0.1); color:var(--warning-text);">Pendiente</span>
+              {% elif t.estado == 'confirmado' %}
+                <span class="badge" style="background:rgba(74,222,128,0.1); color:var(--success-text);">Confirmado</span>
+              {% else %}
+                <span class="badge" style="background:rgba(255,77,77,0.1); color:var(--danger);">Cancelado</span>
+              {% endif %}
+            </div>
+            <p style="font-size:.9rem; color:var(--text-muted); margin-bottom:.5rem;">
+              <i data-lucide="calendar" style="width:14px; vertical-align:middle; margin-right:.25rem;"></i> {{ t.fecha | fecha_es }} a las {{ t.hora_inicio }}
+            </p>
+            <p style="font-size:.9rem; color:var(--text-muted); margin-bottom:1rem;">
+              <i data-lucide="dollar-sign" style="width:14px; vertical-align:middle; margin-right:.25rem;"></i> {{ t.precio | pesos }}
+            </p>
+
+            {% if t.estado != 'cancelado' %}
+              <div style="margin-top:1rem; border-top:1px solid var(--border-soft); padding-top:1rem;">
+                {% if t.puede_cancelar %}
+                  <form method="POST" action="{{ url_for('cliente.cancelar', url_id=url_id, turno_id=t.id) }}" style="display:inline;" onsubmit="return confirm('¿Estás seguro de cancelar este turno?');">
+                    <button type="submit" class="btn btn-ghost btn-sm" style="color:var(--danger); border-color:var(--danger); width:100%;">
+                      Cancelar Turno
+                    </button>
+                  </form>
+                {% else %}
+                  <small style="color:var(--danger); font-size:.8rem; display:block; text-align:center;">
+                    Faltan menos de {{ horas_minimas }} horas, comunicate por teléfono para cancelar.
+                  </small>
+                {% endif %}
+              </div>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endif %}
+
+</div>
+{% endblock %}

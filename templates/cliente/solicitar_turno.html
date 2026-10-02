@@ -1,0 +1,333 @@
+{% extends "base.html" %}
+{% block title %}Pedir turno{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ── Stepper ───────────────────────────────────────────────── */
+.stepper {
+  display: flex; align-items: center; gap: 0;
+  margin-bottom: 2.5rem;
+}
+.step {
+  display: flex; align-items: center; gap: .5rem;
+  flex: 1;
+}
+.step-num {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .78rem; font-weight: 700;
+  background: var(--bg-input); border: 2px solid var(--border);
+  color: var(--text-dim); flex-shrink: 0;
+  transition: all .25s;
+}
+.step.active   .step-num { background: var(--indigo); border-color: var(--indigo); color: #fff; }
+.step.done     .step-num { background: var(--emerald); border-color: var(--emerald); color: #fff; }
+.step-label { font-size: .8rem; font-weight: 500; color: var(--text-dim); }
+.step.active .step-label, .step.done .step-label { color: var(--text); }
+.step-line { flex: 1; height: 2px; background: var(--border); max-width: 60px; }
+.step-line.done { background: var(--emerald); }
+
+/* ── Servicios grid ────────────────────────────────────────── */
+.service-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px,1fr)); gap: 1rem; }
+.service-card {
+  border: 2px solid var(--border-soft);
+  border-radius: var(--radius); padding: 1.25rem;
+  cursor: pointer; transition: all .18s;
+  background: var(--bg-card);
+  user-select: none;
+}
+.service-card:hover    { border-color: var(--indigo); background: var(--indigo-glow); }
+.service-card.selected { border-color: var(--indigo); background: var(--indigo-glow); box-shadow: 0 0 0 3px var(--indigo-glow); }
+.service-card .svc-name  { font-weight: 600; font-size: .95rem; margin-bottom: .3rem; }
+.service-card .svc-meta  { color: var(--text-muted); font-size: .8rem; display: flex; gap: .75rem; }
+
+/* ── Slot grid ──────────────────────────────────────────────── */
+.slot-grid { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1rem; }
+.slot-btn {
+  padding: .45rem 1rem; border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border); background: var(--bg-input);
+  color: var(--text); font-size: .875rem; font-weight: 500;
+  cursor: pointer; transition: all .15s;
+}
+.slot-btn:hover    { border-color: var(--indigo); color: var(--indigo); background: var(--indigo-glow); }
+.slot-btn.selected { border-color: var(--indigo); background: var(--indigo); color: #fff; }
+
+/* ── Resumen ────────────────────────────────────────────────── */
+.resumen-box {
+  background: var(--bg-input); border-radius: var(--radius-sm);
+  padding: 1rem 1.25rem; margin-top: 1.25rem;
+}
+.resumen-row { display: flex; justify-content: space-between; font-size: .875rem; padding: .3rem 0; }
+.resumen-row span:first-child { color: var(--text-muted); }
+.resumen-row span:last-child  { font-weight: 600; }
+
+.loading-spinner {
+  display: none; align-items: center; gap: .5rem;
+  color: var(--text-muted); font-size: .875rem;
+}
+.loading-spinner.visible { display: flex; }
+.spinner { width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: var(--indigo); border-radius: 50%; animation: spin .6s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.no-slots { color: var(--text-muted); font-size: .875rem; padding: .75rem 0; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-wrapper" style="max-width:760px;">
+  <div class="page-header">
+    <h1 class="page-title">Reservar turno</h1>
+    <p class="page-subtitle">{{ config.nombre }}</p>
+  </div>
+
+  <!-- Stepper -->
+  <div class="stepper" id="stepper">
+    <div class="step active" id="step-ind-1">
+      <div class="step-num">1</div>
+      <div class="step-label">Servicio</div>
+    </div>
+    <div class="step-line" id="line-1"></div>
+    <div class="step" id="step-ind-2">
+      <div class="step-num">2</div>
+      <div class="step-label">Fecha y hora</div>
+    </div>
+    <div class="step-line" id="line-2"></div>
+    <div class="step" id="step-ind-3">
+      <div class="step-num">3</div>
+      <div class="step-label">Confirmar</div>
+    </div>
+  </div>
+
+  <!-- ── PASO 1: Elegir servicio ── -->
+  <div id="step-1">
+    <div class="card">
+      <h3 class="card-title">¿Qué servicio necesitás?</h3>
+      {% if servicios %}
+        <div class="service-grid">
+          {% for s in servicios %}
+          <div class="service-card" data-id="{{ s.id }}" data-nombre="{{ s.nombre }}" data-duracion="{{ s.duracion_min }}" data-precio="{{ s.precio }}" onclick="selectService(this)">
+            <div class="svc-name">{{ s.nombre }}</div>
+            <div class="svc-meta">
+              <span>⏱ {{ s.duracion_min }} min</span>
+              {% if s.precio %}<span>{{ s.precio | pesos }}</span>{% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="text-muted">El negocio aún no tiene servicios configurados.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ── PASO 2: Fecha y hora ── -->
+  <div id="step-2" style="display:none;">
+    <div class="card">
+      <h3 class="card-title" id="step2-title">Elegí fecha y horario</h3>
+      <div class="form-group">
+        <label class="form-label">Fecha</label>
+        <input type="date" id="fecha-input" class="form-control" style="max-width:240px;" />
+      </div>
+
+      <div style="display:flex; align-items:center; gap:1rem; margin-bottom:.5rem;">
+        <label class="form-label" style="margin:0;">Horarios disponibles</label>
+        <div class="loading-spinner" id="loading">
+          <div class="spinner"></div> Cargando...
+        </div>
+      </div>
+      <div class="slot-grid" id="slot-grid"></div>
+      <p class="no-slots" id="no-slots" style="display:none;">No hay horarios disponibles para esta fecha.</p>
+
+      <div style="margin-top:1.25rem; display:flex; gap:.75rem;">
+        <button type="button" class="btn btn-ghost" onclick="goStep(1)">← Atrás</button>
+        <button type="button" class="btn btn-primary" id="btn-step3" disabled onclick="goStep(3)">Continuar →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PASO 3: Confirmar ── -->
+  <div id="step-3" style="display:none;">
+    <div class="card">
+      <h3 class="card-title">Confirmá tu turno</h3>
+      <div class="resumen-box">
+        <div class="resumen-row"><span>Servicio</span>    <span id="res-servicio">—</span></div>
+        <div class="resumen-row"><span>Fecha</span>       <span id="res-fecha">—</span></div>
+        <div class="resumen-row"><span>Horario</span>     <span id="res-hora">—</span></div>
+        <div class="resumen-row"><span>Duración</span>    <span id="res-duracion">—</span></div>
+        <div class="resumen-row"><span>Precio</span>      <span id="res-precio">—</span></div>
+      </div>
+
+      {% if config.requiere_senia %}
+      <div class="animate-up" style="background:rgba(255,255,255,0.03); border:1px solid var(--border); padding:1.25rem; border-radius:var(--radius); margin-top:1.5rem; animation-delay: 0.1s;">
+        <h4 style="color:var(--text); font-size:.9rem; margin-bottom:.75rem; display:flex; align-items:center; gap:.5rem; font-weight:500;">
+          <i data-lucide="info" style="width:16px;"></i> Requiere pago previo
+        </h4>
+        <p style="font-size:.85rem; color:var(--text-muted); margin-bottom:.75rem;">
+          Para que tu turno quede <strong>confirmado</strong>, debés transferir el <strong>{{ config.porcentaje_senia }}%</strong> del valor. 
+          Una vez transferido, enviá el comprobante por WhatsApp haciendo clic en el botón debajo.
+        </p>
+        
+        <div style="font-family:'Inter', sans-serif; background:rgba(0,0,0,0.5); padding:.75rem; border-radius:var(--radius); font-size:.85rem; border: 1px solid var(--border); margin-bottom: 1rem;">
+          <div style="margin-bottom: .25rem; color: var(--text-muted);">Titular: <span style="color:var(--accent);">{{ config.titular_pago }}</span></div>
+          <div>{{ config.datos_pago }}</div>
+        </div>
+
+        {% set whatsapp_num = config.whatsapp_pago | default('3755802727') %}
+        <a href="https://wa.me/{{ whatsapp_num }}?text=Hola,%20adjunto%20el%20comprobante%20de%20mi%20turno." target="_blank" class="btn btn-ghost" style="width: 100%; border-color:#2e6f40; color:#4ade80;">
+          <i data-lucide="message-circle" style="width:16px;"></i> Enviar comprobante al {{ whatsapp_num }}
+        </a>
+      </div>
+      {% endif %}
+
+      <form method="POST" action="{{ url_for('cliente.solicitar_turno', url_id=url_id) }}" id="confirm-form" style="margin-top:1.5rem;">
+        {% if not cliente %}
+        <div class="animate-up" style="margin-bottom: 1.5rem; background: var(--bg-input); padding: 1.25rem; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+          <h4 style="margin-bottom: 1rem; font-size: 0.95rem;">Tus Datos</h4>
+          <div class="form-group">
+            <label class="form-label">Nombre completo</label>
+            <input type="text" name="cliente_nombre" class="form-control" placeholder="Juan Pérez" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="email" name="cliente_email" class="form-control" placeholder="juan@email.com" required />
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label">Teléfono (opcional)</label>
+            <input type="text" name="cliente_telefono" class="form-control" placeholder="+54 9 11 1234-5678" />
+          </div>
+        </div>
+        {% endif %}
+        
+        <input type="hidden" name="servicio_id"  id="h-servicio-id" />
+        <input type="hidden" name="fecha"         id="h-fecha" />
+        <input type="hidden" name="hora_inicio"   id="h-hora" />
+        <div style="display:flex; gap:.75rem;">
+          <button type="button" class="btn btn-ghost" onclick="goStep(2)">← Atrás</button>
+          <button type="submit" class="btn btn-success">✓ Confirmar turno</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // ── Estado ─────────────────────────────────────────────────────────────────
+  const state = { servicioId: null, servicioNombre: '', duracion: 0, precio: 0, fecha: '', hora: '' };
+
+  // ── Stepper ────────────────────────────────────────────────────────────────
+  function goStep(n) {
+    [1,2,3].forEach(i => {
+      document.getElementById('step-' + i).style.display = i === n ? 'block' : 'none';
+      const ind = document.getElementById('step-ind-' + i);
+      ind.className = 'step ' + (i < n ? 'done' : i === n ? 'active' : '');
+    });
+    [1,2].forEach(i => {
+      const line = document.getElementById('line-' + i);
+      if (line) line.className = 'step-line ' + (i < n ? 'done' : '');
+    });
+    window.scrollTo({top: 0, behavior:'smooth'});
+  }
+
+  // ── Seleccionar servicio ───────────────────────────────────────────────────
+  function selectService(el) {
+    document.querySelectorAll('.service-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    state.servicioId     = el.dataset.id;
+    state.servicioNombre = el.dataset.nombre;
+    state.duracion       = el.dataset.duracion;
+    state.precio         = el.dataset.precio;
+    document.getElementById('step2-title').textContent = 'Fecha y horario — ' + state.servicioNombre;
+
+    // Poner fecha mínima hoy
+    const today = new Date().toISOString().split('T')[0];
+    const fi = document.getElementById('fecha-input');
+    fi.min = today;
+    if (!fi.value || fi.value < today) fi.value = today;
+
+    goStep(2);
+    fetchSlots();
+  }
+
+  // ── Cambio de fecha ────────────────────────────────────────────────────────
+  document.getElementById('fecha-input').addEventListener('change', fetchSlots);
+
+  // ── Fetch horarios (AJAX) ──────────────────────────────────────────────────
+  function fetchSlots() {
+    const fecha = document.getElementById('fecha-input').value;
+    if (!fecha || !state.servicioId) return;
+    state.fecha = fecha;
+    state.hora  = '';
+    document.getElementById('btn-step3').disabled = true;
+
+    const grid    = document.getElementById('slot-grid');
+    const noSlots = document.getElementById('no-slots');
+    const loading = document.getElementById('loading');
+
+    grid.innerHTML = '';
+    noSlots.style.display = 'none';
+    loading.classList.add('visible');
+
+    fetch(`/b/{{ url_id }}/horarios?fecha=${fecha}&servicio_id=${state.servicioId}`)
+      .then(r => r.json())
+      .then(data => {
+        loading.classList.remove('visible');
+        if (!data.slots || data.slots.length === 0) {
+          noSlots.style.display = 'block';
+          return;
+        }
+        data.slots.forEach(slot => {
+          const btn = document.createElement('button');
+          btn.type      = 'button';
+          btn.className = 'slot-btn';
+          btn.textContent = slot;
+          btn.onclick = () => selectSlot(btn, slot);
+          grid.appendChild(btn);
+        });
+      })
+      .catch(() => {
+        loading.classList.remove('visible');
+        noSlots.style.display = 'block';
+      });
+  }
+
+  // ── Seleccionar horario ────────────────────────────────────────────────────
+  function selectSlot(btn, hora) {
+    document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    state.hora = hora;
+    document.getElementById('btn-step3').disabled = false;
+  }
+
+  // ── Ir al paso 3 ──────────────────────────────────────────────────────────
+  const origGoStep = goStep;
+  function goStep(n) {
+    if (n === 3) {
+      // Rellenar resumen
+      const fechaObj = new Date(state.fecha + 'T00:00:00');
+      const opciones = { weekday:'long', year:'numeric', month:'long', day:'numeric' };
+      document.getElementById('res-servicio').textContent = state.servicioNombre;
+      document.getElementById('res-fecha').textContent    = fechaObj.toLocaleDateString('es-AR', opciones);
+      document.getElementById('res-hora').textContent     = state.hora;
+      document.getElementById('res-duracion').textContent = state.duracion + ' min';
+      document.getElementById('res-precio').textContent   = state.precio ? '$' + Number(state.precio).toLocaleString('es-AR') : 'A convenir';
+      // Campos hidden
+      document.getElementById('h-servicio-id').value = state.servicioId;
+      document.getElementById('h-fecha').value        = state.fecha;
+      document.getElementById('h-hora').value         = state.hora;
+    }
+    [1,2,3].forEach(i => {
+      document.getElementById('step-' + i).style.display = i === n ? 'block' : 'none';
+      const ind = document.getElementById('step-ind-' + i);
+      ind.className = 'step ' + (i < n ? 'done' : i === n ? 'active' : '');
+    });
+    [1,2].forEach(i => {
+      const line = document.getElementById('line-' + i);
+      if (line) line.className = 'step-line ' + (i < n ? 'done' : '');
+    });
+    window.scrollTo({top: 0, behavior:'smooth'});
+  }
+</script>
+{% endblock %}

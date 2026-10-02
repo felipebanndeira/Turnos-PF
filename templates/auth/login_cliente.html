@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Iniciar sesión{% endblock %}
+
+{% block extra_css %}
+<style>
+.auth-wrapper {
+  min-height: calc(100vh - 60px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 2rem 1rem;
+}
+.auth-card {
+  width: 100%; max-width: 420px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-soft);
+  border-radius: 16px;
+  padding: 2.5rem 2rem;
+}
+.auth-logo { text-align: center; margin-bottom: 2rem; }
+.auth-logo svg { color: var(--indigo); }
+.auth-title { font-size: 1.5rem; font-weight: 700; text-align: center; margin-bottom: .3rem; }
+.auth-sub   { color: var(--text-muted); font-size: .875rem; text-align: center; margin-bottom: 2rem; }
+.auth-footer{ text-align: center; margin-top: 1.25rem; font-size: .875rem; color: var(--text-muted); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/>
+        <line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+      </svg>
+    </div>
+    <h1 class="auth-title">Bienvenido</h1>
+    <p class="auth-sub">Ingresá con tu cuenta para gestionar tus turnos.</p>
+
+    <form method="POST" action="{{ url_for('auth.login_cliente_view', url_id=url_id) }}">
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" name="email" class="form-control" placeholder="tu@email.com" required autofocus />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Contraseña</label>
+        <input type="password" name="password" class="form-control" placeholder="••••••••" required />
+      </div>
+      <button type="submit" class="btn btn-primary btn-block" style="margin-top:.5rem;">
+        Iniciar sesión
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      ¿No tenés cuenta? <a href="{{ url_for('auth.registro_cliente_view', url_id=url_id) }}">Registrate gratis</a>
+      <br><br>
+      <a href="{{ url_for('auth.login_admin_view') }}" style="color:var(--text-dim);font-size:.8rem;">Acceso administrador →</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Turnos{% endblock %} — {{ config.nombre if config else 'Gestión' }}</title>
+
+  <!-- Tipografía Profesional: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  
+  <!-- Iconos Lucide -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    /* ── Variables de Diseño Futurista (Rojo Neón / Cursor Glow) ── */
+    :root {
+      /* Fondo negro absoluto / rojo muy oscuro */
+      --bg: #030000;
+      --bg-card: rgba(15, 5, 5, 0.6);
+      --bg-input: rgba(255, 255, 255, 0.03);
+      
+      --border: rgba(255, 255, 255, 0.08);
+      
+      --text: #ffffff;
+      --text-muted: #94a3b8;
+      
+      /* Acentos Rojo Neón */
+      --accent: #ff003c;
+      --accent-glow: rgba(255, 0, 60, 0.5);
+      --primary: #ff003c;
+      --primary-glow: rgba(255, 0, 60, 0.4);
+      
+      --success: #00ff66;
+      --danger: #ff003c;
+
+      --radius: 8px;
+      --transition: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* ── Animaciones ── */
+    @keyframes fadeUp {
+      0% { opacity: 0; transform: translateY(15px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    .animate-up {
+      animation: fadeUp 0.5s var(--transition) forwards;
+      opacity: 0;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* Aura del cursor */
+    #cursor-glow {
+      position: fixed;
+      top: 0; left: 0;
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(255,0,60,0.15) 0%, transparent 60%);
+      border-radius: 50%;
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      z-index: 1; /* Detrás de las cards (z-index natural mayor) */
+      transition: opacity 0.3s ease;
+      opacity: 0;
+    }
+    
+    /* El resto del contenido debe estar por encima del aura */
+    .navbar, .page-wrapper { position: relative; z-index: 10; }
+    
+    h1, h2, h3, h4, h5 { font-weight: 600; letter-spacing: -0.02em; color: #fff; }
+    a { color: var(--accent); text-decoration: none; transition: all var(--transition); }
+    a:hover { text-shadow: 0 0 8px var(--accent-glow); }
+
+    /* ── Navbar Glass ── */
+    .navbar {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2rem; height: 70px;
+      background: rgba(5, 5, 8, 0.7); 
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .navbar-brand { font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: .75rem; letter-spacing: 0.05em; text-transform: uppercase; color: #fff; }
+    .navbar-brand:hover { text-shadow: 0 0 10px var(--accent-glow); color: var(--accent); }
+    
+    .navbar-links { display: flex; align-items: center; gap: 2rem; }
+    .nav-link { color: var(--text-muted); font-size: .95rem; font-weight: 500; display:flex; align-items:center; gap:.5rem; }
+    .nav-link:hover, .nav-link.active { color: var(--accent); text-shadow: 0 0 10px var(--accent-glow); }
+    .nav-badge { background: linear-gradient(135deg, var(--primary), #5a00d6); color: #fff; font-size: .7rem; padding: 3px 8px; border-radius: 6px; font-weight: 700; letter-spacing: 0.1em; box-shadow: 0 0 10px var(--primary-glow); }
+    
+    /* ── Layout ── */
+    .page-wrapper { max-width: 1100px; margin: 0 auto; padding: 4rem 1.5rem; }
+    .page-header { margin-bottom: 3rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 1.5rem; }
+    .page-title { font-size: 2rem; text-shadow: 0 0 20px rgba(255,255,255,0.2); }
+    .page-subtitle { color: var(--accent); font-size: 1rem; margin-top: .5rem; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; }
+
+    /* ── Cards & UI Elements ── */
+    .card { 
+      background: var(--bg-card); 
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border); 
+      border-radius: var(--radius); 
+      padding: 2rem; 
+      transition: all var(--transition);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    }
+    .card:hover { 
+      border-color: rgba(0, 240, 255, 0.3); 
+      transform: translateY(-4px);
+      box-shadow: 0 15px 50px rgba(0,0,0,0.6), 0 0 25px rgba(0,240,255,0.1);
+    }
+    .card-title { font-size: 1.25rem; margin-bottom: 1.5rem; font-weight: 600; color: #fff; }
+    
+    /* ── Formularios ── */
+    .form-group { margin-bottom: 1.5rem; }
+    .form-label { display: block; font-size: .85rem; font-weight: 600; color: var(--text-muted); margin-bottom: .5rem; letter-spacing: 0.05em; text-transform: uppercase; }
+    .form-control {
+      width: 100%; padding: .85rem 1rem;
+      background: var(--bg-input); border: 1px solid var(--border);
+      border-radius: var(--radius); color: #fff;
+      font-family: inherit; font-size: 1rem;
+      transition: all var(--transition);
+    }
+    .form-control:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 15px var(--accent-glow); background: rgba(255,255,255,0.1); }
+    
+    /* ── Botones Grandes y Vibrantes ── */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: .75rem;
+      padding: .85rem 1.75rem; border: 1px solid transparent; border-radius: var(--radius);
+      font-family: inherit; font-size: 1.05rem; font-weight: 600; letter-spacing: 0.02em;
+      cursor: pointer; transition: all var(--transition);
+      position: relative; overflow: hidden;
+    }
+    .btn-primary { 
+      background: linear-gradient(135deg, var(--primary), #5a00d6); 
+      color: #fff; border: 1px solid rgba(255,255,255,0.2);
+      box-shadow: 0 4px 15px var(--primary-glow);
+    }
+    .btn-primary:hover { 
+      box-shadow: 0 8px 25px var(--primary-glow), inset 0 0 15px rgba(255,255,255,0.3); 
+      transform: translateY(-2px); color: #fff;
+    }
+    
+    .btn-ghost { background: transparent; border-color: var(--border); color: var(--text); }
+    .btn-ghost:hover { 
+      background: rgba(0, 240, 255, 0.05); 
+      border-color: var(--accent); 
+      color: var(--accent);
+      box-shadow: 0 0 20px var(--accent-glow);
+    }
+    
+    .btn-success { background: rgba(0,255,102,0.1); color: var(--success); border-color: var(--success); }
+    .btn-success:hover { background: var(--success); color: #000; box-shadow: 0 0 20px rgba(0,255,102,0.5); transform: translateY(-2px); }
+    
+    .btn-danger { background: rgba(255,0,60,0.1); border-color: var(--danger); color: var(--danger); }
+    .btn-danger:hover { background: var(--danger); color: #fff; box-shadow: 0 0 20px rgba(255,0,60,0.5); transform: translateY(-2px); }
+    
+    /* ── Badges Brillantes ── */
+    .badge {
+      display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 20px;
+      font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid;
+    }
+    .badge-pendiente { border-color: #ffaa00; color: #ffaa00; background: rgba(255,170,0,0.1); box-shadow: 0 0 10px rgba(255,170,0,0.2); }
+    .badge-confirmado { border-color: var(--success); color: var(--success); background: rgba(0,255,102,0.1); box-shadow: 0 0 10px rgba(0,255,102,0.2); }
+    .badge-cancelado { border-color: var(--border); color: var(--text-muted); background: var(--bg-input); }
+
+    /* ── Layout Utilities ── */
+    .grid { display: grid; gap: 2rem; }
+    .grid-2 { grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); }
+    .divider { height: 1px; background: rgba(255,255,255,0.05); margin: 2rem 0; }
+    .text-muted { color: var(--text-muted); font-size: .9rem; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+  </style>
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+<div id="cursor-glow"></div>
+
+<nav class="navbar">
+  {% if session.get('rol') == 'admin' %}
+    <a href="{{ url_for('admin.dashboard') }}" class="navbar-brand">
+  {% elif url_id %}
+    <a href="{{ url_for('cliente.solicitar_turno', url_id=url_id) }}" class="navbar-brand">
+  {% else %}
+    <a href="/" class="navbar-brand">
+  {% endif %}
+    {% if config and config.logo_url %}
+      <img src="{{ config.logo_url }}" alt="Logo" style="height: 32px; border-radius: 4px;" />
+    {% else %}
+      <i data-lucide="triangle" fill="currentColor" style="width: 20px; height: 20px; color: var(--accent);"></i>
+    {% endif %}
+    {{ config.nombre if config else 'Turnos SaaS' }}
+  </a>
+
+  <div class="navbar-links">
+    {% if session.get('rol') == 'admin' %}
+      <button onclick="navigator.clipboard.writeText('{{ url_for('cliente.solicitar_turno', url_id=session.get('negocio_id'), _external=True) }}'); alert('¡Link copiado!');" class="btn btn-primary btn-sm" style="margin-right: 1rem; padding: 0.25rem 0.75rem; font-size: 0.8rem;">
+        <i data-lucide="link" style="width: 14px;"></i> Copiar Mi Link
+      </button>
+      <a href="{{ url_for('admin.agenda') }}" class="nav-link {% if request.endpoint == 'admin.agenda' %}active{% endif %}">Agenda</a>
+      <a href="{{ url_for('admin.clientes') }}" class="nav-link {% if request.endpoint == 'admin.clientes' %}active{% endif %}">Clientes</a>
+      <a href="{{ url_for('admin.configuracion') }}" class="nav-link {% if request.endpoint == 'admin.configuracion' %}active{% endif %}"><i data-lucide="settings" style="width: 16px;"></i></a>
+      <span class="nav-badge">ADMIN</span>
+      <a href="{{ url_for('auth.logout') }}" class="nav-link"><i data-lucide="log-out" style="width: 16px;"></i></a>
+    {% elif url_id %}
+      <a href="{{ url_for('cliente.solicitar_turno', url_id=url_id) }}" class="nav-link {% if request.endpoint == 'cliente.solicitar_turno' %}active{% endif %}">Pedir Turno</a>
+      <a href="{{ url_for('cliente.mis_turnos', url_id=url_id) }}" class="nav-link {% if request.endpoint == 'cliente.mis_turnos' %}active{% endif %}">Mis Reservas</a>
+    {% else %}
+      <a href="{{ url_for('auth.login_admin_view') }}" class="nav-link">Acceso Negocios</a>
+    {% endif %}
+  </div>
+</nav>
+
+{% block content %}{% endblock %}
+
+<script>
+  // Inicializar íconos Lucide
+  lucide.createIcons();
+
+  // Cursor Glow (Aura Effect)
+  const cursorGlow = document.getElementById('cursor-glow');
+  let isMoving = false;
+  
+  document.addEventListener('mousemove', (e) => {
+    if(!isMoving) {
+      cursorGlow.style.opacity = '1';
+      isMoving = true;
+    }
+    // Centrar el aura en el cursor
+    cursorGlow.style.left = e.clientX + 'px';
+    cursorGlow.style.top = e.clientY + 'px';
+  });
+
+  document.addEventListener('mouseleave', () => {
+    cursorGlow.style.opacity = '0';
+    isMoving = false;
+  });
+</script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

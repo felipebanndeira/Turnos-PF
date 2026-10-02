@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Clientes — Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+.search-bar {
+  display: flex; gap: .5rem; margin-bottom: 1.5rem;
+}
+.search-bar input { flex: 1; max-width: 400px; }
+
+.table-wrapper {
+  background: var(--bg-card);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  overflow-x: auto;
+}
+table { width: 100%; border-collapse: collapse; text-align: left; }
+th, td { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-soft); }
+th {
+  font-size: .8rem; text-transform: uppercase; letter-spacing: .05em;
+  color: var(--text-muted); font-weight: 600; background: rgba(0,0,0,.1);
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--bg-input); }
+
+.status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: .5rem; }
+.status-dot.active { background: var(--emerald); box-shadow: 0 0 5px var(--emerald); }
+.status-dot.inactive { background: var(--red); box-shadow: 0 0 5px var(--red); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+  
+  <div class="page-header">
+    <h1 class="page-title">Gestión de Clientes</h1>
+    <p class="page-subtitle">Base de datos de usuarios registrados</p>
+  </div>
+
+  <form method="GET" action="{{ url_for('admin.clientes') }}" class="search-bar">
+    <input type="text" name="q" class="form-control" placeholder="Buscar por nombre o email..." value="{{ q }}" />
+    <button type="submit" class="btn btn-primary">Buscar</button>
+    {% if q %}
+      <a href="{{ url_for('admin.clientes') }}" class="btn btn-ghost">Limpiar</a>
+    {% endif %}
+  </form>
+
+  <div class="table-wrapper">
+    {% if clientes %}
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Contacto</th>
+            <th>Estado</th>
+            <th>Registro</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in clientes %}
+          <tr>
+            <td style="font-weight:500;">{{ c.nombre }}</td>
+            <td>
+              <div style="font-size:.9rem;">{{ c.email }}</div>
+              <div style="font-size:.8rem; color:var(--text-muted);">{{ c.telefono }}</div>
+            </td>
+            <td>
+              <span class="status-dot {{ 'active' if c.activo else 'inactive' }}"></span>
+              <span style="font-size:.85rem;">{{ 'Activo' if c.activo else 'Inactivo' }}</span>
+            </td>
+            <td style="font-size:.85rem; color:var(--text-muted);">{{ c.fecha_registro | fecha_es }}</td>
+            <td>
+              <a href="{{ url_for('admin.editar_cliente', cliente_id=c.id) }}" class="btn btn-ghost btn-sm">Editar</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <div class="text-center text-muted" style="padding: 3rem 0;">
+        No se encontraron clientes registrados.
+      </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}
