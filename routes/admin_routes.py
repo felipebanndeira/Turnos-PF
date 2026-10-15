@@ -167,20 +167,52 @@ def configuracion():
     config = load_config(nid)
 
     if request.method == "POST":
-        config["nombre"]      = request.form.get("nombre", "").strip()
-        config["rubro"]       = request.form.get("rubro", "").strip()
-        config["descripcion"] = request.form.get("descripcion", "").strip()
-        config["intervalo_turno_min"] = int(request.form.get("intervalo_turno_min", 30))
-        config["horas_cancelacion"] = int(request.form.get("horas_cancelacion", 24))
+        # Safe int/float helpers to prevent ValueError on empty strings
+        def safe_int(val, default):
+            try:
+                s = str(val).strip()
+                return int(s) if s else default
+            except Exception:
+                return default
+
+        def safe_float(val, default):
+            try:
+                s = str(val).strip()
+                return float(s) if s else default
+            except Exception:
+                return default
+
+        config["nombre"]              = request.form.get("nombre", "").strip()
+        config["rubro"]               = request.form.get("rubro", "").strip()
+        config["descripcion"]         = request.form.get("descripcion", "").strip()
+        config["intervalo_turno_min"] = safe_int(request.form.get("intervalo_turno_min"), 30)
+        config["horas_cancelacion"]   = safe_int(request.form.get("horas_cancelacion"), 24)
         
         import base64
+        import io
+        from PIL import Image
+
         logo_file = request.files.get("logo_file")
         if logo_file and logo_file.filename:
             try:
                 file_bytes = logo_file.read()
                 if file_bytes:
-                    mime = logo_file.mimetype or "image/png"
-                    b64_str = base64.b64encode(file_bytes).decode('utf-8')
+                    # Redimensionar la imagen si es grande para no sobrecargar Firestore (max 300x300)
+                    try:
+                        im = Image.open(io.BytesIO(file_bytes))
+                        im.thumbnail((300, 300))
+                        buf = io.BytesIO()
+                        # Guardar en formato web optimizado
+                        format_to_save = 'PNG' if im.mode in ('RGBA', 'LA') else 'JPEG'
+                        im.save(buf, format=format_to_save, quality=85)
+                        optimized_bytes = buf.getvalue()
+                        mime = f"image/{format_to_save.lower()}"
+                    except Exception as e_img:
+                        print("Fallo optimizacion de imagen, usando original:", e_img)
+                        optimized_bytes = file_bytes
+                        mime = logo_file.mimetype or "image/png"
+
+                    b64_str = base64.b64encode(optimized_bytes).decode('utf-8')
                     config["logo_url"] = f"data:{mime};base64,{b64_str}"
             except Exception as e:
                 print(f"Error procesando logo base64: {e}")
@@ -188,8 +220,9 @@ def configuracion():
             config["logo_url"] = ""
         
         config["requiere_senia"]   = request.form.get("requiere_senia") == "1"
-        config["porcentaje_senia"] = float(request.form.get("porcentaje_senia", 0))
+        config["porcentaje_senia"] = safe_float(request.form.get("porcentaje_senia"), 0.0)
         config["titular_pago"]     = request.form.get("titular_pago", "").strip()
+        config["datos_pago"]       = request.form.get("datos_pago", "").strip()
         config["whatsapp_pago"]    = request.form.get("whatsapp_pago", "").strip()
         
         # Helper para parsear precios argentinos (ej: 10.000 o 10000 o 10,50)
