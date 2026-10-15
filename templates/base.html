@@ -198,9 +198,9 @@
     {% if config and config.logo_url %}
       <img src="{{ config.logo_url }}" alt="Logo" style="height: 32px; border-radius: 4px;" />
     {% else %}
-      <i data-lucide="triangle" fill="currentColor" style="width: 20px; height: 20px; color: var(--accent);"></i>
+      <i data-lucide="calendar-check" fill="none" style="width: 22px; height: 22px; color: var(--accent);"></i>
     {% endif %}
-    {{ config.nombre if config else 'Turnos SaaS' }}
+    {{ config.nombre if config else 'Turnify' }}
   </a>
 
   <div class="navbar-links">
