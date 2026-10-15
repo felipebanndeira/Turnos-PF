@@ -189,33 +189,17 @@ def configuracion():
         config["horas_cancelacion"]   = safe_int(request.form.get("horas_cancelacion"), 24)
         
         import base64
-        import io
-        from PIL import Image
 
         logo_file = request.files.get("logo_file")
         if logo_file and logo_file.filename:
             try:
                 file_bytes = logo_file.read()
                 if file_bytes:
-                    # Redimensionar la imagen si es grande para no sobrecargar Firestore (max 300x300)
-                    try:
-                        im = Image.open(io.BytesIO(file_bytes))
-                        im.thumbnail((300, 300))
-                        buf = io.BytesIO()
-                        # Guardar en formato web optimizado
-                        format_to_save = 'PNG' if im.mode in ('RGBA', 'LA') else 'JPEG'
-                        im.save(buf, format=format_to_save, quality=85)
-                        optimized_bytes = buf.getvalue()
-                        mime = f"image/{format_to_save.lower()}"
-                    except Exception as e_img:
-                        print("Fallo optimizacion de imagen, usando original:", e_img)
-                        optimized_bytes = file_bytes
-                        mime = logo_file.mimetype or "image/png"
-
-                    b64_str = base64.b64encode(optimized_bytes).decode('utf-8')
+                    mime = logo_file.mimetype or "image/png"
+                    b64_str = base64.b64encode(file_bytes).decode('utf-8')
                     config["logo_url"] = f"data:{mime};base64,{b64_str}"
             except Exception as e:
-                print(f"Error procesando logo base64: {e}")
+                print(f"Error procesando logo: {e}")
         elif "eliminar_logo" in request.form:
             config["logo_url"] = ""
         
@@ -303,8 +287,12 @@ def configuracion():
                 })
         config["bloqueos_recurrentes"] = b_recurrentes
 
-        save_config(nid, config)
-        flash("Configuración guardada correctamente.", "success")
+        try:
+            save_config(nid, config)
+            flash("Configuración guardada correctamente.", "success")
+        except Exception as e:
+            print(f"Error al guardar configuracion: {e}")
+            flash(f"Error al guardar en base de datos: {e}", "danger")
         return redirect(url_for("admin.configuracion"))
 
     dias_semana = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"]
