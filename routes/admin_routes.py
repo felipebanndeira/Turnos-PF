@@ -173,18 +173,17 @@ def configuracion():
         config["intervalo_turno_min"] = int(request.form.get("intervalo_turno_min", 30))
         config["horas_cancelacion"] = int(request.form.get("horas_cancelacion", 24))
         
-        import os
-        from werkzeug.utils import secure_filename
+        import base64
         logo_file = request.files.get("logo_file")
         if logo_file and logo_file.filename:
             try:
-                os.makedirs("static", exist_ok=True)
-                filename = secure_filename(logo_file.filename)
-                filepath = os.path.join("static", filename)
-                logo_file.save(filepath)
-                config["logo_url"] = f"/static/{filename}"
+                file_bytes = logo_file.read()
+                if file_bytes:
+                    mime = logo_file.mimetype or "image/png"
+                    b64_str = base64.b64encode(file_bytes).decode('utf-8')
+                    config["logo_url"] = f"data:{mime};base64,{b64_str}"
             except Exception as e:
-                print(f"Error guardando logo en serverless: {e}")
+                print(f"Error procesando logo base64: {e}")
         elif "eliminar_logo" in request.form:
             config["logo_url"] = ""
         
@@ -193,6 +192,23 @@ def configuracion():
         config["titular_pago"]     = request.form.get("titular_pago", "").strip()
         config["whatsapp_pago"]    = request.form.get("whatsapp_pago", "").strip()
         
+        # Helper para parsear precios argentinos (ej: 10.000 o 10000 o 10,50)
+        def parse_precio(raw):
+            if not raw: return 0.0
+            s = str(raw).strip().replace('$', '').replace(' ', '')
+            if '.' in s and ',' in s:
+                s = s.replace('.', '').replace(',', '.')
+            elif '.' in s:
+                parts = s.split('.')
+                if all(len(p) == 3 for p in parts[1:]):
+                    s = s.replace('.', '')
+            elif ',' in s:
+                s = s.replace(',', '.')
+            try:
+                return float(s)
+            except Exception:
+                return 0.0
+
         # Servicios
         s_nombres = request.form.getlist("servicio_nombre[]")
         s_durs = request.form.getlist("servicio_duracion[]")
@@ -204,8 +220,8 @@ def configuracion():
                 servicios.append({
                     "id": f"s{i+1}",
                     "nombre": n,
-                    "duracion_min": int(s_durs[i]) if s_durs[i].isdigit() else 30,
-                    "precio": float(s_precios[i]) if s_precios[i] else 0.0
+                    "duracion_min": int(s_durs[i]) if str(s_durs[i]).isdigit() else 30,
+                    "precio": parse_precio(s_precios[i])
                 })
         config["servicios"] = servicios
 
