@@ -177,11 +177,14 @@ def configuracion():
         from werkzeug.utils import secure_filename
         logo_file = request.files.get("logo_file")
         if logo_file and logo_file.filename:
-            os.makedirs("static", exist_ok=True)
-            filename = secure_filename(logo_file.filename)
-            filepath = os.path.join("static", filename)
-            logo_file.save(filepath)
-            config["logo_url"] = f"/static/{filename}"
+            try:
+                os.makedirs("static", exist_ok=True)
+                filename = secure_filename(logo_file.filename)
+                filepath = os.path.join("static", filename)
+                logo_file.save(filepath)
+                config["logo_url"] = f"/static/{filename}"
+            except Exception as e:
+                print(f"Error guardando logo en serverless: {e}")
         elif "eliminar_logo" in request.form:
             config["logo_url"] = ""
         

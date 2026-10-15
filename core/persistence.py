@@ -69,7 +69,7 @@ def load_config(url_id: str) -> dict:
 
 def save_config(url_id: str, new_config: dict) -> None:
     db = get_db()
-    db.collection("negocios").document(url_id).update({"config": new_config})
+    db.collection("negocios").document(url_id).set({"config": new_config}, merge=True)
 
 
 # ─── Clientes ────────────────────────────────────────────────────────────────
