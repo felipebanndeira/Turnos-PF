@@ -26,7 +26,12 @@ def registro_negocio_view():
         url_id = request.form.get("url_id")
         email = request.form.get("email")
         password = request.form.get("password")
+        confirm_password = request.form.get("confirm_password")
         
+        if password != confirm_password:
+            flash("Las contraseñas no coinciden.", "danger")
+            return render_template("auth/registro_negocio.html")
+            
         ok, msg = auth.registrar_negocio(nombre, url_id, email, password)
         if ok:
             flash("Negocio registrado exitosamente. Ahora podés iniciar sesión.", "success")

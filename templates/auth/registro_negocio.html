@@ -29,10 +29,15 @@
       </div>
       <div class="form-group">
         <label class="form-label">Contraseña</label>
-        <input type="password" name="password" class="form-control" placeholder="••••••••" required />
+        <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" required />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Confirmar Contraseña</label>
+        <input type="password" id="confirm_password" name="confirm_password" class="form-control" placeholder="••••••••" required />
+        <small id="pass_match_msg" style="display:none; color:var(--danger); margin-top:0.25rem; font-size:0.85rem;">Las contraseñas no coinciden.</small>
       </div>
 
-      <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Registrar y Comenzar</button>
+      <button type="submit" id="submit_btn" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Registrar y Comenzar</button>
       
       <p class="text-center text-muted" style="margin-top: 1.5rem; font-size: 0.9rem;">
         ¿Ya tienes una cuenta? <a href="{{ url_for('auth.login_admin_view') }}">Inicia sesión</a>
@@ -40,4 +45,26 @@
     </form>
   </div>
 </div>
+
+<script>
+  const pass = document.getElementById('password');
+  const confirmPass = document.getElementById('confirm_password');
+  const msg = document.getElementById('pass_match_msg');
+  const btn = document.getElementById('submit_btn');
+
+  function validatePasswords() {
+    if (confirmPass.value && pass.value !== confirmPass.value) {
+      msg.style.display = 'block';
+      btn.disabled = true;
+      btn.style.opacity = '0.6';
+    } else {
+      msg.style.display = 'none';
+      btn.disabled = false;
+      btn.style.opacity = '1';
+    }
+  }
+
+  pass.addEventListener('input', validatePasswords);
+  confirmPass.addEventListener('input', validatePasswords);
+</script>
 {% endblock %}
