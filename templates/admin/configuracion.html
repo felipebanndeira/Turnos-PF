@@ -4,544 +4,549 @@
 {% set DIAS = {'lunes':'Lunes','martes':'Martes','miercoles':'Miércoles','miércoles':'Miércoles','jueves':'Jueves','viernes':'Viernes','sabado':'Sábado','sábado':'Sábado','domingo':'Domingo'} %}
 
 {% block content %}
-<div class="max-w-5xl mx-auto px-4 py-8 pb-32">
+<div class="max-w-4xl mx-auto px-4 py-8 pb-28 sm:pb-32">
   
-  <!-- Header de Administración SaaS -->
-  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+  <!-- Encabezado de Página -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
     <div>
       <div class="flex items-center gap-2.5 mb-1.5">
-        <h1 class="text-2xl md:text-3xl font-extrabold text-white tracking-tight">Configuración del Negocio</h1>
-        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-gold/15 text-gold border border-gold/30">
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Configuración del Negocio</h1>
+        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
           Panel SaaS
         </span>
       </div>
-      <p class="text-sm text-neutral-400">Personaliza la información de tu barbería, horarios y pasarelas de pago.</p>
+      <p class="text-sm text-slate-400">Personaliza la información de tu organización, disponibilidad horaria y políticas de pago.</p>
     </div>
 
-    <!-- Enlace de Previsualización Rápida -->
+    <!-- Enlace Directo a Vista Pública -->
     {% set public_url = url_for('cliente.solicitar_turno', url_id=session.get('negocio_id'), _external=True) %}
     <a href="{{ public_url }}" target="_blank" 
-       class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-brand-surface border border-white/10 hover:border-gold/40 text-neutral-300 hover:text-white text-xs font-semibold transition self-start md:self-auto shadow-sm">
-      <i data-lucide="external-link" class="w-4 h-4 text-gold"></i>
+       class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-750 text-slate-200 border border-slate-700/70 hover:border-emerald-500/50 text-xs font-semibold transition shrink-0 self-start sm:self-auto shadow-sm">
+      <i data-lucide="external-link" class="w-4 h-4 text-emerald-400"></i>
       <span>Ver página pública</span>
     </a>
   </div>
 
-  <!-- Banner de Alerta Informativo si faltan datos clave -->
+  <!-- Banner de Notificación Informativo -->
   {% set faltan = [] %}
   {% if not config.servicios %}{% set _ = faltan.append('servicios') %}{% endif %}
   {% if not config.horarios_atencion %}{% set _ = faltan.append('horarios de atención') %}{% endif %}
   {% if faltan %}
-    <div class="flex items-center gap-3 p-4 mb-6 rounded-2xl bg-[#1a1710] border border-gold/30 text-xs text-neutral-300">
-      <div class="w-8 h-8 rounded-lg bg-gold/15 text-gold flex items-center justify-center flex-shrink-0">
+    <div class="flex items-center gap-3 p-4 mb-6 rounded-2xl bg-[#0f172a] border border-emerald-500/30 text-xs text-slate-300 shadow-sm">
+      <div class="w-8 h-8 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center shrink-0">
         <i data-lucide="info" class="w-4 h-4"></i>
       </div>
       <div>
-        Para habilitar las reservas de tus clientes, recuerda completar tus <b class="text-white">{{ faltan | join(' y ') }}</b>.
+        Para habilitar las reservas públicas a tus clientes, completa los <b class="text-white">{{ faltan | join(' y ') }}</b> requeridos.
       </div>
     </div>
   {% endif %}
 
-  <!-- Formulario de Configuración Persistente -->
+  <!-- Formulario de Configuración Principal -->
   <form method="POST" action="{{ url_for('admin.configuracion') }}" enctype="multipart/form-data" id="cfg-form" class="space-y-6">
     
-    <!-- 1. MÓDULO: IDENTIDAD Y BRANDING -->
-    <section class="bg-brand-surface border border-white/[0.08] rounded-2xl p-6 shadow-xl">
-      <div class="flex items-center gap-3 mb-6">
-        <div class="w-10 h-10 rounded-xl bg-gold/10 text-gold flex items-center justify-center flex-shrink-0">
-          <i data-lucide="store" class="w-5 h-5"></i>
-        </div>
-        <div>
-          <h2 class="text-base font-bold text-white leading-tight">Identidad y Marca</h2>
-          <p class="text-xs text-neutral-500">Logotipo, nombre y enlace personalizado de tu barbería.</p>
+    <!-- 1. IDENTIDAD DEL NEGOCIO & ENLACE PÚBLICO -->
+    <section class="bg-[#111827] border border-slate-800/80 rounded-2xl p-5 sm:p-6 shadow-xl">
+      <div class="flex items-center justify-between gap-3 mb-5">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/20">
+            <i data-lucide="building-2" class="w-5 h-5"></i>
+          </div>
+          <div class="min-w-0">
+            <h2 class="text-base font-bold text-white truncate">Identidad & Enlace Público</h2>
+            <p class="text-xs text-slate-400 truncate">Información principal, marca y URL para reservas.</p>
+          </div>
         </div>
       </div>
 
-      <!-- Subida de Logo -->
-      <div class="mb-6">
-        <label class="block text-[11px] font-semibold uppercase tracking-wider text-neutral-400 mb-2">Logotipo</label>
+      <!-- Logotipo de la Organización -->
+      <div class="mb-5">
+        <label class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5 block">Logotipo o Imagen de Perfil</label>
         <div class="flex flex-wrap items-center gap-4">
-          <div class="w-16 h-16 rounded-2xl bg-brand-input border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0" id="logo-preview-box">
+          <div class="w-16 h-16 rounded-2xl bg-slate-900 border border-slate-700/80 flex items-center justify-center overflow-hidden shrink-0 shadow-inner" id="logo-preview-box">
             {% if config.logo_url %}
               <img src="{{ config.logo_url }}" alt="Logo" class="w-full h-full object-cover" />
             {% else %}
-              <i data-lucide="image" class="w-6 h-6 text-neutral-600"></i>
+              <i data-lucide="image" class="w-6 h-6 text-slate-600"></i>
             {% endif %}
           </div>
 
           <div class="space-y-1.5">
             <div class="flex items-center gap-2">
-              <label for="logo_file" class="cursor-pointer inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gold/10 hover:bg-gold/20 text-gold text-xs font-semibold transition border border-gold/20">
-                <i data-lucide="upload" class="w-4 h-4"></i>
-                <span>Cambiar imagen</span>
+              <label for="logo_file" class="cursor-pointer inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700/80 hover:border-emerald-500/40 text-xs font-semibold transition shrink-0">
+                <i data-lucide="upload" class="w-4 h-4 text-emerald-400"></i>
+                <span>Cargar imagen</span>
               </label>
               {% if config.logo_url %}
-                <label id="remove-logo-btn" class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-rose-500/20 text-rose-400 hover:bg-rose-500/10 text-xs font-semibold transition">
+                <label id="remove-logo-btn" class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-rose-500/20 text-rose-400 hover:bg-rose-500/10 text-xs font-semibold transition shrink-0">
                   <input type="checkbox" name="eliminar_logo" value="1" id="eliminar_logo" class="hidden" />
                   <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                   <span>Quitar</span>
                 </label>
               {% endif %}
             </div>
-            <span class="block text-[11px] text-neutral-500" id="logo-name-hint">Formatos: PNG, JPG o WEBP (máx. 700 KB).</span>
+            <span class="text-[11px] text-slate-500 block" id="logo-name-hint">PNG, JPG o WEBP (máx. 700 KB).</span>
             <input type="file" name="logo_file" id="logo_file" accept="image/*" class="hidden" />
           </div>
         </div>
       </div>
 
-      <!-- Inputs Principales -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+      <!-- Nombre y Rubro Agnostico -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
         <div>
-          <label class="block text-[11px] font-semibold uppercase tracking-wider text-neutral-400 mb-1.5">Nombre de la Barbería</label>
+          <label class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5 block">Nombre del Negocio u Organización</label>
           <input type="text" name="nombre" value="{{ config.nombre }}" required 
-                 class="w-full bg-brand-input border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-gold focus:ring-1 focus:ring-gold outline-none transition" />
+                 class="w-full block bg-slate-900/90 border border-slate-700/80 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 rounded-xl px-3.5 py-2.5 text-slate-100 placeholder-slate-500 text-sm transition-all outline-none" />
         </div>
 
         <div>
-          <label class="block text-[11px] font-semibold uppercase tracking-wider text-neutral-400 mb-1.5">Rubro / Categoría</label>
-          <input type="text" name="rubro" value="{{ config.rubro }}" placeholder="Ej: Barbería & Peluquería" required 
-                 class="w-full bg-brand-input border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-gold focus:ring-1 focus:ring-gold outline-none transition" />
+          <label class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5 block">Rubro / Especialidad</label>
+          <input type="text" name="rubro" value="{{ config.rubro }}" placeholder="Ej: Consultorio, Estudio, Estética, Salud" required 
+                 class="w-full block bg-slate-900/90 border border-slate-700/80 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 rounded-xl px-3.5 py-2.5 text-slate-100 placeholder-slate-500 text-sm transition-all outline-none" />
         </div>
       </div>
 
+      <!-- Descripción -->
       <div class="mb-4">
-        <label class="block text-[11px] font-semibold uppercase tracking-wider text-neutral-400 mb-1.5">Descripción o Lema (Opcional)</label>
-        <input type="text" name="descripcion" value="{{ config.descripcion or '' }}" placeholder="Ej: Especialistas en cortes modernos y afeitado tradicional." 
-               class="w-full bg-brand-input border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-gold focus:ring-1 focus:ring-gold outline-none transition" />
+        <label class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5 block">Descripción o Presentación Breve <span class="text-slate-500 capitalize font-normal">(Opcional)</span></label>
+        <input type="text" name="descripcion" value="{{ config.descripcion or '' }}" placeholder="Ej: Atención personalizada, citas programadas y asesoría profesional." 
+               class="w-full block bg-slate-900/90 border border-slate-700/80 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 rounded-xl px-3.5 py-2.5 text-slate-100 placeholder-slate-500 text-sm transition-all outline-none" />
       </div>
 
-      <!-- Enlace Personalizado SaaS (Slug) -->
-      <div class="mb-4">
-        <label class="block text-[11px] font-semibold uppercase tracking-wider text-neutral-400 mb-1.5">Enlace Personalizado SaaS (URL de Reservas)</label>
-        <div class="flex items-stretch rounded-xl overflow-hidden border border-white/10 bg-brand-input">
-          <span class="px-3.5 py-3 text-xs text-neutral-500 bg-[#161619] border-r border-white/5 font-mono select-none flex items-center">
+      <!-- Enlace Personalizado (Slug del SaaS) -->
+      <div class="mb-5">
+        <label class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5 block">URL Pública de Reservas</label>
+        <div class="flex items-stretch rounded-xl overflow-hidden border border-slate-700/80 bg-slate-900/90 shadow-sm">
+          <span class="px-3.5 py-2.5 text-xs text-slate-400 bg-slate-800/60 border-r border-slate-700/80 font-mono select-none flex items-center shrink-0">
             {{ request.host }}/b/
           </span>
-          <div class="flex-1 px-4 py-3 text-sm font-bold text-gold tracking-wide truncate flex items-center">
+          <div class="flex-1 px-3.5 py-2.5 text-sm font-semibold text-emerald-400 tracking-wide truncate flex items-center min-w-0">
             {{ session.get('negocio_id') }}
           </div>
-          <button type="button" onclick="copySlugLink('{{ public_url }}', this)" 
-                  class="px-4 text-neutral-400 hover:text-gold hover:bg-white/5 transition flex items-center gap-1.5 text-xs font-semibold border-l border-white/5">
+          <button type="button" onclick="copyPublicLink('{{ public_url }}', this)" 
+                  class="px-4 text-slate-300 hover:text-emerald-400 hover:bg-slate-800/80 transition flex items-center gap-1.5 text-xs font-semibold border-l border-slate-700/80 shrink-0">
             <i data-lucide="copy" class="w-4 h-4"></i>
-            <span class="hidden sm:inline">Copiar</span>
+            <span class="hidden sm:inline">Copiar enlace</span>
           </button>
         </div>
+        <span class="text-[11px] text-slate-500 mt-1 block">Comparte esta dirección web con tus clientes para que puedan reservar de forma directa.</span>
       </div>
 
-      <!-- Parámetros Numéricos -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-white/5">
+      <!-- Parámetros de Reserva -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-slate-800">
         <div>
-          <label class="block text-[11px] font-semibold uppercase tracking-wider text-neutral-400 mb-1.5">Intervalo de turnos (minutos)</label>
-          <div class="flex items-center rounded-xl border border-white/10 bg-brand-input overflow-hidden">
-            <button type="button" onclick="stepNumber('intervalo_turno_min', -5)" class="w-11 py-3 text-neutral-400 hover:text-white bg-[#161619] text-base transition select-none">−</button>
+          <label class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5 block">Frecuencia / Intervalo de Citas (min)</label>
+          <div class="flex items-center rounded-xl border border-slate-700/80 bg-slate-900/90 overflow-hidden">
+            <button type="button" onclick="adjustNum('intervalo_turno_min', -5)" class="w-11 py-2.5 text-slate-300 hover:text-white bg-slate-800/70 text-base transition select-none shrink-0">−</button>
             <input type="number" id="intervalo_turno_min" name="intervalo_turno_min" value="{{ config.intervalo_turno_min or 30 }}" min="5" step="5" required
-                   class="flex-1 bg-transparent text-center font-bold text-white text-sm outline-none" />
-            <button type="button" onclick="stepNumber('intervalo_turno_min', 5)" class="w-11 py-3 text-neutral-400 hover:text-white bg-[#161619] text-base transition select-none">+</button>
+                   class="flex-1 bg-transparent text-center font-bold text-slate-100 text-sm outline-none py-2" />
+            <button type="button" onclick="adjustNum('intervalo_turno_min', 5)" class="w-11 py-2.5 text-slate-300 hover:text-white bg-slate-800/70 text-base transition select-none shrink-0">+</button>
           </div>
-          <span class="block text-[11px] text-neutral-500 mt-1">Frecuencia de las citas (ej. cada 30 min).</span>
+          <span class="text-[11px] text-slate-500 mt-1 block">Intervalo entre turnos disponibles (ej. cada 30 o 45 min).</span>
         </div>
 
         <div>
-          <label class="block text-[11px] font-semibold uppercase tracking-wider text-neutral-400 mb-1.5">Límite para cancelar (horas)</label>
-          <div class="flex items-center rounded-xl border border-white/10 bg-brand-input overflow-hidden">
-            <button type="button" onclick="stepNumber('horas_cancelacion', -1)" class="w-11 py-3 text-neutral-400 hover:text-white bg-[#161619] text-base transition select-none">−</button>
+          <label class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5 block">Anticipación para Cancelar (horas)</label>
+          <div class="flex items-center rounded-xl border border-slate-700/80 bg-slate-900/90 overflow-hidden">
+            <button type="button" onclick="adjustNum('horas_cancelacion', -1)" class="w-11 py-2.5 text-slate-300 hover:text-white bg-slate-800/70 text-base transition select-none shrink-0">−</button>
             <input type="number" id="horas_cancelacion" name="horas_cancelacion" value="{{ config.horas_cancelacion | default(24) }}" min="0" required
-                   class="flex-1 bg-transparent text-center font-bold text-white text-sm outline-none" />
-            <button type="button" onclick="stepNumber('horas_cancelacion', 1)" class="w-11 py-3 text-neutral-400 hover:text-white bg-[#161619] text-base transition select-none">+</button>
+                   class="flex-1 bg-transparent text-center font-bold text-slate-100 text-sm outline-none py-2" />
+            <button type="button" onclick="adjustNum('horas_cancelacion', 1)" class="w-11 py-2.5 text-slate-300 hover:text-white bg-slate-800/70 text-base transition select-none shrink-0">+</button>
           </div>
-          <span class="block text-[11px] text-neutral-500 mt-1">Anticipación mínima para cancelaciones online.</span>
+          <span class="text-[11px] text-slate-500 mt-1 block">Margen límite para que el cliente cancele online.</span>
         </div>
       </div>
     </section>
 
-    <!-- 2. MÓDULO: PAGOS Y SEÑAS -->
-    <section class="bg-brand-surface border border-white/[0.08] rounded-2xl p-6 shadow-xl">
-      <div class="flex items-center gap-3 mb-6">
-        <div class="w-10 h-10 rounded-xl bg-gold/10 text-gold flex items-center justify-center flex-shrink-0">
-          <i data-lucide="wallet" class="w-5 h-5"></i>
-        </div>
-        <div>
-          <h2 class="text-base font-bold text-white leading-tight">Pagos y Señas</h2>
-          <p class="text-xs text-neutral-500">Configuración de transferencias bancarias o Mercado Pago.</p>
+    <!-- 2. POLÍTICAS DE PAGO Y SEÑAS -->
+    <section class="bg-[#111827] border border-slate-800/80 rounded-2xl p-5 sm:p-6 shadow-xl">
+      <div class="flex items-center justify-between gap-3 mb-5">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/20">
+            <i data-lucide="credit-card" class="w-5 h-5"></i>
+          </div>
+          <div class="min-w-0">
+            <h2 class="text-base font-bold text-white truncate">Políticas de Pago y Señas</h2>
+            <p class="text-xs text-slate-400 truncate">Configuración de anticipos bancarios o transferencias.</p>
+          </div>
         </div>
       </div>
 
-      <!-- Toggle Switch Dorado -->
-      <div class="flex items-center justify-between gap-4 p-4 rounded-xl bg-brand-input border border-white/5 mb-5 cursor-pointer" onclick="toggleSenia()">
+      <!-- Toggle Switch Esmeralda -->
+      <div class="flex items-center justify-between gap-4 p-4 rounded-xl bg-slate-900/90 border border-slate-800 mb-5 cursor-pointer select-none" onclick="togglePaymentPolicy()">
         <div>
-          <span class="block text-sm font-bold text-white">Requerir seña / pago previo para reservar</span>
-          <span class="block text-xs text-neutral-500">El turno quedará en estado pendiente hasta la confirmación de la transferencia.</span>
+          <span class="block text-sm font-semibold text-white">Exigir seña o anticipo previo</span>
+          <span class="block text-xs text-slate-400 mt-0.5">La reserva quedará en estado pendiente hasta confirmar la recepción del comprobante.</span>
         </div>
-        <label class="relative inline-flex items-center cursor-pointer pointer-events-none">
+        <label class="relative inline-flex items-center cursor-pointer pointer-events-none shrink-0">
           <input type="checkbox" id="requiere_senia" name="requiere_senia" value="1" {% if config.requiere_senia %}checked{% endif %} class="sr-only peer" />
-          <div class="w-11 h-6 bg-neutral-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-[#c59a3f] peer-checked:to-[#e5b84c]"></div>
+          <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-emerald-500 peer-checked:to-teal-400"></div>
         </label>
       </div>
 
-      <!-- Campos de Pago -->
-      <div id="payment-fields" class="grid grid-cols-1 md:grid-cols-2 gap-4 transition-all duration-200 {% if not config.requiere_senia %}opacity-30 pointer-events-none{% endif %}">
+      <!-- Campos Bancarios y de Contacto -->
+      <div id="payment-fields-wrapper" class="grid grid-cols-1 sm:grid-cols-2 gap-4 transition-all duration-200 {% if not config.requiere_senia %}opacity-30 pointer-events-none{% endif %}">
         <div>
-          <label class="block text-[11px] font-semibold uppercase tracking-wider text-neutral-400 mb-1.5">Porcentaje de Seña (%)</label>
+          <label class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5 block">Porcentaje de Seña (%)</label>
           <input type="number" id="porcentaje_senia" name="porcentaje_senia" value="{{ (config.porcentaje_senia or 30) | int }}" min="1" max="100"
-                 class="w-full bg-brand-input border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-gold focus:ring-1 focus:ring-gold outline-none transition" />
+                 class="w-full block bg-slate-900/90 border border-slate-700/80 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 rounded-xl px-3.5 py-2.5 text-slate-100 placeholder-slate-500 text-sm transition-all outline-none" />
         </div>
 
         <div>
-          <label class="block text-[11px] font-semibold uppercase tracking-wider text-neutral-400 mb-1.5">Titular de la Cuenta</label>
-          <input type="text" id="titular_pago" name="titular_pago" value="{{ config.titular_pago or '' }}" placeholder="Ej: Juan Pérez"
-                 class="w-full bg-brand-input border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-gold focus:ring-1 focus:ring-gold outline-none transition" />
+          <label class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5 block">Titular de la Cuenta</label>
+          <input type="text" id="titular_pago" name="titular_pago" value="{{ config.titular_pago or '' }}" placeholder="Ej: Dr. Martín Gómez"
+                 class="w-full block bg-slate-900/90 border border-slate-700/80 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 rounded-xl px-3.5 py-2.5 text-slate-100 placeholder-slate-500 text-sm transition-all outline-none" />
         </div>
 
         <div>
-          <label class="block text-[11px] font-semibold uppercase tracking-wider text-neutral-400 mb-1.5">Datos Bancarios (Alias de Mercado Pago / CBU)</label>
-          <input type="text" id="datos_pago" name="datos_pago" value="{{ config.datos_pago or '' }}" placeholder="Ej: BARBERIA.MP"
-                 class="w-full bg-brand-input border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-gold focus:ring-1 focus:ring-gold outline-none transition" />
+          <label class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5 block">Datos de Transferencia (Alias / CBU)</label>
+          <input type="text" id="datos_pago" name="datos_pago" value="{{ config.datos_pago or '' }}" placeholder="Ej: CONSULTORIO.SALUD.MP"
+                 class="w-full block bg-slate-900/90 border border-slate-700/80 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 rounded-xl px-3.5 py-2.5 text-slate-100 placeholder-slate-500 text-sm transition-all outline-none" />
         </div>
 
         <div>
-          <label class="block text-[11px] font-semibold uppercase tracking-wider text-neutral-400 mb-1.5">WhatsApp para recibir comprobantes</label>
+          <label class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5 block">WhatsApp de Contacto / Comprobantes</label>
           <input type="tel" id="whatsapp_pago" name="whatsapp_pago" value="{{ config.whatsapp_pago or '' }}" placeholder="Ej: 3755802727"
-                 class="w-full bg-brand-input border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-gold focus:ring-1 focus:ring-gold outline-none transition" />
-          <span class="block text-[11px] text-neutral-500 mt-1">Sin signos ni espacios (código de área + número).</span>
+                 class="w-full block bg-slate-900/90 border border-slate-700/80 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 rounded-xl px-3.5 py-2.5 text-slate-100 placeholder-slate-500 text-sm transition-all outline-none" />
+          <span class="text-[11px] text-slate-500 mt-1 block">Número telefónico internacional sin signos (ej. código de área + teléfono).</span>
         </div>
       </div>
     </section>
 
-    <!-- 3. MÓDULO: SERVICIOS OFRECIDOS -->
-    <section class="bg-brand-surface border border-white/[0.08] rounded-2xl p-6 shadow-xl">
-      <div class="flex items-center justify-between gap-4 mb-6 flex-wrap">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-gold/10 text-gold flex items-center justify-center flex-shrink-0">
-            <i data-lucide="scissors" class="w-5 h-5"></i>
+    <!-- 3. CATÁLOGO DE SERVICIOS -->
+    <section class="bg-[#111827] border border-slate-800/80 rounded-2xl p-5 sm:p-6 shadow-xl overflow-x-hidden">
+      <div class="flex items-center justify-between gap-3 mb-5">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/20">
+            <i data-lucide="layers" class="w-5 h-5"></i>
           </div>
-          <div>
-            <h2 class="text-base font-bold text-white leading-tight">Servicios Ofrecidos</h2>
-            <p class="text-xs text-neutral-500">Gestión de catálogo, precios y duración de turnos.</p>
+          <div class="min-w-0">
+            <h2 class="text-base font-bold text-white truncate">Catálogo de Servicios</h2>
+            <p class="text-xs text-slate-400 truncate">Configuración de prestaciones, tiempos y tarifas.</p>
           </div>
         </div>
 
-        <button type="button" onclick="addNewRow('servicio')" 
-                class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gold/10 hover:bg-gold/20 text-gold border border-gold/30 text-xs font-bold transition">
-          <i data-lucide="plus" class="w-4 h-4"></i>
+        <button type="button" onclick="appendDynamicItem('servicio')" 
+                class="bg-slate-800/70 hover:bg-slate-750 text-slate-200 border border-slate-700/60 rounded-xl px-3.5 py-2 text-xs font-semibold inline-flex items-center gap-1.5 transition shrink-0">
+          <i data-lucide="plus" class="w-4 h-4 text-emerald-400"></i>
           <span>Agregar Servicio</span>
         </button>
       </div>
 
       <div class="space-y-3" id="servicio-list">
         {% for s in config.servicios %}
-        <div class="row-card flex flex-col md:flex-row md:items-end gap-3 p-4 bg-brand-input border border-white/5 rounded-2xl">
+        <div class="row-entry flex flex-col sm:flex-row sm:items-end gap-3 p-3.5 bg-slate-900/80 border border-slate-800 rounded-xl">
           <input type="hidden" name="servicio_id[]" value="{{ s.id }}" />
           
-          <div class="flex-[2]">
-            <label class="block text-[10px] font-semibold uppercase tracking-wider text-neutral-400 mb-1">Nombre del Servicio</label>
-            <input type="text" name="servicio_nombre[]" value="{{ s.nombre }}" required placeholder="Ej: Corte & Barba"
-                   class="w-full bg-[#161619] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-gold outline-none" />
+          <div class="flex-[2] min-w-0">
+            <label class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1 block">Nombre de la Prestación</label>
+            <input type="text" name="servicio_nombre[]" value="{{ s.nombre }}" required placeholder="Ej: Consulta general"
+                   class="w-full block bg-slate-950 border border-slate-700/70 focus:border-emerald-500 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none" />
           </div>
 
-          <div class="flex-1">
-            <label class="block text-[10px] font-semibold uppercase tracking-wider text-neutral-400 mb-1">Duración (min)</label>
+          <div class="flex-1 min-w-0">
+            <label class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1 block">Duración (min)</label>
             <input type="number" name="servicio_duracion[]" value="{{ s.duracion_min }}" min="5" required
-                   class="w-full bg-[#161619] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-gold outline-none" />
+                   class="w-full block bg-slate-950 border border-slate-700/70 focus:border-emerald-500 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none" />
           </div>
 
-          <div class="flex-1">
-            <label class="block text-[10px] font-semibold uppercase tracking-wider text-neutral-400 mb-1">Precio ($)</label>
+          <div class="flex-1 min-w-0">
+            <label class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1 block">Arancel / Precio ($)</label>
             <input type="text" name="servicio_precio[]" value="{{ '{:,.0f}'.format((s.precio or 0)|float).replace(',', '.') }}" placeholder="10.000"
-                   class="w-full bg-[#161619] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white font-bold text-amber-400 focus:border-gold outline-none" />
+                   class="w-full block bg-slate-950 border border-slate-700/70 focus:border-emerald-500 rounded-lg px-3 py-2 text-xs text-emerald-400 font-bold outline-none" />
           </div>
 
-          <button type="button" onclick="deleteRow(this)" title="Eliminar servicio"
-                  class="w-10 h-9 md:h-10 rounded-xl border border-rose-500/20 text-rose-400 hover:bg-rose-500/10 flex items-center justify-center transition flex-shrink-0">
+          <button type="button" onclick="removeDynamicItem(this)" title="Eliminar servicio"
+                  class="text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 border border-rose-500/20 rounded-xl p-2 transition-colors shrink-0 flex items-center justify-center h-9 sm:h-9 w-full sm:w-9">
             <i data-lucide="trash-2" class="w-4 h-4"></i>
           </button>
         </div>
         {% endfor %}
       </div>
 
-      <div id="servicio-empty" class="text-center py-8 text-neutral-500 text-xs border border-dashed border-white/10 rounded-xl mt-3 {% if config.servicios %}hidden{% endif %}">
-        No hay servicios configurados.
+      <div id="servicio-empty" class="text-center py-8 text-slate-500 text-xs border border-dashed border-slate-800 rounded-xl mt-3 {% if config.servicios %}hidden{% endif %}">
+        No hay servicios activos cargados en el catálogo.
       </div>
     </section>
 
-    <!-- 4. MÓDULO: HORARIOS DE ATENCIÓN -->
-    <section class="bg-brand-surface border border-white/[0.08] rounded-2xl p-6 shadow-xl">
-      <div class="flex items-center justify-between gap-4 mb-6 flex-wrap">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-gold/10 text-gold flex items-center justify-center flex-shrink-0">
+    <!-- 4. HORARIOS DE ATENCIÓN Y EXCEPCIONES -->
+    <section class="bg-[#111827] border border-slate-800/80 rounded-2xl p-5 sm:p-6 shadow-xl overflow-x-hidden">
+      <div class="flex items-center justify-between gap-3 mb-5">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/20">
             <i data-lucide="clock" class="w-5 h-5"></i>
           </div>
-          <div>
-            <h2 class="text-base font-bold text-white leading-tight">Horarios de Atención</h2>
-            <p class="text-xs text-neutral-500">Franjas horarias y días de apertura semanal.</p>
+          <div class="min-w-0">
+            <h2 class="text-base font-bold text-white truncate">Horarios de Atención</h2>
+            <p class="text-xs text-slate-400 truncate">Franjas horarias semanales de atención al público.</p>
           </div>
         </div>
 
-        <button type="button" onclick="addNewRow('horario')" 
-                class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gold/10 hover:bg-gold/20 text-gold border border-gold/30 text-xs font-bold transition">
-          <i data-lucide="plus" class="w-4 h-4"></i>
+        <button type="button" onclick="appendDynamicItem('horario')" 
+                class="bg-slate-800/70 hover:bg-slate-750 text-slate-200 border border-slate-700/60 rounded-xl px-3.5 py-2 text-xs font-semibold inline-flex items-center gap-1.5 transition shrink-0">
+          <i data-lucide="plus" class="w-4 h-4 text-emerald-400"></i>
           <span>Agregar Franja</span>
         </button>
       </div>
 
       <div class="space-y-3" id="horario-list">
         {% for h in config.horarios_atencion %}
-        <div class="row-card flex flex-col md:flex-row md:items-end gap-3 p-4 bg-brand-input border border-white/5 rounded-2xl">
-          <div class="flex-[1.5]">
-            <label class="block text-[10px] font-semibold uppercase tracking-wider text-neutral-400 mb-1">Día de la semana</label>
-            <select name="horario_dia[]" required class="w-full bg-[#161619] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-gold outline-none">
+        <div class="row-entry flex flex-col sm:flex-row sm:items-end gap-3 p-3.5 bg-slate-900/80 border border-slate-800 rounded-xl">
+          <div class="flex-[1.5] min-w-0">
+            <label class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1 block">Día de la semana</label>
+            <select name="horario_dia[]" required class="w-full block bg-slate-950 border border-slate-700/70 focus:border-emerald-500 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none">
               {% for d in dias_semana %}
                 <option value="{{ d }}" {% if h.dia == d or DIAS.get(h.dia) == DIAS.get(d) %}selected{% endif %}>{{ DIAS.get(d, d|capitalize) }}</option>
               {% endfor %}
             </select>
           </div>
 
-          <div class="flex-1">
-            <label class="block text-[10px] font-semibold uppercase tracking-wider text-neutral-400 mb-1">Apertura</label>
+          <div class="flex-1 min-w-0">
+            <label class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1 block">Hora Apertura</label>
             <input type="time" name="horario_desde[]" value="{{ h.desde }}" required 
-                   class="w-full bg-[#161619] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-gold outline-none" />
+                   class="w-full block bg-slate-950 border border-slate-700/70 focus:border-emerald-500 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none" />
           </div>
 
-          <div class="flex-1">
-            <label class="block text-[10px] font-semibold uppercase tracking-wider text-neutral-400 mb-1">Cierre</label>
+          <div class="flex-1 min-w-0">
+            <label class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1 block">Hora Cierre</label>
             <input type="time" name="horario_hasta[]" value="{{ h.hasta }}" required 
-                   class="w-full bg-[#161619] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-gold outline-none" />
+                   class="w-full block bg-slate-950 border border-slate-700/70 focus:border-emerald-500 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none" />
           </div>
 
-          <button type="button" onclick="deleteRow(this)" title="Eliminar franja"
-                  class="w-10 h-9 md:h-10 rounded-xl border border-rose-500/20 text-rose-400 hover:bg-rose-500/10 flex items-center justify-center transition flex-shrink-0">
+          <button type="button" onclick="removeDynamicItem(this)" title="Eliminar franja"
+                  class="text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 border border-rose-500/20 rounded-xl p-2 transition-colors shrink-0 flex items-center justify-center h-9 sm:h-9 w-full sm:w-9">
             <i data-lucide="trash-2" class="w-4 h-4"></i>
           </button>
         </div>
         {% endfor %}
       </div>
 
-      <div id="horario-empty" class="text-center py-8 text-neutral-500 text-xs border border-dashed border-white/10 rounded-xl mt-3 {% if config.horarios_atencion %}hidden{% endif %}">
+      <div id="horario-empty" class="text-center py-8 text-slate-500 text-xs border border-dashed border-slate-800 rounded-xl mt-3 {% if config.horarios_atencion %}hidden{% endif %}">
         No hay franjas horarias configuradas.
       </div>
     </section>
 
-    <!-- 5. MÓDULO: EXCEPCIONES Y DESCANSOS -->
-    <section class="bg-brand-surface border border-white/[0.08] rounded-2xl p-6 shadow-xl">
-      <div class="flex items-center justify-between gap-4 mb-6 flex-wrap">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-gold/10 text-gold flex items-center justify-center flex-shrink-0">
+    <!-- 5. PAUSAS FIJAS / DESCANSOS -->
+    <section class="bg-[#111827] border border-slate-800/80 rounded-2xl p-5 sm:p-6 shadow-xl overflow-x-hidden">
+      <div class="flex items-center justify-between gap-3 mb-5">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/20">
             <i data-lucide="coffee" class="w-5 h-5"></i>
           </div>
-          <div>
-            <h2 class="text-base font-bold text-white leading-tight">Pausas Fijas (Almuerzos / Descansos)</h2>
-            <p class="text-xs text-neutral-500">Bloqueos horarios automáticos recurrentes cada semana.</p>
+          <div class="min-w-0">
+            <h2 class="text-base font-bold text-white truncate">Pausas Recurrentes</h2>
+            <p class="text-xs text-slate-400 truncate">Horarios de descanso o almuerzo semanales no reservables.</p>
           </div>
         </div>
 
-        <button type="button" onclick="addNewRow('recurrente')" 
-                class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gold/10 hover:bg-gold/20 text-gold border border-gold/30 text-xs font-bold transition">
-          <i data-lucide="plus" class="w-4 h-4"></i>
+        <button type="button" onclick="appendDynamicItem('recurrente')" 
+                class="bg-slate-800/70 hover:bg-slate-750 text-slate-200 border border-slate-700/60 rounded-xl px-3.5 py-2 text-xs font-semibold inline-flex items-center gap-1.5 transition shrink-0">
+          <i data-lucide="plus" class="w-4 h-4 text-emerald-400"></i>
           <span>Agregar Pausa</span>
         </button>
       </div>
 
       <div class="space-y-3" id="recurrente-list">
         {% for b in config.bloqueos_recurrentes %}
-        <div class="row-card flex flex-col md:flex-row md:items-end gap-3 p-4 bg-brand-input border border-white/5 rounded-2xl">
-          <div class="flex-[1.5]">
-            <label class="block text-[10px] font-semibold uppercase tracking-wider text-neutral-400 mb-1">Día</label>
-            <select name="br_dia[]" required class="w-full bg-[#161619] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-gold outline-none">
+        <div class="row-entry flex flex-col sm:flex-row sm:items-end gap-3 p-3.5 bg-slate-900/80 border border-slate-800 rounded-xl">
+          <div class="flex-[1.5] min-w-0">
+            <label class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1 block">Día</label>
+            <select name="br_dia[]" required class="w-full block bg-slate-950 border border-slate-700/70 focus:border-emerald-500 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none">
               {% for d in dias_semana %}
                 <option value="{{ d }}" {% if b.dia == d or DIAS.get(b.dia) == DIAS.get(d) %}selected{% endif %}>{{ DIAS.get(d, d|capitalize) }}</option>
               {% endfor %}
             </select>
           </div>
 
-          <div class="flex-1">
-            <label class="block text-[10px] font-semibold uppercase tracking-wider text-neutral-400 mb-1">Desde</label>
+          <div class="flex-1 min-w-0">
+            <label class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1 block">Inicio</label>
             <input type="time" name="br_desde[]" value="{{ b.hora_desde }}" required 
-                   class="w-full bg-[#161619] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-gold outline-none" />
+                   class="w-full block bg-slate-950 border border-slate-700/70 focus:border-emerald-500 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none" />
           </div>
 
-          <div class="flex-1">
-            <label class="block text-[10px] font-semibold uppercase tracking-wider text-neutral-400 mb-1">Hasta</label>
+          <div class="flex-1 min-w-0">
+            <label class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1 block">Fin</label>
             <input type="time" name="br_hasta[]" value="{{ b.hora_hasta }}" required 
-                   class="w-full bg-[#161619] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-gold outline-none" />
+                   class="w-full block bg-slate-950 border border-slate-700/70 focus:border-emerald-500 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none" />
           </div>
 
-          <button type="button" onclick="deleteRow(this)" title="Eliminar pausa"
-                  class="w-10 h-9 md:h-10 rounded-xl border border-rose-500/20 text-rose-400 hover:bg-rose-500/10 flex items-center justify-center transition flex-shrink-0">
+          <button type="button" onclick="removeDynamicItem(this)" title="Eliminar pausa"
+                  class="text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 border border-rose-500/20 rounded-xl p-2 transition-colors shrink-0 flex items-center justify-center h-9 sm:h-9 w-full sm:w-9">
             <i data-lucide="trash-2" class="w-4 h-4"></i>
           </button>
         </div>
         {% endfor %}
       </div>
 
-      <div id="recurrente-empty" class="text-center py-8 text-neutral-500 text-xs border border-dashed border-white/10 rounded-xl mt-3 {% if config.bloqueos_recurrentes %}hidden{% endif %}">
-        No hay descansos fijos configurados.
+      <div id="recurrente-empty" class="text-center py-8 text-slate-500 text-xs border border-dashed border-slate-800 rounded-xl mt-3 {% if config.bloqueos_recurrentes %}hidden{% endif %}">
+        No hay pausas recurrentes configuradas.
       </div>
     </section>
 
-    <!-- 6. MÓDULO: DÍAS BLOQUEADOS / FERIADOS -->
-    <section class="bg-brand-surface border border-white/[0.08] rounded-2xl p-6 shadow-xl">
-      <div class="flex items-center justify-between gap-4 mb-6 flex-wrap">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-gold/10 text-gold flex items-center justify-center flex-shrink-0">
-            <i data-lucide="calendar-x" class="w-5 h-5"></i>
+    <!-- 6. DÍAS BLOQUEADOS / FERIADOS -->
+    <section class="bg-[#111827] border border-slate-800/80 rounded-2xl p-5 sm:p-6 shadow-xl overflow-x-hidden">
+      <div class="flex items-center justify-between gap-3 mb-5">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/20">
+            <i data-lucide="calendar-off" class="w-5 h-5"></i>
           </div>
-          <div>
-            <h2 class="text-base font-bold text-white leading-tight">Feriados y Vacaciones</h2>
-            <p class="text-xs text-neutral-500">Bloqueo de fechas puntuales. Deja las horas vacías para todo el día.</p>
+          <div class="min-w-0">
+            <h2 class="text-base font-bold text-white truncate">Feriados y Fechas Inactivas</h2>
+            <p class="text-xs text-slate-400 truncate">Bloqueo de fechas específicas o rangos especiales.</p>
           </div>
         </div>
 
-        <button type="button" onclick="addNewRow('bloqueo')" 
-                class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gold/10 hover:bg-gold/20 text-gold border border-gold/30 text-xs font-bold transition">
-          <i data-lucide="plus" class="w-4 h-4"></i>
+        <button type="button" onclick="appendDynamicItem('bloqueo')" 
+                class="bg-slate-800/70 hover:bg-slate-750 text-slate-200 border border-slate-700/60 rounded-xl px-3.5 py-2 text-xs font-semibold inline-flex items-center gap-1.5 transition shrink-0">
+          <i data-lucide="plus" class="w-4 h-4 text-emerald-400"></i>
           <span>Bloquear Fecha</span>
         </button>
       </div>
 
       <div class="space-y-3" id="bloqueo-list">
         {% for b in config.bloqueos %}
-        <div class="row-card flex flex-col md:flex-row md:items-end gap-3 p-4 bg-brand-input border border-white/5 rounded-2xl">
-          <div class="flex-[1.5]">
-            <label class="block text-[10px] font-semibold uppercase tracking-wider text-neutral-400 mb-1">Fecha</label>
+        <div class="row-entry flex flex-col sm:flex-row sm:items-end gap-3 p-3.5 bg-slate-900/80 border border-slate-800 rounded-xl">
+          <div class="flex-[1.5] min-w-0">
+            <label class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1 block">Fecha a Bloquear</label>
             <input type="date" name="bloqueo_fecha[]" value="{{ b.fecha }}" required 
-                   class="w-full bg-[#161619] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-gold outline-none" />
+                   class="w-full block bg-slate-950 border border-slate-700/70 focus:border-emerald-500 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none" />
           </div>
 
-          <div class="flex-1">
-            <label class="block text-[10px] font-semibold uppercase tracking-wider text-neutral-400 mb-1">Desde (Opcional)</label>
+          <div class="flex-1 min-w-0">
+            <label class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1 block">Desde (Opcional)</label>
             <input type="time" name="bloqueo_desde[]" value="{{ b.hora_desde }}" 
-                   class="w-full bg-[#161619] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-gold outline-none" />
+                   class="w-full block bg-slate-950 border border-slate-700/70 focus:border-emerald-500 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none" />
           </div>
 
-          <div class="flex-1">
-            <label class="block text-[10px] font-semibold uppercase tracking-wider text-neutral-400 mb-1">Hasta (Opcional)</label>
+          <div class="flex-1 min-w-0">
+            <label class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1 block">Hasta (Opcional)</label>
             <input type="time" name="bloqueo_hasta[]" value="{{ b.hora_hasta }}" 
-                   class="w-full bg-[#161619] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-gold outline-none" />
+                   class="w-full block bg-slate-950 border border-slate-700/70 focus:border-emerald-500 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none" />
           </div>
 
-          <button type="button" onclick="deleteRow(this)" title="Eliminar bloqueo"
-                  class="w-10 h-9 md:h-10 rounded-xl border border-rose-500/20 text-rose-400 hover:bg-rose-500/10 flex items-center justify-center transition flex-shrink-0">
+          <button type="button" onclick="removeDynamicItem(this)" title="Eliminar bloqueo"
+                  class="text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 border border-rose-500/20 rounded-xl p-2 transition-colors shrink-0 flex items-center justify-center h-9 sm:h-9 w-full sm:w-9">
             <i data-lucide="trash-2" class="w-4 h-4"></i>
           </button>
         </div>
         {% endfor %}
       </div>
 
-      <div id="bloqueo-empty" class="text-center py-8 text-neutral-500 text-xs border border-dashed border-white/10 rounded-xl mt-3 {% if config.bloqueos %}hidden{% endif %}">
-        No hay fechas bloqueadas.
+      <div id="bloqueo-empty" class="text-center py-8 text-slate-500 text-xs border border-dashed border-slate-800 rounded-xl mt-3 {% if config.bloqueos %}hidden{% endif %}">
+        No hay fechas inactivas o feriados configurados.
       </div>
     </section>
 
   </form>
 </div>
 
-<!-- Barra Flotante de Guardado (Sticky Bottom Bar) -->
-<div class="sticky bottom-4 z-40 max-w-5xl mx-auto px-4">
-  <div class="bg-neutral-900/90 backdrop-blur-md border border-neutral-800 rounded-2xl p-4 flex items-center justify-between shadow-2xl">
-    <div class="flex items-center gap-2" id="save-status-box">
-      <span class="w-2 h-2 rounded-full bg-emerald-400" id="status-dot"></span>
-      <span class="text-xs text-neutral-400 font-medium" id="status-text">Sin cambios</span>
-    </div>
+<!-- BARRA DE GUARDADO FIJA INFERIOR (STICKY ACTION BAR) -->
+<div class="fixed bottom-0 left-0 right-0 z-50 bg-slate-950/90 backdrop-blur-md border-t border-slate-800/80 px-4 py-3">
+  <div class="max-w-4xl mx-auto flex items-center justify-between gap-4">
+    <button type="button" onclick="discardFormChanges()" 
+            class="text-sm text-slate-400 hover:text-slate-200 transition font-medium">
+      Descartar cambios
+    </button>
 
     <div class="flex items-center gap-3">
-      <button type="button" onclick="discardChanges()" 
-              class="px-4 py-2.5 rounded-xl border border-white/10 text-neutral-400 hover:text-white text-xs font-semibold hover:bg-white/5 transition">
-        Descartar
-      </button>
+      <div class="hidden sm:flex items-center gap-1.5 text-xs text-slate-400" id="sync-status">
+        <span class="w-2 h-2 rounded-full bg-emerald-400" id="status-indicator"></span>
+        <span id="status-label">Sin cambios</span>
+      </div>
 
-      <button type="submit" form="cfg-form" id="btn-submit-save"
-              class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#c59a3f] to-[#e5b84c] text-neutral-950 font-extrabold text-xs tracking-wider uppercase hover:brightness-105 active:scale-95 transition shadow-[0_0_20px_rgba(212,175,55,0.2)] flex items-center gap-2">
+      <button type="submit" form="cfg-form" id="btn-submit-action"
+              class="bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 font-semibold hover:opacity-95 shadow-lg shadow-emerald-500/20 active:scale-[0.99] transition-all rounded-xl px-5 py-2.5 text-xs uppercase tracking-wider inline-flex items-center gap-2">
         <i data-lucide="check" class="w-4 h-4 stroke-[2.5]"></i>
-        <span>Guardar Cambios</span>
+        <span>Guardar configuración</span>
       </button>
     </div>
   </div>
 </div>
 
-<!-- Plantillas Dinámicas JS -->
+<!-- Plantillas Dinámicas en Memoria -->
 <template id="tpl-servicio">
-  <div class="row-card flex flex-col md:flex-row md:items-end gap-3 p-4 bg-brand-input border border-white/5 rounded-2xl">
+  <div class="row-entry flex flex-col sm:flex-row sm:items-end gap-3 p-3.5 bg-slate-900/80 border border-slate-800 rounded-xl">
     <input type="hidden" name="servicio_id[]" value="" />
-    <div class="flex-[2]">
-      <label class="block text-[10px] font-semibold uppercase tracking-wider text-neutral-400 mb-1">Nombre del Servicio</label>
-      <input type="text" name="servicio_nombre[]" placeholder="Ej: Corte Degradado" required 
-             class="w-full bg-[#161619] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-gold outline-none" />
+    <div class="flex-[2] min-w-0">
+      <label class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1 block">Nombre de la Prestación</label>
+      <input type="text" name="servicio_nombre[]" placeholder="Ej: Consulta Médica" required 
+             class="w-full block bg-slate-950 border border-slate-700/70 focus:border-emerald-500 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none" />
     </div>
-    <div class="flex-1">
-      <label class="block text-[10px] font-semibold uppercase tracking-wider text-neutral-400 mb-1">Duración (min)</label>
+    <div class="flex-1 min-w-0">
+      <label class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1 block">Duración (min)</label>
       <input type="number" name="servicio_duracion[]" value="30" min="5" required 
-             class="w-full bg-[#161619] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-gold outline-none" />
+             class="w-full block bg-slate-950 border border-slate-700/70 focus:border-emerald-500 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none" />
     </div>
-    <div class="flex-1">
-      <label class="block text-[10px] font-semibold uppercase tracking-wider text-neutral-400 mb-1">Precio ($)</label>
+    <div class="flex-1 min-w-0">
+      <label class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1 block">Arancel / Precio ($)</label>
       <input type="text" name="servicio_precio[]" placeholder="10.000" 
-             class="w-full bg-[#161619] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white font-bold text-amber-400 focus:border-gold outline-none" />
+             class="w-full block bg-slate-950 border border-slate-700/70 focus:border-emerald-500 rounded-lg px-3 py-2 text-xs text-emerald-400 font-bold outline-none" />
     </div>
-    <button type="button" onclick="deleteRow(this)" title="Eliminar servicio"
-            class="w-10 h-9 md:h-10 rounded-xl border border-rose-500/20 text-rose-400 hover:bg-rose-500/10 flex items-center justify-center transition flex-shrink-0">
+    <button type="button" onclick="removeDynamicItem(this)" class="text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 border border-rose-500/20 rounded-xl p-2 transition-colors shrink-0 flex items-center justify-center h-9 sm:h-9 w-full sm:w-9">
       <i data-lucide="trash-2" class="w-4 h-4"></i>
     </button>
   </div>
 </template>
 
 <template id="tpl-horario">
-  <div class="row-card flex flex-col md:flex-row md:items-end gap-3 p-4 bg-brand-input border border-white/5 rounded-2xl">
-    <div class="flex-[1.5]">
-      <label class="block text-[10px] font-semibold uppercase tracking-wider text-neutral-400 mb-1">Día</label>
-      <select name="horario_dia[]" required class="w-full bg-[#161619] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-gold outline-none">
+  <div class="row-entry flex flex-col sm:flex-row sm:items-end gap-3 p-3.5 bg-slate-900/80 border border-slate-800 rounded-xl">
+    <div class="flex-[1.5] min-w-0">
+      <label class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1 block">Día de la semana</label>
+      <select name="horario_dia[]" required class="w-full block bg-slate-950 border border-slate-700/70 focus:border-emerald-500 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none">
         {% for d in dias_semana %}<option value="{{ d }}">{{ DIAS.get(d, d|capitalize) }}</option>{% endfor %}
       </select>
     </div>
-    <div class="flex-1">
-      <label class="block text-[10px] font-semibold uppercase tracking-wider text-neutral-400 mb-1">Apertura</label>
-      <input type="time" name="horario_desde[]" value="09:00" required class="w-full bg-[#161619] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-gold outline-none" />
+    <div class="flex-1 min-w-0">
+      <label class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1 block">Hora Apertura</label>
+      <input type="time" name="horario_desde[]" value="09:00" required class="w-full block bg-slate-950 border border-slate-700/70 focus:border-emerald-500 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none" />
     </div>
-    <div class="flex-1">
-      <label class="block text-[10px] font-semibold uppercase tracking-wider text-neutral-400 mb-1">Cierre</label>
-      <input type="time" name="horario_hasta[]" value="18:00" required class="w-full bg-[#161619] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-gold outline-none" />
+    <div class="flex-1 min-w-0">
+      <label class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1 block">Hora Cierre</label>
+      <input type="time" name="horario_hasta[]" value="18:00" required class="w-full block bg-slate-950 border border-slate-700/70 focus:border-emerald-500 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none" />
     </div>
-    <button type="button" onclick="deleteRow(this)" class="w-10 h-9 md:h-10 rounded-xl border border-rose-500/20 text-rose-400 hover:bg-rose-500/10 flex items-center justify-center transition flex-shrink-0">
+    <button type="button" onclick="removeDynamicItem(this)" class="text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 border border-rose-500/20 rounded-xl p-2 transition-colors shrink-0 flex items-center justify-center h-9 sm:h-9 w-full sm:w-9">
       <i data-lucide="trash-2" class="w-4 h-4"></i>
     </button>
   </div>
 </template>
 
 <template id="tpl-recurrente">
-  <div class="row-card flex flex-col md:flex-row md:items-end gap-3 p-4 bg-brand-input border border-white/5 rounded-2xl">
-    <div class="flex-[1.5]">
-      <label class="block text-[10px] font-semibold uppercase tracking-wider text-neutral-400 mb-1">Día</label>
-      <select name="br_dia[]" required class="w-full bg-[#161619] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-gold outline-none">
+  <div class="row-entry flex flex-col sm:flex-row sm:items-end gap-3 p-3.5 bg-slate-900/80 border border-slate-800 rounded-xl">
+    <div class="flex-[1.5] min-w-0">
+      <label class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1 block">Día</label>
+      <select name="br_dia[]" required class="w-full block bg-slate-950 border border-slate-700/70 focus:border-emerald-500 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none">
         {% for d in dias_semana %}<option value="{{ d }}">{{ DIAS.get(d, d|capitalize) }}</option>{% endfor %}
       </select>
     </div>
-    <div class="flex-1">
-      <label class="block text-[10px] font-semibold uppercase tracking-wider text-neutral-400 mb-1">Desde</label>
-      <input type="time" name="br_desde[]" value="13:00" required class="w-full bg-[#161619] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-gold outline-none" />
+    <div class="flex-1 min-w-0">
+      <label class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1 block">Inicio</label>
+      <input type="time" name="br_desde[]" value="13:00" required class="w-full block bg-slate-950 border border-slate-700/70 focus:border-emerald-500 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none" />
     </div>
-    <div class="flex-1">
-      <label class="block text-[10px] font-semibold uppercase tracking-wider text-neutral-400 mb-1">Hasta</label>
-      <input type="time" name="br_hasta[]" value="14:00" required class="w-full bg-[#161619] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-gold outline-none" />
+    <div class="flex-1 min-w-0">
+      <label class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1 block">Fin</label>
+      <input type="time" name="br_hasta[]" value="14:00" required class="w-full block bg-slate-950 border border-slate-700/70 focus:border-emerald-500 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none" />
     </div>
-    <button type="button" onclick="deleteRow(this)" class="w-10 h-9 md:h-10 rounded-xl border border-rose-500/20 text-rose-400 hover:bg-rose-500/10 flex items-center justify-center transition flex-shrink-0">
+    <button type="button" onclick="removeDynamicItem(this)" class="text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 border border-rose-500/20 rounded-xl p-2 transition-colors shrink-0 flex items-center justify-center h-9 sm:h-9 w-full sm:w-9">
       <i data-lucide="trash-2" class="w-4 h-4"></i>
     </button>
   </div>
 </template>
 
 <template id="tpl-bloqueo">
-  <div class="row-card flex flex-col md:flex-row md:items-end gap-3 p-4 bg-brand-input border border-white/5 rounded-2xl">
-    <div class="flex-[1.5]">
-      <label class="block text-[10px] font-semibold uppercase tracking-wider text-neutral-400 mb-1">Fecha</label>
-      <input type="date" name="bloqueo_fecha[]" required class="w-full bg-[#161619] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-gold outline-none" />
+  <div class="row-entry flex flex-col sm:flex-row sm:items-end gap-3 p-3.5 bg-slate-900/80 border border-slate-800 rounded-xl">
+    <div class="flex-[1.5] min-w-0">
+      <label class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1 block">Fecha</label>
+      <input type="date" name="bloqueo_fecha[]" required class="w-full block bg-slate-950 border border-slate-700/70 focus:border-emerald-500 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none" />
     </div>
-    <div class="flex-1">
-      <label class="block text-[10px] font-semibold uppercase tracking-wider text-neutral-400 mb-1">Desde (Opcional)</label>
-      <input type="time" name="bloqueo_desde[]" class="w-full bg-[#161619] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-gold outline-none" />
+    <div class="flex-1 min-w-0">
+      <label class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1 block">Desde (Opcional)</label>
+      <input type="time" name="bloqueo_desde[]" class="w-full block bg-slate-950 border border-slate-700/70 focus:border-emerald-500 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none" />
     </div>
-    <div class="flex-1">
-      <label class="block text-[10px] font-semibold uppercase tracking-wider text-neutral-400 mb-1">Hasta (Opcional)</label>
-      <input type="time" name="bloqueo_hasta[]" class="w-full bg-[#161619] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-gold outline-none" />
+    <div class="flex-1 min-w-0">
+      <label class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1 block">Hasta (Opcional)</label>
+      <input type="time" name="bloqueo_hasta[]" class="w-full block bg-slate-950 border border-slate-700/70 focus:border-emerald-500 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none" />
     </div>
-    <button type="button" onclick="deleteRow(this)" class="w-10 h-9 md:h-10 rounded-xl border border-rose-500/20 text-rose-400 hover:bg-rose-500/10 flex items-center justify-center transition flex-shrink-0">
+    <button type="button" onclick="removeDynamicItem(this)" class="text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 border border-rose-500/20 rounded-xl p-2 transition-colors shrink-0 flex items-center justify-center h-9 sm:h-9 w-full sm:w-9">
       <i data-lucide="trash-2" class="w-4 h-4"></i>
     </button>
   </div>
@@ -550,97 +555,101 @@
 
 {% block extra_js %}
 <script>
-  let isDirty = false;
-  const cfgForm = document.getElementById('cfg-form');
+  let hasPendingChanges = false;
+  const configForm = document.getElementById('cfg-form');
 
-  function setDirty() {
-    if (isDirty) return;
-    isDirty = true;
-    document.getElementById('status-dot').className = 'w-2 h-2 rounded-full bg-amber-400 animate-pulse';
-    document.getElementById('status-text').textContent = 'Hay cambios sin guardar';
-    document.getElementById('status-text').className = 'text-xs text-amber-300 font-medium';
+  function markChangesPending() {
+    if (hasPendingChanges) return;
+    hasPendingChanges = true;
+    const ind = document.getElementById('status-indicator');
+    const lbl = document.getElementById('status-label');
+    if (ind && lbl) {
+      ind.className = 'w-2 h-2 rounded-full bg-amber-400 animate-pulse';
+      lbl.textContent = 'Hay cambios sin guardar';
+      lbl.className = 'text-amber-300 font-medium';
+    }
   }
 
-  cfgForm.addEventListener('input', setDirty);
-  cfgForm.addEventListener('change', setDirty);
+  configForm.addEventListener('input', markChangesPending);
+  configForm.addEventListener('change', markChangesPending);
 
-  function toggleSenia() {
+  function togglePaymentPolicy() {
     const chk = document.getElementById('requiere_senia');
     chk.checked = !chk.checked;
-    const fields = document.getElementById('payment-fields');
+    const wrapper = document.getElementById('payment-fields-wrapper');
     if (chk.checked) {
-      fields.classList.remove('opacity-30', 'pointer-events-none');
+      wrapper.classList.remove('opacity-30', 'pointer-events-none');
     } else {
-      fields.classList.add('opacity-30', 'pointer-events-none');
+      wrapper.classList.add('opacity-30', 'pointer-events-none');
     }
-    setDirty();
+    markChangesPending();
   }
 
-  function stepNumber(id, delta) {
-    const input = document.getElementById(id);
-    const min = parseInt(input.min || 0);
-    input.value = Math.max(min, (parseInt(input.value) || 0) + delta);
-    setDirty();
+  function adjustNum(id, step) {
+    const el = document.getElementById(id);
+    const min = parseInt(el.min || 0);
+    el.value = Math.max(min, (parseInt(el.value) || 0) + step);
+    markChangesPending();
   }
 
-  function copySlugLink(url, btn) {
+  function copyPublicLink(url, btn) {
     navigator.clipboard.writeText(url).then(() => {
       btn.innerHTML = '<i data-lucide="check" class="w-4 h-4 text-emerald-400"></i><span class="text-emerald-400 hidden sm:inline">¡Copiado!</span>';
       lucide.createIcons();
       setTimeout(() => {
-        btn.innerHTML = '<i data-lucide="copy" class="w-4 h-4"></i><span class="hidden sm:inline">Copiar</span>';
+        btn.innerHTML = '<i data-lucide="copy" class="w-4 h-4"></i><span class="hidden sm:inline">Copiar enlace</span>';
         lucide.createIcons();
       }, 1500);
     });
   }
 
-  function updateEmptyNotice(kind) {
+  function updateEmptyState(kind) {
     const container = document.getElementById(kind + '-list');
-    const emptyNotice = document.getElementById(kind + '-empty');
-    if (container && emptyNotice) {
-      emptyNotice.classList.toggle('hidden', container.children.length > 0);
+    const notice = document.getElementById(kind + '-empty');
+    if (container && notice) {
+      notice.classList.toggle('hidden', container.children.length > 0);
     }
   }
 
-  function addNewRow(kind) {
+  function appendDynamicItem(kind) {
     const tpl = document.getElementById('tpl-' + kind);
-    const container = document.getElementById(kind + '-list');
-    if (tpl && container) {
-      container.appendChild(tpl.content.cloneNode(true));
-      updateEmptyNotice(kind);
+    const list = document.getElementById(kind + '-list');
+    if (tpl && list) {
+      list.appendChild(tpl.content.cloneNode(true));
+      updateEmptyState(kind);
       lucide.createIcons();
-      setDirty();
-      const firstInput = container.lastElementChild.querySelector('input:not([type=hidden]), select');
-      if (firstInput) firstInput.focus();
+      markChangesPending();
+      const first = list.lastElementChild.querySelector('input:not([type=hidden]), select');
+      if (first) first.focus();
     }
   }
 
-  function deleteRow(btn) {
-    const row = btn.closest('.row-card');
-    const container = row.parentElement;
+  function removeDynamicItem(btn) {
+    const row = btn.closest('.row-entry');
+    const parent = row.parentElement;
     row.remove();
-    updateEmptyNotice(container.id.replace('-list', ''));
-    setDirty();
+    updateEmptyState(parent.id.replace('-list', ''));
+    markChangesPending();
   }
 
-  // Logo Preview y Validación
+  // Preview de Logotipo
   document.getElementById('logo_file').addEventListener('change', function(e) {
-    const f = e.target.files[0];
-    if (!f) return;
-    if (f.size > 700 * 1024) {
-      alert('La imagen supera los 700 KB. Por favor selecciona una versión más ligera.');
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 700 * 1024) {
+      alert('La imagen excede el límite recomendado de 700 KB.');
       e.target.value = '';
       return;
     }
     const reader = new FileReader();
-    reader.onload = function(ev) {
-      document.getElementById('logo-preview-box').innerHTML = `<img src="${ev.target.result}" alt="Logo" class="w-full h-full object-cover" />`;
+    reader.onload = function(evt) {
+      document.getElementById('logo-preview-box').innerHTML = `<img src="${evt.target.result}" alt="Logo" class="w-full h-full object-cover" />`;
     };
-    reader.readAsDataURL(f);
-    document.getElementById('logo-name-hint').textContent = f.name;
+    reader.readAsDataURL(file);
+    document.getElementById('logo-name-hint').textContent = file.name;
     const removeChk = document.getElementById('eliminar_logo');
     if (removeChk) removeChk.checked = false;
-    setDirty();
+    markChangesPending();
   });
 
   const removeBtn = document.getElementById('remove-logo-btn');
@@ -652,26 +661,26 @@
         document.getElementById('logo-preview-box').innerHTML = '<i data-lucide="image-off" class="w-6 h-6 text-rose-400"></i>';
       }
       lucide.createIcons();
-      setDirty();
+      markChangesPending();
     });
   }
 
-  function discardChanges() {
-    if (!isDirty || confirm('¿Descartar los cambios no guardados?')) {
-      isDirty = false;
+  function discardFormChanges() {
+    if (!hasPendingChanges || confirm('¿Deseas descartar las modificaciones no guardadas?')) {
+      hasPendingChanges = false;
       location.reload();
     }
   }
 
-  cfgForm.addEventListener('submit', function() {
-    isDirty = false;
-    const btn = document.getElementById('btn-submit-save');
+  configForm.addEventListener('submit', function() {
+    hasPendingChanges = false;
+    const btn = document.getElementById('btn-submit-action');
     btn.disabled = true;
-    btn.innerHTML = '<div class="w-4 h-4 border-2 border-neutral-950 border-t-transparent rounded-full animate-spin"></div><span>Guardando...</span>';
+    btn.innerHTML = '<div class="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin"></div><span>Guardando...</span>';
   });
 
   window.addEventListener('beforeunload', function(e) {
-    if (isDirty) {
+    if (hasPendingChanges) {
       e.preventDefault();
       e.returnValue = '';
     }
