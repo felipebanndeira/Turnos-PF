@@ -3,368 +3,436 @@
 
 {% block extra_css %}
 <style>
-.section-title { font-size: 1.15rem; font-weight: 700; margin-bottom: 1rem; color: var(--text); padding-bottom: .5rem; border-bottom: 1px solid var(--border-soft); }
-.dynamic-row {
-  display: flex; gap: 1rem; align-items: flex-start;
-  background: var(--bg-input); padding: 1rem; border-radius: var(--radius-sm);
-  margin-bottom: .75rem; border: 1px solid var(--border);
-}
-.dynamic-row .form-group { margin-bottom: 0; flex: 1; }
-.btn-remove { margin-top: 1.5rem; }
-@media (max-width: 768px) {
-  .dynamic-row { flex-direction: column; }
-  .dynamic-row .form-group { width: 100%; }
-  .btn-remove { margin-top: 0; align-self: flex-end; }
-}
+  #cursor-glow{display:none}
+  .cfg{max-width:56rem;margin:0 auto;padding:2rem 1rem 8rem}
+  .cfg-head{margin-bottom:1.75rem}
+  .cfg-head h1{font-size:1.75rem;font-weight:700;color:#fff;letter-spacing:-.02em;text-shadow:none}
+  .cfg-head p{color:var(--text-muted);font-size:.95rem;margin-top:.35rem}
+
+  .alert{display:flex;gap:.75rem;align-items:flex-start;background:#16161a;border:1px solid rgba(212,175,55,.25);border-radius:14px;padding:.9rem 1rem;margin-bottom:1.5rem;font-size:.88rem;color:#d4d4d8}
+  .alert i{color:var(--accent);flex-shrink:0;margin-top:2px}
+  .alert b{color:#fff}
+
+  .stack{display:flex;flex-direction:column;gap:1.5rem}
+  .panel{background:#16161a;border:1px solid rgba(255,255,255,.05);border-radius:18px;padding:1.5rem}
+  .panel-h{display:flex;justify-content:space-between;align-items:center;gap:1rem;margin-bottom:1.25rem;flex-wrap:wrap}
+  .panel-h .t{display:flex;align-items:center;gap:.75rem;min-width:0}
+  .panel-h .ic{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:rgba(212,175,55,.1);color:var(--accent);flex-shrink:0}
+  .panel-h h2{font-size:1.05rem;font-weight:700;color:#fff;margin:0}
+  .panel-h p{font-size:.78rem;color:#71717a;margin-top:2px}
+
+  .g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem 1.25rem}
+  .g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem 1.25rem}
+  .full{grid-column:1/-1}
+  @media (max-width:640px){ .g2,.g3{grid-template-columns:1fr} .panel{padding:1.15rem} .cfg-head h1{font-size:1.4rem} }
+
+  .f label{display:block;margin-bottom:.4rem;font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#a1a1aa}
+  .f .hint{display:block;margin-top:.4rem;font-size:.75rem;color:#71717a}
+  .in{width:100%;box-sizing:border-box;padding:.75rem .9rem;background:#0f0f12;border:1px solid rgba(255,255,255,.08);border-radius:10px;color:#fff;font-family:inherit;font-size:.95rem;transition:border-color .2s,box-shadow .2s;color-scheme:dark}
+  .in:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(212,175,55,.15)}
+  select.in{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%23a1a1aa' stroke-width='2'%3E%3Cpath d='M2 4l4 4 4-4'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .9rem center;padding-right:2.2rem}
+
+  .pre{display:flex;align-items:stretch;border:1px solid rgba(255,255,255,.08);border-radius:10px;overflow:hidden;background:#0f0f12}
+  .pre span{display:flex;align-items:center;padding:0 .75rem;color:#71717a;font-size:.85rem;background:#131316;border-right:1px solid rgba(255,255,255,.06);white-space:nowrap}
+  .pre .slug{flex:1;padding:.75rem .9rem;color:var(--accent);font-weight:600;font-size:.95rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pre button{border:0;background:transparent;color:#a1a1aa;padding:0 .85rem;cursor:pointer}
+  .pre button:hover{color:var(--accent)}
+  .money{position:relative}
+  .money::before{content:"$";position:absolute;left:.85rem;top:50%;transform:translateY(-50%);color:#71717a;font-size:.95rem}
+  .money .in{padding-left:1.75rem}
+
+  /* Stepper numérico */
+  .num{display:flex;border:1px solid rgba(255,255,255,.08);border-radius:10px;overflow:hidden;background:#0f0f12}
+  .num button{width:44px;border:0;background:#131316;color:#d4d4d8;font-size:1.1rem;cursor:pointer}
+  .num button:hover{color:var(--accent)}
+  .num input{flex:1;min-width:0;border:0;background:transparent;color:#fff;text-align:center;font-size:.95rem;font-family:inherit;padding:.75rem 0;-moz-appearance:textfield}
+  .num input::-webkit-inner-spin-button{-webkit-appearance:none}
+  .num input:focus{outline:none}
+
+  /* Logo */
+  .logo-row{display:flex;align-items:center;gap:1.1rem;flex-wrap:wrap}
+  .logo-prev{width:72px;height:72px;border-radius:18px;background:#0f0f12;border:1px solid rgba(255,255,255,.08);display:grid;place-items:center;overflow:hidden;color:#52525b;flex-shrink:0}
+  .logo-prev img{width:100%;height:100%;object-fit:cover}
+  .logo-actions{display:flex;flex-direction:column;gap:.5rem}
+  .logo-actions .row{display:flex;gap:.5rem;flex-wrap:wrap}
+
+  /* Botones */
+  .b{display:inline-flex;align-items:center;justify-content:center;gap:.45rem;padding:.6rem 1rem;border-radius:10px;font-family:inherit;font-weight:600;font-size:.85rem;cursor:pointer;border:1px solid transparent;transition:all .2s;white-space:nowrap;text-shadow:none}
+  .b-gold{background:linear-gradient(90deg,#c59a3f,#e6c275);color:#0b0b0c}
+  .b-gold:hover{filter:brightness(1.08);box-shadow:0 6px 18px rgba(212,175,55,.2)}
+  .b-gold:disabled{opacity:.6;cursor:wait}
+  .b-soft{background:rgba(212,175,55,.08);color:#e6c275;border-color:rgba(212,175,55,.2)}
+  .b-soft:hover{background:rgba(212,175,55,.14)}
+  .b-ghost{background:transparent;color:#a1a1aa;border-color:rgba(255,255,255,.08)}
+  .b-ghost:hover{color:#fff;border-color:rgba(255,255,255,.18)}
+  .b-del{width:40px;height:40px;padding:0;background:transparent;color:#fb7185;border-color:rgba(244,63,94,.2);flex-shrink:0}
+  .b-del:hover{background:rgba(244,63,94,.1)}
+  .b-del-txt{background:transparent;color:#fb7185;border-color:rgba(244,63,94,.2)}
+  .b-del-txt.on{background:rgba(244,63,94,.12)}
+
+  /* Toggle */
+  .tg{display:flex;justify-content:space-between;align-items:center;gap:1rem;padding:1rem;background:#0f0f12;border:1px solid rgba(255,255,255,.06);border-radius:12px;cursor:pointer}
+  .tg .tx b{display:block;color:#fff;font-size:.92rem;font-weight:600}
+  .tg .tx small{color:#71717a;font-size:.78rem}
+  .sw{position:relative;width:46px;height:26px;flex-shrink:0}
+  .sw input{opacity:0;width:0;height:0;position:absolute}
+  .sw .k{position:absolute;inset:0;background:#2a2a2e;border-radius:26px;transition:.25s}
+  .sw .k::before{content:"";position:absolute;width:20px;height:20px;left:3px;top:3px;background:#a1a1aa;border-radius:50%;transition:.25s}
+  .sw input:checked + .k{background:linear-gradient(90deg,#c59a3f,#e6c275)}
+  .sw input:checked + .k::before{transform:translateX(20px);background:#0b0b0c}
+  .pay-fields{margin-top:1.1rem;transition:opacity .25s}
+  .pay-fields.off{opacity:.4;pointer-events:none}
+
+  /* Filas dinámicas */
+  .rows{display:flex;flex-direction:column;gap:.75rem}
+  .row-i{display:flex;gap:.75rem;align-items:flex-end;padding:1rem;background:#0f0f12;border:1px solid rgba(255,255,255,.06);border-radius:12px}
+  .row-i .fields{flex:1;display:grid;gap:.75rem;min-width:0}
+  .row-i.svc .fields{grid-template-columns:2fr 1fr 1fr}
+  .row-i.hr .fields{grid-template-columns:1.4fr 1fr 1fr}
+  .row-i .f label{font-size:.65rem}
+  @media (max-width:640px){
+    .row-i{flex-direction:column;align-items:stretch}
+    .row-i.svc .fields{grid-template-columns:1fr 1fr}
+    .row-i.svc .fields .f:first-child{grid-column:1/-1}
+    .row-i.hr .fields{grid-template-columns:1fr 1fr}
+    .row-i.hr .fields .f:first-child{grid-column:1/-1}
+    .row-i .b-del{width:100%}
+  }
+  .empty{display:flex;flex-direction:column;align-items:center;gap:.4rem;padding:1.5rem;border:1px dashed rgba(255,255,255,.08);border-radius:12px;color:#71717a;font-size:.85rem;text-align:center}
+  .empty i{color:#52525b}
+
+  /* Barra de guardado */
+  .savebar{position:fixed;left:0;right:0;bottom:0;z-index:60;background:rgba(10,10,10,.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid rgba(255,255,255,.08);padding:.9rem 1rem calc(.9rem + env(safe-area-inset-bottom))}
+  .savebar-in{max-width:56rem;margin:0 auto;display:flex;justify-content:flex-end;align-items:center;gap:.75rem}
+  .savebar .st{margin-right:auto;font-size:.8rem;color:#71717a;display:flex;align-items:center;gap:.4rem}
+  .savebar .st.dirty{color:#e6c275}
+  .savebar .b{padding:.75rem 1.25rem;font-size:.9rem}
+  @media (max-width:480px){ .savebar .st{display:none} .savebar .b{flex:1} }
+  .spin{width:16px;height:16px;border:2px solid rgba(0,0,0,.25);border-top-color:#0b0b0c;border-radius:50%;animation:rt .7s linear infinite}
+  @keyframes rt{to{transform:rotate(360deg)}}
 </style>
 {% endblock %}
 
+{% set DIAS = {'lunes':'Lunes','martes':'Martes','miercoles':'Miércoles','miércoles':'Miércoles','jueves':'Jueves','viernes':'Viernes','sabado':'Sábado','sábado':'Sábado','domingo':'Domingo'} %}
+
 {% block content %}
-<div class="page-wrapper" style="max-width:900px;">
-  
-  <div class="page-header">
-    <h1 class="page-title">Configuración del Negocio</h1>
-    <p class="page-subtitle">Ajustá los parámetros para adaptar el sistema a tu rubro.</p>
+<div class="cfg">
+  <div class="cfg-head">
+    <h1>Configuración del Negocio</h1>
+    <p>Personalizá la información de tu negocio, horarios y pagos.</p>
   </div>
 
-  <form method="POST" action="{{ url_for('admin.configuracion') }}" enctype="multipart/form-data">
-    
-    <!-- 1. Datos Generales -->
-    <div class="card mb-3 animate-up">
-      <h2 class="section-title">1. Datos Generales</h2>
-      
-      <div class="form-group" style="margin-bottom:1.5rem; background:rgba(255,255,255,0.02); padding:1rem; border-radius:var(--radius); border:1px dashed var(--border);">
-        <label class="form-label">Logo del Negocio</label>
-        {% if config.logo_url %}
-          <div style="margin-bottom:1rem; display:flex; align-items:center; gap:1rem;">
-            <img src="{{ config.logo_url }}" alt="Logo" style="height:40px; border-radius:4px;" />
-            <label style="color:var(--danger); font-size:.8rem; cursor:pointer;">
-              <input type="checkbox" name="eliminar_logo" value="1" style="vertical-align:middle; margin-right:.25rem;"> Eliminar logo actual
-            </label>
+  {% set faltan = [] %}
+  {% if not config.servicios %}{% set _ = faltan.append('servicios') %}{% endif %}
+  {% if not config.horarios_atencion %}{% set _ = faltan.append('horarios de atención') %}{% endif %}
+  {% if faltan %}
+  <div class="alert"><i data-lucide="info" style="width:18px"></i>
+    <div>Para que tus clientes puedan reservar, cargá <b>{{ faltan | join(' y ') }}</b>.</div>
+  </div>
+  {% endif %}
+
+  <form method="POST" action="{{ url_for('admin.configuracion') }}" enctype="multipart/form-data" id="cfg-form">
+  <div class="stack">
+
+    <!-- 1. Datos generales -->
+    <section class="panel">
+      <div class="panel-h"><div class="t"><div class="ic"><i data-lucide="store" style="width:18px"></i></div>
+        <div><h2>Datos generales y branding</h2><p>Cómo te ven tus clientes.</p></div></div></div>
+
+      <div class="f" style="margin-bottom:1.25rem">
+        <label>Logo</label>
+        <div class="logo-row">
+          <div class="logo-prev" id="logo-prev">
+            {% if config.logo_url %}<img src="{{ config.logo_url }}" alt="Logo" />{% else %}<i data-lucide="image" style="width:24px"></i>{% endif %}
           </div>
-        {% endif %}
-        <input type="file" name="logo_file" class="form-control" accept="image/*" style="padding:.5rem;" />
-        <small class="text-muted">Se mostrará arriba a la izquierda. Formatos: PNG, JPG, WEBP.</small>
+          <div class="logo-actions">
+            <div class="row">
+              <label for="logo_file" class="b b-soft" style="margin:0;font-size:.85rem;letter-spacing:0;text-transform:none;color:#e6c275"><i data-lucide="upload" style="width:15px"></i> Cambiar imagen</label>
+              {% if config.logo_url %}
+              <label class="b b-del-txt" id="del-logo-btn" style="margin:0;font-size:.85rem;letter-spacing:0;text-transform:none;color:#fb7185">
+                <input type="checkbox" name="eliminar_logo" value="1" id="eliminar_logo" hidden /> <i data-lucide="trash-2" style="width:15px"></i> Quitar
+              </label>
+              {% endif %}
+            </div>
+            <span class="hint" id="logo-name">PNG, JPG o WEBP. Ideal cuadrado.</span>
+          </div>
+          <input type="file" name="logo_file" id="logo_file" accept="image/*" hidden />
+        </div>
       </div>
 
-      <div class="grid grid-2">
-        <div class="form-group">
-          <label class="form-label">Nombre del Negocio</label>
-          <input type="text" name="nombre" class="form-control" value="{{ config.nombre }}" required />
+      <div class="g2">
+        <div class="f"><label for="nombre">Nombre del negocio</label>
+          <input class="in" id="nombre" type="text" name="nombre" value="{{ config.nombre }}" required /></div>
+        <div class="f"><label for="rubro">Rubro</label>
+          <input class="in" id="rubro" type="text" name="rubro" value="{{ config.rubro }}" placeholder="Ej: Barbería" required /></div>
+        <div class="f full"><label for="descripcion">Descripción corta <span style="text-transform:none;letter-spacing:0;color:#71717a">(opcional)</span></label>
+          <input class="in" id="descripcion" type="text" name="descripcion" value="{{ config.descripcion or '' }}" /></div>
+        <div class="f full"><label>Tu link público</label>
+          {% set link = url_for('cliente.solicitar_turno', url_id=session.get('negocio_id'), _external=True) %}
+          <div class="pre">
+            <span>{{ request.host }}/b/</span>
+            <div class="slug">{{ session.get('negocio_id') }}</div>
+            <button type="button" title="Copiar link" onclick="copyLink('{{ link }}', this)"><i data-lucide="copy" style="width:16px"></i></button>
+            <a href="{{ link }}" target="_blank" title="Abrir" style="display:flex;align-items:center;padding:0 .85rem;color:#a1a1aa"><i data-lucide="external-link" style="width:16px"></i></a>
+          </div>
+          <span class="hint">Compartí este link con tus clientes para que reserven.</span>
         </div>
-        <div class="form-group">
-          <label class="form-label">Rubro (Ej: Barbería, Consultorio)</label>
-          <input type="text" name="rubro" class="form-control" value="{{ config.rubro }}" required />
-        </div>
+        <div class="f"><label>Intervalo entre turnos (min)</label>
+          <div class="num"><button type="button" onclick="step('intervalo_turno_min',-5)">−</button>
+            <input type="number" id="intervalo_turno_min" name="intervalo_turno_min" value="{{ config.intervalo_turno_min or 30 }}" min="5" step="5" required />
+            <button type="button" onclick="step('intervalo_turno_min',5)">+</button></div>
+          <span class="hint">Ej: 30 → 09:00, 09:30, 10:00…</span></div>
+        <div class="f"><label>Límite para cancelar (horas)</label>
+          <div class="num"><button type="button" onclick="step('horas_cancelacion',-1)">−</button>
+            <input type="number" id="horas_cancelacion" name="horas_cancelacion" value="{{ config.horas_cancelacion | default(24) }}" min="0" required />
+            <button type="button" onclick="step('horas_cancelacion',1)">+</button></div>
+          <span class="hint">Hasta cuántas horas antes el cliente puede cancelar online.</span></div>
       </div>
-      <div class="form-group">
-        <label class="form-label">Descripción corta (opcional)</label>
-        <input type="text" name="descripcion" class="form-control" value="{{ config.descripcion }}" />
-      </div>
-      <div class="grid grid-2">
-        <div class="form-group">
-          <label class="form-label">Intervalo de turnos (minutos)</label>
-          <input type="number" name="intervalo_turno_min" class="form-control" value="{{ config.intervalo_turno_min }}" min="5" step="5" required />
-          <small class="text-muted">Frecuencia de los horarios (ej: 30 = 09:00, 09:30...)</small>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Anticipación para cancelar (horas)</label>
-          <input type="number" name="horas_cancelacion" class="form-control" value="{{ config.horas_cancelacion | default(24) }}" min="0" required />
-          <small class="text-muted">Tiempo límite para cancelar el turno online.</small>
-        </div>
-      </div>
-    </div>
+    </section>
 
-    <!-- 2. Pagos y Señas -->
-    <div class="card mb-3 animate-up" style="animation-delay: 0.1s;">
-      <h2 class="section-title">2. Pagos y Señas</h2>
-      <div class="form-group" style="margin-bottom: 1rem;">
-        <label style="display:flex; align-items:center; gap:.5rem; cursor:pointer;">
-          <input type="checkbox" name="requiere_senia" value="1" {% if config.requiere_senia %}checked{% endif %} style="width:18px; height:18px; accent-color:var(--accent);" />
-          <span style="font-weight:500;">Exigir seña obligatoria para confirmar turnos</span>
-        </label>
+    <!-- 2. Pagos -->
+    <section class="panel">
+      <div class="panel-h"><div class="t"><div class="ic"><i data-lucide="wallet" style="width:18px"></i></div>
+        <div><h2>Pagos y señas</h2><p>Transferencia manual con comprobante por WhatsApp.</p></div></div></div>
+
+      <label class="tg" for="requiere_senia">
+        <div class="tx"><b>Requerir seña para reservar</b><small>El turno queda pendiente hasta que confirmes el pago.</small></div>
+        <span class="sw"><input type="checkbox" id="requiere_senia" name="requiere_senia" value="1" {% if config.requiere_senia %}checked{% endif %} /><span class="k"></span></span>
+      </label>
+
+      <div class="pay-fields g2 {% if not config.requiere_senia %}off{% endif %}" id="pay-fields">
+        <div class="f"><label for="porcentaje_senia">Porcentaje de seña (%)</label>
+          <input class="in" id="porcentaje_senia" type="number" name="porcentaje_senia" value="{{ (config.porcentaje_senia or 30) | int }}" min="1" max="100" /></div>
+        <div class="f"><label for="titular_pago">Titular de la cuenta</label>
+          <input class="in" id="titular_pago" type="text" name="titular_pago" value="{{ config.titular_pago or '' }}" placeholder="Ej: Juan Pérez" /></div>
+        <div class="f"><label for="datos_pago">Alias / CBU</label>
+          <input class="in" id="datos_pago" type="text" name="datos_pago" value="{{ config.datos_pago or '' }}" placeholder="Ej: MINEGOCIO.MP" /></div>
+        <div class="f"><label for="whatsapp_pago">WhatsApp del negocio</label>
+          <input class="in" id="whatsapp_pago" type="tel" inputmode="tel" name="whatsapp_pago" value="{{ config.whatsapp_pago or '' }}" placeholder="Ej: 3755802727" />
+          <span class="hint">También se usa para el botón de contacto del cliente.</span></div>
       </div>
-      
-      <div class="grid grid-2" style="gap:1.5rem;">
-        <div class="form-group">
-          <label class="form-label">Porcentaje de Seña (%)</label>
-          <input type="number" name="porcentaje_senia" class="form-control" value="{{ config.porcentaje_senia or 30 }}" min="1" max="100" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Titular de la Cuenta</label>
-          <input type="text" name="titular_pago" class="form-control" placeholder="Ej: Juan Perez" value="{{ config.titular_pago }}" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Datos Bancarios (Alias / CBU)</label>
-          <input type="text" name="datos_pago" class="form-control" placeholder="Ej: Alias: MINEGOCIO.MP" value="{{ config.datos_pago }}" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">WhatsApp para recibir comprobantes</label>
-          <input type="text" name="whatsapp_pago" class="form-control" placeholder="Ej: 3755802727" value="{{ config.whatsapp_pago }}" />
-        </div>
-      </div>
-    </div>
+    </section>
 
     <!-- 3. Servicios -->
-    <div class="card mb-3 animate-up" style="animation-delay: 0.2s;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1px solid var(--border); padding-bottom:.5rem;">
-        <h2 class="section-title" style="margin:0; border:none; padding:0;">3. Servicios Ofrecidos</h2>
-        <button type="button" class="btn btn-primary btn-sm" onclick="addServicio()"><i data-lucide="plus" style="width:16px;"></i> Agregar servicio</button>
+    <section class="panel">
+      <div class="panel-h">
+        <div class="t"><div class="ic"><i data-lucide="scissors" style="width:18px"></i></div>
+          <div><h2>Servicios</h2><p>Lo que tus clientes pueden reservar.</p></div></div>
+        <button type="button" class="b b-soft" onclick="addRow('servicio')"><i data-lucide="plus" style="width:16px"></i> Agregar servicio</button>
       </div>
-      
-      <div id="servicios-container">
+      <div class="rows" id="servicio-list">
         {% for s in config.servicios %}
-        <div class="dynamic-row">
+        <div class="row-i svc">
           <input type="hidden" name="servicio_id[]" value="{{ s.id }}" />
-          <div class="form-group" style="flex:2;">
-            <label class="form-label">Nombre del Servicio</label>
-            <input type="text" name="servicio_nombre[]" class="form-control" value="{{ s.nombre }}" required />
+          <div class="fields">
+            <div class="f"><label>Nombre</label><input class="in" type="text" name="servicio_nombre[]" value="{{ s.nombre }}" required /></div>
+            <div class="f"><label>Duración (min)</label><input class="in" type="number" name="servicio_duracion[]" value="{{ s.duracion_min }}" min="5" required /></div>
+            <div class="f"><label>Precio</label><div class="money"><input class="in" type="text" inputmode="numeric" name="servicio_precio[]" value="{{ '{:,.0f}'.format((s.precio or 0)|float).replace(',', '.') }}" /></div></div>
           </div>
-          <div class="form-group">
-            <label class="form-label">Duración (min)</label>
-            <input type="number" name="servicio_duracion[]" class="form-control" value="{{ s.duracion_min }}" required />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Precio ($)</label>
-            <input type="text" name="servicio_precio[]" class="form-control" value="{{ s.precio | default(0) }}" placeholder="Ej: 10000 o 10.000" />
-          </div>
-          <button type="button" class="btn btn-danger btn-remove" onclick="this.parentElement.remove()"><i data-lucide="x" style="width:16px;"></i></button>
+          <button type="button" class="b b-del" title="Eliminar" onclick="delRow(this)"><i data-lucide="trash-2" style="width:16px"></i></button>
         </div>
         {% endfor %}
       </div>
-      <p id="no-servicios-msg" style="display:{% if config.servicios %}none{% else %}block{% endif %};" class="text-muted text-center mt-2">
-        No hay servicios configurados.
-      </p>
-    </div>
+      <div class="empty" id="servicio-empty" {% if config.servicios %}hidden{% endif %}><i data-lucide="scissors" style="width:22px"></i>Todavía no cargaste servicios.</div>
+    </section>
 
     <!-- 4. Horarios -->
-    <div class="card mb-3 animate-up" style="animation-delay: 0.3s;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1px solid var(--border); padding-bottom:.5rem;">
-        <h2 class="section-title" style="margin:0; border:none; padding:0;">4. Horarios de Atención</h2>
-        <button type="button" class="btn btn-primary btn-sm" onclick="addHorario()"><i data-lucide="plus" style="width:16px;"></i> Agregar franja</button>
+    <section class="panel">
+      <div class="panel-h">
+        <div class="t"><div class="ic"><i data-lucide="clock" style="width:18px"></i></div>
+          <div><h2>Horarios de atención</h2><p>Podés cargar varias franjas por día (ej: mañana y tarde).</p></div></div>
+        <button type="button" class="b b-soft" onclick="addRow('horario')"><i data-lucide="plus" style="width:16px"></i> Agregar franja</button>
       </div>
-
-      <div id="horarios-container">
+      <div class="rows" id="horario-list">
         {% for h in config.horarios_atencion %}
-        <div class="dynamic-row">
-          <div class="form-group">
-            <label class="form-label">Día de la semana</label>
-            <select name="horario_dia[]" class="form-control" required>
-              {% for d in dias_semana %}
-              <option value="{{ d }}" {% if h.dia == d %}selected{% endif %}>{{ d | capitalize }}</option>
-              {% endfor %}
-            </select>
+        <div class="row-i hr">
+          <div class="fields">
+            <div class="f"><label>Día</label><select class="in" name="horario_dia[]" required>
+              {% for d in dias_semana %}<option value="{{ d }}" {% if h.dia == d or DIAS.get(h.dia) == DIAS.get(d) %}selected{% endif %}>{{ DIAS.get(d, d|capitalize) }}</option>{% endfor %}
+            </select></div>
+            <div class="f"><label>Apertura</label><input class="in" type="time" name="horario_desde[]" value="{{ h.desde }}" required /></div>
+            <div class="f"><label>Cierre</label><input class="in" type="time" name="horario_hasta[]" value="{{ h.hasta }}" required /></div>
           </div>
-          <div class="form-group">
-            <label class="form-label">Apertura</label>
-            <input type="time" name="horario_desde[]" class="form-control" value="{{ h.desde }}" required />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Cierre</label>
-            <input type="time" name="horario_hasta[]" class="form-control" value="{{ h.hasta }}" required />
-          </div>
-          <button type="button" class="btn btn-danger btn-remove" onclick="this.parentElement.remove()"><i data-lucide="x" style="width:16px;"></i></button>
+          <button type="button" class="b b-del" title="Eliminar" onclick="delRow(this)"><i data-lucide="trash-2" style="width:16px"></i></button>
         </div>
         {% endfor %}
       </div>
-      <p id="no-horarios-msg" style="display:{% if config.horarios_atencion %}none{% else %}block{% endif %};" class="text-muted text-center mt-2">
-        No hay horarios configurados.
-      </p>
-    </div>
+      <div class="empty" id="horario-empty" {% if config.horarios_atencion %}hidden{% endif %}><i data-lucide="clock" style="width:22px"></i>No hay horarios configurados.</div>
+    </section>
 
-    <!-- 5. Excepciones y Bloqueos -->
-    <div class="card mb-3 animate-up" style="animation-delay: 0.4s;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1px solid var(--border); padding-bottom:.5rem;">
-        <div>
-          <h2 class="section-title" style="margin:0; border:none; padding:0;">5. Excepciones y Bloqueos</h2>
-          <p style="font-size:.8rem; color:var(--text-muted); margin-top:.25rem;">Para bloquear un día entero, dejá las horas en blanco.</p>
-        </div>
-        <button type="button" class="btn btn-primary btn-sm" onclick="addBloqueo()"><i data-lucide="plus" style="width:16px;"></i> Añadir bloqueo</button>
+    <!-- 5. Descansos fijos -->
+    <section class="panel">
+      <div class="panel-h">
+        <div class="t"><div class="ic"><i data-lucide="coffee" style="width:18px"></i></div>
+          <div><h2>Descansos fijos</h2><p>Pausas que se repiten cada semana (ej: almuerzo).</p></div></div>
+        <button type="button" class="b b-soft" onclick="addRow('recurrente')"><i data-lucide="plus" style="width:16px"></i> Agregar descanso</button>
       </div>
-
-      <div id="bloqueos-container">
-        {% for b in config.bloqueos %}
-        <div class="dynamic-row">
-          <div class="form-group">
-            <label class="form-label">Fecha a bloquear</label>
-            <input type="date" name="bloqueo_fecha[]" class="form-control" value="{{ b.fecha }}" required />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Desde hora (Opcional)</label>
-            <input type="time" name="bloqueo_desde[]" class="form-control" value="{{ b.hora_desde }}" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Hasta hora (Opcional)</label>
-            <input type="time" name="bloqueo_hasta[]" class="form-control" value="{{ b.hora_hasta }}" />
-          </div>
-          <button type="button" class="btn btn-danger btn-remove" onclick="this.parentElement.remove()"><i data-lucide="x" style="width:16px;"></i></button>
-        </div>
-        {% endfor %}
-      </div>
-      <p id="no-bloqueos-msg" style="display:{% if config.bloqueos %}none{% else %}block{% endif %};" class="text-muted text-center mt-2">
-        No hay fechas bloqueadas.
-      </p>
-    </div>
-
-    <!-- 6. Bloqueos Fijos por Día (Almuerzos / Descansos) -->
-    <div class="card mb-3 animate-up" style="animation-delay: 0.5s;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1px solid var(--border); padding-bottom:.5rem;">
-        <div>
-          <h2 class="section-title" style="margin:0; border:none; padding:0;">6. Bloqueos Fijos (Almuerzos / Descansos)</h2>
-          <p style="font-size:.8rem; color:var(--text-muted); margin-top:.25rem;">Se bloquearán estas franjas horarias todos los días seleccionados.</p>
-        </div>
-        <button type="button" class="btn btn-primary btn-sm" onclick="addBloqueoRecurrente()"><i data-lucide="plus" style="width:16px;"></i> Añadir regla</button>
-      </div>
-
-      <div id="recurrentes-container">
+      <div class="rows" id="recurrente-list">
         {% for b in config.bloqueos_recurrentes %}
-        <div class="dynamic-row">
-          <div class="form-group">
-            <label class="form-label">Día de la semana</label>
-            <select name="br_dia[]" class="form-control" required>
-              {% for d in dias_semana %}
-              <option value="{{ d }}" {% if b.dia == d %}selected{% endif %}>{{ d | capitalize }}</option>
-              {% endfor %}
-            </select>
+        <div class="row-i hr">
+          <div class="fields">
+            <div class="f"><label>Día</label><select class="in" name="br_dia[]" required>
+              {% for d in dias_semana %}<option value="{{ d }}" {% if b.dia == d or DIAS.get(b.dia) == DIAS.get(d) %}selected{% endif %}>{{ DIAS.get(d, d|capitalize) }}</option>{% endfor %}
+            </select></div>
+            <div class="f"><label>Desde</label><input class="in" type="time" name="br_desde[]" value="{{ b.hora_desde }}" required /></div>
+            <div class="f"><label>Hasta</label><input class="in" type="time" name="br_hasta[]" value="{{ b.hora_hasta }}" required /></div>
           </div>
-          <div class="form-group">
-            <label class="form-label">Desde hora</label>
-            <input type="time" name="br_desde[]" class="form-control" value="{{ b.hora_desde }}" required />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Hasta hora</label>
-            <input type="time" name="br_hasta[]" class="form-control" value="{{ b.hora_hasta }}" required />
-          </div>
-          <button type="button" class="btn btn-danger btn-remove" onclick="this.parentElement.remove()"><i data-lucide="x" style="width:16px;"></i></button>
+          <button type="button" class="b b-del" title="Eliminar" onclick="delRow(this)"><i data-lucide="trash-2" style="width:16px"></i></button>
         </div>
         {% endfor %}
       </div>
-      <p id="no-recurrentes-msg" style="display:{% if config.bloqueos_recurrentes %}none{% else %}block{% endif %};" class="text-muted text-center mt-2">
-        No hay bloqueos fijos configurados.
-      </p>
-    </div>
+      <div class="empty" id="recurrente-empty" {% if config.bloqueos_recurrentes %}hidden{% endif %}><i data-lucide="coffee" style="width:22px"></i>No hay descansos configurados.</div>
+    </section>
 
-    <!-- Submit -->
-    <div class="animate-up" style="animation-delay: 0.6s; position:sticky; bottom:1rem; background:rgba(5,5,8,0.8); padding:1rem; border:1px solid var(--border); border-radius:var(--radius); backdrop-filter:blur(12px); display:flex; justify-content:flex-end; z-index:10;">
-      <button type="submit" class="btn btn-primary" style="font-size:1rem; padding:.75rem 2rem;">
-        <i data-lucide="save" style="width:18px;"></i> Guardar Configuración
-      </button>
-    </div>
+    <!-- 6. Días bloqueados -->
+    <section class="panel">
+      <div class="panel-h">
+        <div class="t"><div class="ic"><i data-lucide="calendar-x" style="width:18px"></i></div>
+          <div><h2>Días bloqueados</h2><p>Feriados o vacaciones. Dejá las horas vacías para bloquear el día entero.</p></div></div>
+        <button type="button" class="b b-soft" onclick="addRow('bloqueo')"><i data-lucide="plus" style="width:16px"></i> Agregar bloqueo</button>
+      </div>
+      <div class="rows" id="bloqueo-list">
+        {% for b in config.bloqueos %}
+        <div class="row-i hr">
+          <div class="fields">
+            <div class="f"><label>Fecha</label><input class="in" type="date" name="bloqueo_fecha[]" value="{{ b.fecha }}" required /></div>
+            <div class="f"><label>Desde (opcional)</label><input class="in" type="time" name="bloqueo_desde[]" value="{{ b.hora_desde }}" /></div>
+            <div class="f"><label>Hasta (opcional)</label><input class="in" type="time" name="bloqueo_hasta[]" value="{{ b.hora_hasta }}" /></div>
+          </div>
+          <button type="button" class="b b-del" title="Eliminar" onclick="delRow(this)"><i data-lucide="trash-2" style="width:16px"></i></button>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="empty" id="bloqueo-empty" {% if config.bloqueos %}hidden{% endif %}><i data-lucide="calendar-check" style="width:22px"></i>No hay bloqueos configurados.</div>
+    </section>
 
+  </div>
   </form>
 </div>
 
-<!-- Plantillas ocultas para JS -->
+<div class="savebar">
+  <div class="savebar-in">
+    <span class="st" id="save-st"><i data-lucide="check-circle-2" style="width:14px"></i> Sin cambios</span>
+    <button type="button" class="b b-ghost" id="btn-discard" onclick="discard()">Descartar</button>
+    <button type="submit" form="cfg-form" class="b b-gold" id="btn-save"><i data-lucide="check" style="width:16px"></i> Guardar configuración</button>
+  </div>
+</div>
+
+<!-- Plantillas -->
 <template id="tpl-servicio">
-  <div class="dynamic-row">
+  <div class="row-i svc">
     <input type="hidden" name="servicio_id[]" value="" />
-    <div class="form-group" style="flex:2;">
-      <label class="form-label">Nombre del Servicio</label>
-      <input type="text" name="servicio_nombre[]" class="form-control" required placeholder="Ej: Corte clásico" />
+    <div class="fields">
+      <div class="f"><label>Nombre</label><input class="in" type="text" name="servicio_nombre[]" placeholder="Ej: Corte clásico" required /></div>
+      <div class="f"><label>Duración (min)</label><input class="in" type="number" name="servicio_duracion[]" value="30" min="5" required /></div>
+      <div class="f"><label>Precio</label><div class="money"><input class="in" type="text" inputmode="numeric" name="servicio_precio[]" placeholder="10.000" /></div></div>
     </div>
-    <div class="form-group">
-      <label class="form-label">Duración (min)</label>
-      <input type="number" name="servicio_duracion[]" class="form-control" value="30" required />
-    </div>
-    <div class="form-group">
-      <label class="form-label">Precio ($)</label>
-      <input type="text" name="servicio_precio[]" class="form-control" value="0" placeholder="Ej: 10000 o 10.000" />
-    </div>
-    <button type="button" class="btn btn-danger btn-remove" onclick="this.parentElement.remove()"><i data-lucide="x" style="width:16px;"></i></button>
+    <button type="button" class="b b-del" title="Eliminar" onclick="delRow(this)"><i data-lucide="trash-2" style="width:16px"></i></button>
   </div>
 </template>
-
 <template id="tpl-horario">
-  <div class="dynamic-row">
-    <div class="form-group">
-      <label class="form-label">Día de la semana</label>
-      <select name="horario_dia[]" class="form-control" required>
-        {% for d in dias_semana %}
-        <option value="{{ d }}">{{ d | capitalize }}</option>
-        {% endfor %}
-      </select>
+  <div class="row-i hr">
+    <div class="fields">
+      <div class="f"><label>Día</label><select class="in" name="horario_dia[]" required>{% for d in dias_semana %}<option value="{{ d }}">{{ DIAS.get(d, d|capitalize) }}</option>{% endfor %}</select></div>
+      <div class="f"><label>Apertura</label><input class="in" type="time" name="horario_desde[]" value="09:00" required /></div>
+      <div class="f"><label>Cierre</label><input class="in" type="time" name="horario_hasta[]" value="18:00" required /></div>
     </div>
-    <div class="form-group">
-      <label class="form-label">Apertura</label>
-      <input type="time" name="horario_desde[]" class="form-control" value="09:00" required />
-    </div>
-    <div class="form-group">
-      <label class="form-label">Cierre</label>
-      <input type="time" name="horario_hasta[]" class="form-control" value="18:00" required />
-    </div>
-    <button type="button" class="btn btn-danger btn-remove" onclick="this.parentElement.remove()"><i data-lucide="x" style="width:16px;"></i></button>
+    <button type="button" class="b b-del" title="Eliminar" onclick="delRow(this)"><i data-lucide="trash-2" style="width:16px"></i></button>
   </div>
 </template>
-
-<template id="tpl-bloqueo">
-  <div class="dynamic-row">
-    <div class="form-group">
-      <label class="form-label">Fecha a bloquear</label>
-      <input type="date" name="bloqueo_fecha[]" class="form-control" required />
-    </div>
-    <div class="form-group">
-      <label class="form-label">Desde hora (Opcional)</label>
-      <input type="time" name="bloqueo_desde[]" class="form-control" />
-    </div>
-    <div class="form-group">
-      <label class="form-label">Hasta hora (Opcional)</label>
-      <input type="time" name="bloqueo_hasta[]" class="form-control" />
-    </div>
-    <button type="button" class="btn btn-danger btn-remove" onclick="this.parentElement.remove()"><i data-lucide="x" style="width:16px;"></i></button>
-  </div>
-</template>
-
 <template id="tpl-recurrente">
-  <div class="dynamic-row">
-    <div class="form-group">
-      <label class="form-label">Día de la semana</label>
-      <select name="br_dia[]" class="form-control" required>
-        {% for d in dias_semana %}
-        <option value="{{ d }}">{{ d | capitalize }}</option>
-        {% endfor %}
-      </select>
+  <div class="row-i hr">
+    <div class="fields">
+      <div class="f"><label>Día</label><select class="in" name="br_dia[]" required>{% for d in dias_semana %}<option value="{{ d }}">{{ DIAS.get(d, d|capitalize) }}</option>{% endfor %}</select></div>
+      <div class="f"><label>Desde</label><input class="in" type="time" name="br_desde[]" value="13:00" required /></div>
+      <div class="f"><label>Hasta</label><input class="in" type="time" name="br_hasta[]" value="14:00" required /></div>
     </div>
-    <div class="form-group">
-      <label class="form-label">Desde hora</label>
-      <input type="time" name="br_desde[]" class="form-control" required />
+    <button type="button" class="b b-del" title="Eliminar" onclick="delRow(this)"><i data-lucide="trash-2" style="width:16px"></i></button>
+  </div>
+</template>
+<template id="tpl-bloqueo">
+  <div class="row-i hr">
+    <div class="fields">
+      <div class="f"><label>Fecha</label><input class="in" type="date" name="bloqueo_fecha[]" required /></div>
+      <div class="f"><label>Desde (opcional)</label><input class="in" type="time" name="bloqueo_desde[]" /></div>
+      <div class="f"><label>Hasta (opcional)</label><input class="in" type="time" name="bloqueo_hasta[]" /></div>
     </div>
-    <div class="form-group">
-      <label class="form-label">Hasta hora</label>
-      <input type="time" name="br_hasta[]" class="form-control" required />
-    </div>
-    <button type="button" class="btn btn-danger btn-remove" onclick="this.parentElement.remove()"><i data-lucide="x" style="width:16px;"></i></button>
+    <button type="button" class="b b-del" title="Eliminar" onclick="delRow(this)"><i data-lucide="trash-2" style="width:16px"></i></button>
   </div>
 </template>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-function addServicio() {
-  const tpl = document.getElementById('tpl-servicio').content.cloneNode(true);
-  document.getElementById('servicios-container').appendChild(tpl);
-  document.getElementById('no-servicios-msg').style.display = 'none';
-  lucide.createIcons();
-}
+  const form = document.getElementById('cfg-form');
+  let dirty = false, submitting = false;
+  function markDirty(){
+    if (dirty) return; dirty = true;
+    const st = document.getElementById('save-st');
+    st.className = 'st dirty'; st.innerHTML = '<i data-lucide="circle-dot" style="width:14px"></i> Cambios sin guardar';
+    lucide.createIcons();
+  }
+  form.addEventListener('input', markDirty);
+  form.addEventListener('change', markDirty);
 
-function addHorario() {
-  const tpl = document.getElementById('tpl-horario').content.cloneNode(true);
-  document.getElementById('horarios-container').appendChild(tpl);
-  document.getElementById('no-horarios-msg').style.display = 'none';
-  lucide.createIcons();
-}
+  function refreshEmpty(kind){
+    const n = document.getElementById(kind+'-list').children.length;
+    document.getElementById(kind+'-empty').hidden = n > 0;
+  }
+  function addRow(kind){
+    const node = document.getElementById('tpl-'+kind).content.cloneNode(true);
+    const list = document.getElementById(kind+'-list');
+    list.appendChild(node);
+    refreshEmpty(kind); lucide.createIcons(); markDirty();
+    const last = list.lastElementChild.querySelector('input:not([type=hidden]),select');
+    if (last) last.focus();
+  }
+  function delRow(btn){
+    const row = btn.closest('.row-i'); const list = row.parentElement;
+    row.remove(); refreshEmpty(list.id.replace('-list','')); markDirty();
+  }
+  function step(id, d){
+    const el = document.getElementById(id);
+    const min = parseInt(el.min || 0);
+    el.value = Math.max(min, (parseInt(el.value)||0) + d); markDirty();
+  }
+  function copyLink(url, btn){
+    navigator.clipboard.writeText(url).then(()=>{
+      btn.innerHTML = '<i data-lucide="check" style="width:16px;color:#e6c275"></i>'; lucide.createIcons();
+      setTimeout(()=>{ btn.innerHTML='<i data-lucide="copy" style="width:16px"></i>'; lucide.createIcons(); }, 1500);
+    });
+  }
 
-function addBloqueo() {
-  const tpl = document.getElementById('tpl-bloqueo').content.cloneNode(true);
-  document.getElementById('bloqueos-container').appendChild(tpl);
-  document.getElementById('no-bloqueos-msg').style.display = 'none';
-  lucide.createIcons();
-}
+  // Toggle seña
+  const sen = document.getElementById('requiere_senia');
+  sen.addEventListener('change', ()=> document.getElementById('pay-fields').classList.toggle('off', !sen.checked));
 
-function addBloqueoRecurrente() {
-  const tpl = document.getElementById('tpl-recurrente').content.cloneNode(true);
-  document.getElementById('recurrentes-container').appendChild(tpl);
-  document.getElementById('no-recurrentes-msg').style.display = 'none';
-  lucide.createIcons();
-}
+  // Logo preview
+  document.getElementById('logo_file').addEventListener('change', e=>{
+    const f = e.target.files[0]; if (!f) return;
+    if (f.size > 700*1024){ alert('La imagen pesa más de 700 KB. Usá una más liviana para que se guarde bien.'); e.target.value=''; return; }
+    const r = new FileReader();
+    r.onload = ev => { document.getElementById('logo-prev').innerHTML = '<img src="'+ev.target.result+'" alt="Logo" />'; };
+    r.readAsDataURL(f);
+    document.getElementById('logo-name').textContent = f.name;
+    const del = document.getElementById('eliminar_logo'); if (del){ del.checked=false; document.getElementById('del-logo-btn').classList.remove('on'); }
+  });
+  const delBtn = document.getElementById('del-logo-btn');
+  if (delBtn) delBtn.addEventListener('click', ()=> setTimeout(()=>{
+    const on = document.getElementById('eliminar_logo').checked;
+    delBtn.classList.toggle('on', on);
+    if (on) document.getElementById('logo-prev').innerHTML = '<i data-lucide="image-off" style="width:24px"></i>';
+    lucide.createIcons(); markDirty();
+  }, 0));
+
+  function discard(){
+    if (!dirty || confirm('¿Descartar los cambios sin guardar?')) { dirty=false; location.reload(); }
+  }
+  form.addEventListener('submit', ()=>{
+    submitting = true;
+    const b = document.getElementById('btn-save');
+    b.disabled = true; b.innerHTML = '<span class="spin"></span> Guardando…';
+  });
+  window.addEventListener('beforeunload', e=>{ if (dirty && !submitting){ e.preventDefault(); e.returnValue=''; } });
 </script>
 {% endblock %}

@@ -87,10 +87,24 @@ def get_estadisticas(negocio_id: str) -> dict:
             for p in t.get("pagos", []):
                 total_ingresos += p.get("monto", 0.0)
                 
+    por_dia: dict = {}
+    por_servicio: dict = {}
+    for t in turnos:
+        if t.get("estado") == "cancelado":
+            continue
+        f = t.get("fecha") or ""
+        if f:
+            por_dia[f] = por_dia.get(f, 0) + 1
+        s = t.get("servicio_nombre") or "Sin servicio"
+        por_servicio[s] = por_servicio.get(s, 0) + 1
+    por_dia = dict(sorted(por_dia.items())[-30:])
+
     return {
         "pendientes": pendientes,
         "confirmados": confirmados,
         "cancelados": cancelados,
         "total": len(turnos),
-        "ingresos": total_ingresos
+        "ingresos": total_ingresos,
+        "por_dia": por_dia,
+        "por_servicio": por_servicio,
     }

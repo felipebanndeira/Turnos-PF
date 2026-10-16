@@ -16,27 +16,24 @@
   <style>
     /* ── Variables de Diseño Futurista (Rojo Neón / Cursor Glow) ── */
     :root {
-      /* Fondo negro absoluto / rojo muy oscuro */
-      --bg: #030000;
-      --bg-card: rgba(15, 5, 5, 0.6);
-      --bg-input: rgba(255, 255, 255, 0.03);
-      
-      --border: rgba(255, 255, 255, 0.08);
-      
+      --bg: #0b0b0c;
+      --bg-card: #16161a;
+      --bg-input: #0f0f12;
+      --border: rgba(255, 255, 255, 0.07);
+      --border-soft: rgba(255, 255, 255, 0.05);
       --text: #ffffff;
-      --text-muted: #94a3b8;
-      
-      /* Acentos Rojo Neón */
-      --accent: #ff003c;
-      --accent-glow: rgba(255, 0, 60, 0.5);
-      --primary: #ff003c;
-      --primary-glow: rgba(255, 0, 60, 0.4);
-      
-      --success: #00ff66;
-      --danger: #ff003c;
-
-      --radius: 8px;
-      --transition: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      --text-muted: #a1a1aa;
+      --text-dim: #71717a;
+      --accent: #d4af37;
+      --accent-glow: rgba(212, 175, 55, 0.25);
+      --primary: #d4af37;
+      --primary-glow: rgba(212, 175, 55, 0.22);
+      --gold-grad: linear-gradient(135deg, #c59a3f, #e6c275);
+      --success: #4ade80;
+      --danger: #fb7185;
+      --radius: 14px;
+      --radius-sm: 10px;
+      --transition: 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     /* ── Animaciones ── */
@@ -66,7 +63,7 @@
       position: fixed;
       top: 0; left: 0;
       width: 400px; height: 400px;
-      background: radial-gradient(circle, rgba(255,0,60,0.15) 0%, transparent 60%);
+      background: radial-gradient(circle, rgba(212,175,55,0.06) 0%, transparent 60%);
       border-radius: 50%;
       pointer-events: none;
       transform: translate(-50%, -50%);
@@ -94,10 +91,18 @@
     .navbar-brand { font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: .75rem; letter-spacing: 0.05em; text-transform: uppercase; color: #fff; }
     .navbar-brand:hover { text-shadow: 0 0 10px var(--accent-glow); color: var(--accent); }
     
-    .navbar-links { display: flex; align-items: center; gap: 2rem; }
+    .navbar-links { display: flex; align-items: center; gap: 1.5rem; }
+    .nav-sep { width:1px; height:22px; background: var(--border); }
+    @media (max-width: 900px) {
+      .navbar { flex-wrap: wrap; height: auto; padding: .75rem 1rem 0; gap: .5rem; }
+      .navbar-links { width: 100%; overflow-x: auto; gap: 1.25rem; padding: .5rem 0 .75rem; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+      .navbar-links::-webkit-scrollbar { display: none; }
+      .navbar-links .nav-link { white-space: nowrap; flex-shrink: 0; }
+      .nav-sep { display: none; }
+    }
     .nav-link { color: var(--text-muted); font-size: .95rem; font-weight: 500; display:flex; align-items:center; gap:.5rem; }
     .nav-link:hover, .nav-link.active { color: var(--accent); text-shadow: 0 0 10px var(--accent-glow); }
-    .nav-badge { background: linear-gradient(135deg, var(--primary), #5a00d6); color: #fff; font-size: .7rem; padding: 3px 8px; border-radius: 6px; font-weight: 700; letter-spacing: 0.1em; box-shadow: 0 0 10px var(--primary-glow); }
+    .nav-badge { background: var(--gold-grad); color: #0b0b0c; font-size: .7rem; padding: 3px 8px; border-radius: 6px; font-weight: 700; letter-spacing: 0.1em; box-shadow: 0 0 10px var(--primary-glow); }
     
     /* ── Layout ── */
     .page-wrapper { max-width: 1100px; margin: 0 auto; padding: 4rem 1.5rem; }
@@ -115,10 +120,10 @@
       transition: all var(--transition);
       box-shadow: 0 10px 40px rgba(0,0,0,0.5);
     }
-    .card:hover { 
-      border-color: rgba(0, 240, 255, 0.3); 
+    .card:hover { transform:none !important; 
+      border-color: rgba(212,175,55,0.25); 
       transform: translateY(-4px);
-      box-shadow: 0 15px 50px rgba(0,0,0,0.6), 0 0 25px rgba(0,240,255,0.1);
+      box-shadow: 0 15px 50px rgba(0,0,0,0.6), 0 0 0 transparent;
     }
     .card-title { font-size: 1.25rem; margin-bottom: 1.5rem; font-weight: 600; color: #fff; }
     
@@ -143,18 +148,18 @@
       position: relative; overflow: hidden;
     }
     .btn-primary { 
-      background: linear-gradient(135deg, var(--primary), #5a00d6); 
-      color: #fff; border: 1px solid rgba(255,255,255,0.2);
+      background: var(--gold-grad); 
+      color: #0b0b0c; border: 0;
       box-shadow: 0 4px 15px var(--primary-glow);
     }
     .btn-primary:hover { 
       box-shadow: 0 8px 25px var(--primary-glow), inset 0 0 15px rgba(255,255,255,0.3); 
-      transform: translateY(-2px); color: #fff;
+      transform: translateY(-1px); color: #0b0b0c;
     }
     
     .btn-ghost { background: transparent; border-color: var(--border); color: var(--text); }
     .btn-ghost:hover { 
-      background: rgba(0, 240, 255, 0.05); 
+      background: rgba(212,175,55,0.06); 
       border-color: var(--accent); 
       color: var(--accent);
       box-shadow: 0 0 20px var(--accent-glow);
@@ -163,8 +168,8 @@
     .btn-success { background: rgba(0,255,102,0.1); color: var(--success); border-color: var(--success); }
     .btn-success:hover { background: var(--success); color: #000; box-shadow: 0 0 20px rgba(0,255,102,0.5); transform: translateY(-2px); }
     
-    .btn-danger { background: rgba(255,0,60,0.1); border-color: var(--danger); color: var(--danger); }
-    .btn-danger:hover { background: var(--danger); color: #fff; box-shadow: 0 0 20px rgba(255,0,60,0.5); transform: translateY(-2px); }
+    .btn-danger { background: transparent; border-color: rgba(244,63,94,0.2); color: #fb7185; }
+    .btn-danger:hover { background: rgba(244,63,94,0.1); color: #fda4af; }
     
     /* ── Badges Brillantes ── */
     .badge {
@@ -210,14 +215,14 @@
       <a href="{{ url_for('cliente.solicitar_turno', url_id=url_id) }}" class="nav-link {% if request.endpoint == 'cliente.solicitar_turno' %}active{% endif %}">Nuevo Turno</a>
       <a href="{{ url_for('cliente.mis_turnos', url_id=url_id) }}" class="nav-link {% if request.endpoint == 'cliente.mis_turnos' %}active{% endif %}">Mis Turnos</a>
     {% elif session.get('rol') == 'admin' %}
-      <button onclick="navigator.clipboard.writeText('{{ url_for('cliente.solicitar_turno', url_id=session.get('negocio_id'), _external=True) }}'); alert('¡Link copiado!');" class="btn btn-primary btn-sm" style="margin-right: 1rem; padding: 0.25rem 0.75rem; font-size: 0.8rem;">
-        <i data-lucide="link" style="width: 14px;"></i> Copiar Mi Link
-      </button>
-      <a href="{{ url_for('admin.agenda') }}" class="nav-link {% if request.endpoint == 'admin.agenda' %}active{% endif %}">Agenda</a>
-      <a href="{{ url_for('admin.clientes') }}" class="nav-link {% if request.endpoint == 'admin.clientes' %}active{% endif %}">Clientes</a>
-      <a href="{{ url_for('admin.configuracion') }}" class="nav-link {% if request.endpoint == 'admin.configuracion' %}active{% endif %}"><i data-lucide="settings" style="width: 16px;"></i></a>
+      <a href="{{ url_for('admin.agenda') }}" class="nav-link {% if request.endpoint == 'admin.agenda' %}active{% endif %}"><i data-lucide="calendar" style="width:16px"></i>Turnos</a>
+      <a href="{{ url_for('admin.clientes') }}" class="nav-link {% if request.endpoint == 'admin.clientes' %}active{% endif %}"><i data-lucide="users" style="width:16px"></i>Clientes</a>
+      <a href="{{ url_for('admin.reportes') }}" class="nav-link {% if request.endpoint == 'admin.reportes' %}active{% endif %}"><i data-lucide="bar-chart-3" style="width:16px"></i>Métricas</a>
+      <a href="{{ url_for('admin.configuracion') }}" class="nav-link {% if request.endpoint == 'admin.configuracion' %}active{% endif %}"><i data-lucide="settings" style="width:16px"></i>Configuración</a>
+      <span class="nav-sep"></span>
+      <a href="{{ url_for('cliente.solicitar_turno', url_id=session.get('negocio_id')) }}" target="_blank" class="nav-link" title="Ver página pública"><i data-lucide="external-link" style="width:16px"></i>Mi página</a>
       <span class="nav-badge">ADMIN</span>
-      <a href="{{ url_for('auth.logout') }}" class="nav-link"><i data-lucide="log-out" style="width: 16px;"></i></a>
+      <a href="{{ url_for('auth.logout') }}" class="nav-link" title="Cerrar sesión"><i data-lucide="log-out" style="width:16px"></i></a>
     {% elif url_id %}
       <a href="{{ url_for('cliente.solicitar_turno', url_id=url_id) }}" class="nav-link {% if request.endpoint == 'cliente.solicitar_turno' %}active{% endif %}">Nuevo Turno</a>
       <a href="{{ url_for('cliente.mis_turnos', url_id=url_id) }}" class="nav-link {% if request.endpoint == 'cliente.mis_turnos' %}active{% endif %}">Mis Turnos</a>
