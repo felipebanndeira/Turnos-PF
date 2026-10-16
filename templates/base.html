@@ -188,7 +188,9 @@
 <div id="cursor-glow"></div>
 
 <nav class="navbar">
-  {% if session.get('rol') == 'admin' %}
+{% if request.endpoint and request.endpoint.startswith('cliente.') %}
+    <a href="{{ url_for('cliente.solicitar_turno', url_id=url_id) }}" class="navbar-brand">
+  {% elif session.get('rol') == 'admin' %}
     <a href="{{ url_for('admin.dashboard') }}" class="navbar-brand">
   {% elif url_id %}
     <a href="{{ url_for('cliente.solicitar_turno', url_id=url_id) }}" class="navbar-brand">
@@ -204,7 +206,10 @@
   </a>
 
   <div class="navbar-links">
-    {% if session.get('rol') == 'admin' %}
+    {% if request.endpoint and request.endpoint.startswith('cliente.') %}
+      <a href="{{ url_for('cliente.solicitar_turno', url_id=url_id) }}" class="nav-link {% if request.endpoint == 'cliente.solicitar_turno' %}active{% endif %}">Nuevo Turno</a>
+      <a href="{{ url_for('cliente.mis_turnos', url_id=url_id) }}" class="nav-link {% if request.endpoint == 'cliente.mis_turnos' %}active{% endif %}">Mis Turnos</a>
+    {% elif session.get('rol') == 'admin' %}
       <button onclick="navigator.clipboard.writeText('{{ url_for('cliente.solicitar_turno', url_id=session.get('negocio_id'), _external=True) }}'); alert('¡Link copiado!');" class="btn btn-primary btn-sm" style="margin-right: 1rem; padding: 0.25rem 0.75rem; font-size: 0.8rem;">
         <i data-lucide="link" style="width: 14px;"></i> Copiar Mi Link
       </button>
@@ -214,8 +219,8 @@
       <span class="nav-badge">ADMIN</span>
       <a href="{{ url_for('auth.logout') }}" class="nav-link"><i data-lucide="log-out" style="width: 16px;"></i></a>
     {% elif url_id %}
-      <a href="{{ url_for('cliente.solicitar_turno', url_id=url_id) }}" class="nav-link {% if request.endpoint == 'cliente.solicitar_turno' %}active{% endif %}">Pedir Turno</a>
-      <a href="{{ url_for('cliente.mis_turnos', url_id=url_id) }}" class="nav-link {% if request.endpoint == 'cliente.mis_turnos' %}active{% endif %}">Mis Reservas</a>
+      <a href="{{ url_for('cliente.solicitar_turno', url_id=url_id) }}" class="nav-link {% if request.endpoint == 'cliente.solicitar_turno' %}active{% endif %}">Nuevo Turno</a>
+      <a href="{{ url_for('cliente.mis_turnos', url_id=url_id) }}" class="nav-link {% if request.endpoint == 'cliente.mis_turnos' %}active{% endif %}">Mis Turnos</a>
     {% else %}
       <a href="{{ url_for('auth.login_admin_view') }}" class="nav-link">Acceso Negocios</a>
     {% endif %}
