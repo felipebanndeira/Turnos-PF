@@ -114,8 +114,8 @@
           <form method="POST" action="{{ url_for('admin.cobrar_turno_view', turno_id=turno.id) }}" style="display:flex; flex-direction:column; gap:.75rem; margin-top:1rem; padding-top:1rem; border-top:1px solid var(--border);">
             <div style="display:flex; gap:.5rem;">
               <select name="metodo" class="form-control" style="flex:1; font-size:.85rem;">
-                <option value="efectivo">💵 Efectivo</option>
-                <option value="transferencia">📱 Transf. / MP</option>
+                <option value="efectivo">Efectivo</option>
+                <option value="transferencia">Transferencia / MP</option>
               </select>
               <input type="number" step="any" name="monto" class="form-control" value="{{ (turno.precio_total or 0) - (turno.monto_abonado or 0) }}" placeholder="Monto" style="flex:1; font-size:.85rem;" required />
             </div>

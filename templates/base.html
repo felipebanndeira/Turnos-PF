@@ -236,15 +236,35 @@
       <a href="{{ url_for('cliente.solicitar_turno', url_id=url_id) }}" class="nav-link {% if request.endpoint == 'cliente.solicitar_turno' %}active{% endif %}">Nuevo Turno</a>
       <a href="{{ url_for('cliente.mis_turnos', url_id=url_id) }}" class="nav-link {% if request.endpoint == 'cliente.mis_turnos' %}active{% endif %}">Mis Turnos</a>
     {% elif session.get('rol') == 'admin' %}
-      <a href="{{ url_for('admin.agenda') }}" class="nav-link {% if request.endpoint == 'admin.agenda' %}active{% endif %}"><i data-lucide="calendar" style="width:16px"></i>Turnos</a>
-      <a href="{{ url_for('admin.clientes') }}" class="nav-link {% if request.endpoint == 'admin.clientes' %}active{% endif %}"><i data-lucide="users" style="width:16px"></i>Clientes</a>
-      <a href="{{ url_for('admin.reportes') }}" class="nav-link {% if request.endpoint == 'admin.reportes' %}active{% endif %}"><i data-lucide="bar-chart-3" style="width:16px"></i>Métricas</a>
-      <a href="{{ url_for('admin.caja_view') }}" class="nav-link {% if request.endpoint == 'admin.caja_view' %}active{% endif %}"><i data-lucide="wallet" style="width:16px"></i>Caja</a>
-      <a href="{{ url_for('admin.configuracion') }}" class="nav-link {% if request.endpoint == 'admin.configuracion' %}active{% endif %}"><i data-lucide="settings" style="width:16px"></i>Configuración</a>
+      <a href="{{ url_for('admin.agenda') }}" class="nav-link {% if request.endpoint == 'admin.agenda' %}active{% endif %}">
+        <i data-lucide="calendar" class="w-4 h-4 text-slate-400 stroke-[1.5]"></i>
+        <span>Turnos</span>
+      </a>
+      <a href="{{ url_for('admin.clientes') }}" class="nav-link {% if request.endpoint == 'admin.clientes' %}active{% endif %}">
+        <i data-lucide="users" class="w-4 h-4 text-slate-400 stroke-[1.5]"></i>
+        <span>Clientes</span>
+      </a>
+      <a href="{{ url_for('admin.reportes') }}" class="nav-link {% if request.endpoint == 'admin.reportes' %}active{% endif %}">
+        <i data-lucide="bar-chart-3" class="w-4 h-4 text-slate-400 stroke-[1.5]"></i>
+        <span>Métricas</span>
+      </a>
+      <a href="{{ url_for('admin.caja_view') }}" class="nav-link {% if request.endpoint == 'admin.caja_view' %}active{% endif %}">
+        <i data-lucide="wallet" class="w-4 h-4 text-slate-400 stroke-[1.5]"></i>
+        <span>Caja</span>
+      </a>
+      <a href="{{ url_for('admin.configuracion') }}" class="nav-link {% if request.endpoint == 'admin.configuracion' %}active{% endif %}">
+        <i data-lucide="settings" class="w-4 h-4 text-slate-400 stroke-[1.5]"></i>
+        <span>Configuración</span>
+      </a>
       <span class="nav-sep"></span>
-      <a href="{{ url_for('cliente.solicitar_turno', url_id=session.get('negocio_id')) }}" target="_blank" class="nav-link" title="Ver página pública"><i data-lucide="external-link" style="width:16px"></i>Mi página</a>
+      <a href="{{ url_for('cliente.solicitar_turno', url_id=session.get('negocio_id')) }}" target="_blank" class="nav-link" title="Ver página pública">
+        <i data-lucide="external-link" class="w-4 h-4 text-slate-400 stroke-[1.5]"></i>
+        <span>Mi página</span>
+      </a>
       <span class="nav-badge">ADMIN</span>
-      <a href="{{ url_for('auth.logout') }}" class="nav-link" title="Cerrar sesión"><i data-lucide="log-out" style="width:16px"></i></a>
+      <a href="{{ url_for('auth.logout') }}" class="nav-link" title="Cerrar sesión">
+        <i data-lucide="log-out" class="w-4 h-4 text-slate-400 stroke-[1.5]"></i>
+      </a>
     {% elif url_id %}
       <a href="{{ url_for('cliente.solicitar_turno', url_id=url_id) }}" class="nav-link {% if request.endpoint == 'cliente.solicitar_turno' %}active{% endif %}">Nuevo Turno</a>
       <a href="{{ url_for('cliente.mis_turnos', url_id=url_id) }}" class="nav-link {% if request.endpoint == 'cliente.mis_turnos' %}active{% endif %}">Mis Turnos</a>
