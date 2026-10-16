@@ -183,12 +183,12 @@ def estado_turno(url_id, turno_id):
     c = get_cliente_by_id(t["cliente_id"], url_id)
     
     # Calcular si se puede cancelar
-    from datetime import datetime
-    import time
+    from core.disponibilidad import ahora_argentina
     
     try:
         fecha_hora_turno = datetime.strptime(f"{t['fecha']} {t['hora_inicio']}", "%Y-%m-%d %H:%M")
-        horas_restantes = (fecha_hora_turno - datetime.now()).total_seconds() / 3600.0
+        hoy_naive = ahora_argentina().replace(tzinfo=None)
+        horas_restantes = (fecha_hora_turno - hoy_naive).total_seconds() / 3600.0
     except Exception:
         horas_restantes = 0
         

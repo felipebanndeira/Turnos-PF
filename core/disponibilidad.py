@@ -10,8 +10,19 @@ tomando en cuenta:
   - Bloqueos de agenda (Excepciones).
   - Horarios pasados si la fecha solicitada es hoy.
 """
-from datetime import datetime, timedelta, date as date_type
+import zoneinfo
+from datetime import datetime, timedelta, date as date_type, timezone
 from core.persistence import load_config, load_turnos
+
+# Zona horaria oficial de Argentina (UTC-3)
+try:
+    TZ_ARGENTINA = zoneinfo.ZoneInfo("America/Argentina/Buenos_Aires")
+except Exception:
+    TZ_ARGENTINA = timezone(timedelta(hours=-3))
+
+def ahora_argentina() -> datetime:
+    """Retorna la fecha y hora actual en la zona horaria de Argentina (UTC-3)."""
+    return datetime.now(TZ_ARGENTINA)
 
 # Mapeo español → número de semana (weekday())
 DIA_A_NUM = {
@@ -27,13 +38,14 @@ def _parse_time(t: str) -> datetime:
 
 
 def _slots_del_dia(desde: str, hasta: str, intervalo_min: int) -> list[str]:
-    """Genera todos los slots HH:MM dentro de [desde, hasta)."""
+    """Genera todos los slots HH:MM dentro de [desde, hasta]."""
     inicio = _parse_time(desde)
     fin    = _parse_time(hasta)
     delta  = timedelta(minutes=intervalo_min)
     slots  = []
     current = inicio
-    while current < fin:
+    # Incluir hasta inclusive para permitir reservar en el horario de cierre indicado (ej. 18:00)
+    while current <= fin:
         slots.append(current.strftime("%H:%M"))
         current += delta
     return slots
@@ -71,17 +83,17 @@ def get_slots_disponibles(fecha_str: str, servicio_id: str, negocio_id: str) -> 
     todos_slots  = _slots_del_dia(horario_dia["desde"], horario_dia["hasta"], intervalo)
     cierre       = _parse_time(horario_dia["hasta"])
     
-    # 1. Filtramos slots que por duración se pasan del cierre
+    # 1. Filtramos slots: el turno puede comenzar hasta la hora límite configurada
     slots_validos = []
     for slot in todos_slots:
         slot_dt = _parse_time(slot)
-        if slot_dt + timedelta(minutes=duracion_min) <= cierre:
+        if slot_dt <= cierre:
             slots_validos.append(slot)
             
-    # 2. Prevenir reservar turnos pasados (si la fecha es hoy)
-    hoy = datetime.now()
-    if fecha_str == hoy.strftime("%Y-%m-%d"):
-        hora_actual = hoy.strftime("%H:%M")
+    # 2. Prevenir reservar turnos pasados evaluando con la hora real de Argentina (UTC-3)
+    hoy_ar = ahora_argentina()
+    if fecha_str == hoy_ar.strftime("%Y-%m-%d"):
+        hora_actual = hoy_ar.strftime("%H:%M")
         slots_validos = [s for s in slots_validos if s > hora_actual]
 
     # 3. Filtrar Excepciones / Bloqueos Manuales y Recurrentes
@@ -180,12 +192,12 @@ def get_slots_disponibles_excluyendo(fecha_str: str, servicio_id: str, excluir_t
     slots_validos = []
     for slot in todos_slots:
         slot_dt = _parse_time(slot)
-        if slot_dt + timedelta(minutes=duracion_min) <= cierre:
+        if slot_dt <= cierre:
             slots_validos.append(slot)
             
-    hoy = datetime.now()
-    if fecha_str == hoy.strftime("%Y-%m-%d"):
-        hora_actual = hoy.strftime("%H:%M")
+    hoy_ar = ahora_argentina()
+    if fecha_str == hoy_ar.strftime("%Y-%m-%d"):
+        hora_actual = hoy_ar.strftime("%H:%M")
         slots_validos = [s for s in slots_validos if s > hora_actual]
 
     # Bloqueos Recurrentes
