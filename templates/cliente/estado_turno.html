@@ -2,81 +2,61 @@
 {% block title %}Resumen del Turno{% endblock %}
 
 {% block content %}
-<div class="page-wrapper" style="max-width:600px; padding-top:2rem;">
-  
-  <div class="card animate-up" style="text-align: center;">
+<div class="py-2">
+  <div class="bg-slate-900/80 border border-slate-800/80 rounded-2xl p-5 text-center shadow-lg">
     {% if turno.estado == 'pendiente' %}
-      <div style="display:inline-flex; align-items:center; justify-content:center; width:64px; height:64px; border-radius:50%; background:rgba(255,193,7,0.1); color:var(--warning-text); margin-bottom:1rem;">
-        <i data-lucide="clock" style="width:32px; height:32px;"></i>
+      <div class="w-14 h-14 rounded-2xl bg-sky-500/10 border border-sky-500/20 text-sky-400 flex items-center justify-center mx-auto mb-3 shadow-sm">
+        <i data-lucide="clock" class="w-7 h-7"></i>
       </div>
-      <h2 style="font-size:1.75rem; margin-bottom:.5rem;">Turno Pendiente</h2>
-      <p style="color:var(--text-muted); margin-bottom:2rem;">Tu reserva fue recibida. Te esperamos.</p>
+      <h2 class="text-xl font-bold text-white mb-1">Turno Pendiente</h2>
+      <p class="text-xs text-slate-400 mb-5">Tu reserva fue registrada correctamente. Te esperamos.</p>
     {% elif turno.estado == 'confirmado' %}
-      <div style="display:inline-flex; align-items:center; justify-content:center; width:64px; height:64px; border-radius:50%; background:rgba(74,222,128,0.1); color:var(--success-text); margin-bottom:1rem;">
-        <i data-lucide="check-circle" style="width:32px; height:32px;"></i>
+      <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto mb-3 shadow-sm">
+        <i data-lucide="check-circle" class="w-7 h-7"></i>
       </div>
-      <h2 style="font-size:1.75rem; margin-bottom:.5rem;">Turno Confirmado</h2>
-      <p style="color:var(--text-muted); margin-bottom:2rem;">¡Todo listo para tu cita!</p>
+      <h2 class="text-xl font-bold text-white mb-1">Turno Confirmado</h2>
+      <p class="text-xs text-slate-400 mb-5">¡Todo listo para tu atención!</p>
     {% elif turno.estado == 'cancelado' %}
-      <div style="display:inline-flex; align-items:center; justify-content:center; width:64px; height:64px; border-radius:50%; background:rgba(255,77,77,0.1); color:var(--danger); margin-bottom:1rem;">
-        <i data-lucide="x-circle" style="width:32px; height:32px;"></i>
+      <div class="w-14 h-14 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center mx-auto mb-3 shadow-sm">
+        <i data-lucide="x-circle" class="w-7 h-7"></i>
       </div>
-      <h2 style="font-size:1.75rem; margin-bottom:.5rem;">Turno Cancelado</h2>
-      <p style="color:var(--text-muted); margin-bottom:2rem;">Esta reserva ya no está activa.</p>
+      <h2 class="text-xl font-bold text-white mb-1">Turno Cancelado</h2>
+      <p class="text-xs text-slate-400 mb-5">Esta reserva ya no se encuentra activa.</p>
     {% endif %}
 
-    <div style="background:var(--bg-input); border:1px solid var(--border); border-radius:var(--radius-sm); padding:1.25rem; text-align:left; margin-bottom:1.5rem;">
-      <div style="display:flex; justify-content:space-between; margin-bottom:.75rem;">
-        <span style="color:var(--text-muted); font-size:.9rem;">Servicio</span>
-        <strong style="font-size:.95rem;">{{ turno.servicio_nombre }}</strong>
-      </div>
-      <div style="display:flex; justify-content:space-between; margin-bottom:.75rem;">
-        <span style="color:var(--text-muted); font-size:.9rem;">Fecha</span>
-        <strong style="font-size:.95rem;">{{ turno.fecha | fecha_es }}</strong>
-      </div>
-      <div style="display:flex; justify-content:space-between; margin-bottom:.75rem;">
-        <span style="color:var(--text-muted); font-size:.9rem;">Hora</span>
-        <strong style="font-size:.95rem;">{{ turno.hora_inicio }}</strong>
-      </div>
-      <div style="display:flex; justify-content:space-between; margin-bottom:.75rem;">
-        <span style="color:var(--text-muted); font-size:.9rem;">Cliente</span>
-        <strong style="font-size:.95rem;">{{ cliente.nombre }}</strong>
-      </div>
-      <div style="display:flex; justify-content:space-between;">
-        <span style="color:var(--text-muted); font-size:.9rem;">A pagar</span>
-        <strong style="font-size:.95rem; color:var(--accent);">{{ turno.precio | pesos }}</strong>
-      </div>
+    <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-4 text-left space-y-2.5 mb-5 divide-y divide-slate-800/60">
+      <div class="flex justify-between text-xs pt-1.5 first:pt-0"><span class="text-slate-400">Servicio</span><strong class="text-white">{{ turno.servicio_nombre }}</strong></div>
+      <div class="flex justify-between text-xs pt-2"><span class="text-slate-400">Fecha</span><strong class="text-white">{{ turno.fecha | fecha_es }}</strong></div>
+      <div class="flex justify-between text-xs pt-2"><span class="text-slate-400">Hora</span><strong class="text-cyan-400 font-mono">{{ turno.hora_inicio }} hs</strong></div>
+      <div class="flex justify-between text-xs pt-2"><span class="text-slate-400">Cliente</span><strong class="text-white">{{ cliente.nombre }}</strong></div>
+      <div class="flex justify-between text-xs pt-2"><span class="text-slate-400">Arancel / Precio</span><strong class="text-blue-400 font-mono tabular-nums">{{ turno.precio | pesos }}</strong></div>
     </div>
 
     {% if turno.estado != 'cancelado' %}
-      <div style="margin-top: 2rem; border-top: 1px solid var(--border-soft); padding-top: 1.5rem;">
-        <h4 style="font-size:.9rem; color:var(--text-muted); margin-bottom:1rem;">Gestión de tu turno</h4>
-        <p style="font-size:.8rem; color:var(--text-dim); margin-bottom:1rem;">
-          Guarda este link o agregalo a favoritos si necesitas revisar o cancelar tu turno más tarde.
-        </p>
+      <div class="pt-2 border-t border-slate-800/80">
+        <p class="text-[11px] text-slate-500 mb-3">Guarda este enlace si necesitas consultar o gestionar tu turno posteriormente.</p>
         
         {% if puede_cancelar %}
-          <form method="POST" action="{{ url_for('cliente.cancelar', url_id=url_id, turno_id=turno.id) }}" onsubmit="return confirm('¿Estás seguro de que querés cancelar tu turno de forma definitiva?');">
-            <button type="submit" class="btn btn-ghost" style="color:var(--danger); border-color:var(--danger); width:100%;">
-              <i data-lucide="x-circle" style="width:16px;"></i> Cancelar mi turno
+          <form method="POST" action="{{ url_for('cliente.cancelar', url_id=url_id, turno_id=turno.id) }}" onsubmit="return confirm('¿Confirmas la cancelación definitiva de tu reserva?');">
+            <button type="submit" class="w-full py-2.5 rounded-xl border border-rose-500/25 text-rose-400 hover:bg-rose-500/10 text-xs font-semibold flex items-center justify-center gap-2 transition">
+              <i data-lucide="x-circle" class="w-4 h-4"></i>
+              <span>Cancelar mi turno</span>
             </button>
           </form>
-          <small style="display:block; margin-top:.75rem; color:var(--text-muted); font-size:.75rem;">
-            Se permite cancelar con hasta {{ horas_minimas }} horas de anticipación.
-          </small>
+          <span class="block mt-2 text-[10px] text-slate-500">Se permite cancelar con hasta {{ horas_minimas }} horas de anticipación.</span>
         {% else %}
-          <div style="background:rgba(255,77,77,0.05); border:1px solid var(--danger); padding:1rem; border-radius:var(--radius-sm); color:var(--danger); font-size:.85rem;">
-            Ya no puedes cancelar el turno online porque faltan menos de {{ horas_minimas }} horas para tu cita. Comunicate por teléfono con el negocio si surgió una emergencia.
+          <div class="text-[11px] text-rose-400/90 bg-rose-950/20 border border-rose-900/30 rounded-xl p-2.5">
+            Faltan menos de {{ horas_minimas }} horas. Para cancelar comunícate de forma directa.
           </div>
         {% endif %}
       </div>
     {% endif %}
 
+    <div class="mt-4 pt-3 border-t border-slate-800/80">
+      <a href="{{ url_for('cliente.solicitar_turno', url_id=url_id) }}" class="inline-flex items-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 font-semibold transition">
+        <span>← Solicitar otro turno</span>
+      </a>
+    </div>
   </div>
-  
-  <div style="text-align:center; margin-top:1.5rem;">
-    <a href="{{ url_for('cliente.solicitar_turno', url_id=url_id) }}" class="btn btn-ghost">← Volver al inicio</a>
-  </div>
-
 </div>
 {% endblock %}

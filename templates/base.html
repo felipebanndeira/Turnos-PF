@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{% block title %}Turnos{% endblock %} — {{ config.nombre if config else 'Gestión' }}</title>
 
-  <!-- Tipografía Profesional: Inter -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <!-- Tipografía Global Premium: Plus Jakarta Sans & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -18,19 +18,17 @@
       theme: {
         extend: {
           colors: {
-            gold: {
-              DEFAULT: '#d4af37',
-              50: '#fbf8ea',
-              100: '#f5f0cb',
-              200: '#ece099',
-              300: '#dfcb61',
-              400: '#d4af37',
-              500: '#b89228',
-              600: '#926f1e',
-              700: '#6f501a',
-              800: '#533b19',
-              900: '#3c2b16',
+            brand: {
+              base: '#080c14',
+              surface: '#0f172a',
+              surfaceElevated: '#131d31',
+              card: 'rgba(15, 23, 42, 0.7)',
+              border: 'rgba(51, 65, 85, 0.6)',
             }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'Inter', 'system-ui', 'sans-serif'],
+            mono: ['Inter', 'ui-monospace', 'monospace'],
           }
         }
       }
@@ -41,49 +39,41 @@
   <script src="https://unpkg.com/lucide@latest"></script>
 
   <style>
-    /* ── Variables de Diseño Futurista (Rojo Neón / Cursor Glow) ── */
+    /* ── Variables de Diseño Electric Blue Tech SaaS ── */
     :root {
-      --bg: #0b0b0c;
-      --bg-card: #16161a;
-      --bg-input: #0f0f12;
-      --border: rgba(255, 255, 255, 0.07);
-      --border-soft: rgba(255, 255, 255, 0.05);
-      --text: #ffffff;
-      --text-muted: #a1a1aa;
-      --text-dim: #71717a;
-      --accent: #d4af37;
-      --accent-glow: rgba(212, 175, 55, 0.25);
-      --primary: #d4af37;
-      --primary-glow: rgba(212, 175, 55, 0.22);
-      --gold-grad: linear-gradient(135deg, #c59a3f, #e6c275);
-      --success: #4ade80;
-      --danger: #fb7185;
-      --radius: 14px;
+      --bg: #080c14;
+      --bg-card: rgba(15, 23, 42, 0.75);
+      --bg-input: #0b1120;
+      --border: rgba(51, 65, 85, 0.6);
+      --border-soft: rgba(51, 65, 85, 0.4);
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.25);
+      --primary: #2563eb;
+      --primary-glow: rgba(37, 99, 235, 0.3);
+      --blue-grad: linear-gradient(135deg, #2563eb 0%, #4f46e5 50%, #06b6d4 100%);
+      
+      --success: #10b981;
+      --danger: #f43f5e;
+      --radius: 16px;
       --radius-sm: 10px;
-      --transition: 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      --transition: 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 
       /* Compatibilidad con vistas previas */
-      --indigo: #d4af37;
-      --indigo-glow: rgba(212, 175, 55, 0.15);
-      --emerald: #4ade80;
-      --success-text: #4ade80;
-      --warning-text: #f59e0b;
-    }
-
-    /* ── Animaciones ── */
-    @keyframes fadeUp {
-      0% { opacity: 0; transform: translateY(15px); }
-      100% { opacity: 1; transform: translateY(0); }
-    }
-    .animate-up {
-      animation: fadeUp 0.5s var(--transition) forwards;
-      opacity: 0;
+      --indigo: #3b82f6;
+      --indigo-glow: rgba(59, 130, 246, 0.15);
+      --emerald: #10b981;
+      --success-text: #34d399;
+      --warning-text: #38bdf8;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
     
     body {
-      font-family: 'Inter', sans-serif;
+      font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
       background-color: var(--bg);
       color: var(--text);
       min-height: 100vh;
@@ -92,41 +82,40 @@
       overflow-x: hidden;
     }
 
-    /* Aura del cursor */
+    /* Aura del cursor Tech Cyan/Blue */
     #cursor-glow {
       position: fixed;
       top: 0; left: 0;
-      width: 400px; height: 400px;
-      background: radial-gradient(circle, rgba(212,175,55,0.06) 0%, transparent 60%);
+      width: 450px; height: 450px;
+      background: radial-gradient(circle, rgba(37, 99, 235, 0.08) 0%, rgba(6, 182, 212, 0.04) 40%, transparent 70%);
       border-radius: 50%;
       pointer-events: none;
       transform: translate(-50%, -50%);
-      z-index: 1; /* Detrás de las cards (z-index natural mayor) */
+      z-index: 1;
       transition: opacity 0.3s ease;
       opacity: 0;
     }
     
-    /* El resto del contenido debe estar por encima del aura */
     .navbar, .page-wrapper { position: relative; z-index: 10; }
     
-    h1, h2, h3, h4, h5 { font-weight: 600; letter-spacing: -0.02em; color: #fff; }
+    h1, h2, h3, h4, h5 { font-weight: 700; letter-spacing: -0.025em; color: #fff; }
     a { color: var(--accent); text-decoration: none; transition: all var(--transition); }
-    a:hover { text-shadow: 0 0 8px var(--accent-glow); }
+    a:hover { text-shadow: 0 0 10px var(--accent-glow); }
 
-    /* ── Navbar Glass ── */
+    /* ── Navbar Glass Electric Blue ── */
     .navbar {
       position: sticky; top: 0; z-index: 100;
       display: flex; align-items: center; justify-content: space-between;
       padding: 0 2rem; height: 70px;
-      background: rgba(5, 5, 8, 0.7); 
+      background: rgba(8, 12, 20, 0.85); 
       backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-      border-bottom: 1px solid rgba(255,255,255,0.05);
+      border-bottom: 1px solid var(--border-soft);
     }
-    .navbar-brand { font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: .75rem; letter-spacing: 0.05em; text-transform: uppercase; color: #fff; }
-    .navbar-brand:hover { text-shadow: 0 0 10px var(--accent-glow); color: var(--accent); }
+    .navbar-brand { font-size: 1.05rem; font-weight: 800; display: flex; align-items: center; gap: .75rem; letter-spacing: 0.06em; text-transform: uppercase; color: #fff; }
+    .navbar-brand:hover { text-shadow: 0 0 12px var(--accent-glow); color: #38bdf8; }
     
     .navbar-links { display: flex; align-items: center; gap: 1.5rem; }
-    .nav-sep { width:1px; height:22px; background: var(--border); }
+    .nav-sep { width: 1px; height: 20px; background: var(--border-soft); }
     @media (max-width: 900px) {
       .navbar { flex-wrap: wrap; height: auto; padding: .75rem 1rem 0; gap: .5rem; }
       .navbar-links { width: 100%; overflow-x: auto; gap: 1.25rem; padding: .5rem 0 .75rem; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
@@ -134,15 +123,15 @@
       .navbar-links .nav-link { white-space: nowrap; flex-shrink: 0; }
       .nav-sep { display: none; }
     }
-    .nav-link { color: var(--text-muted); font-size: .95rem; font-weight: 500; display:flex; align-items:center; gap:.5rem; }
-    .nav-link:hover, .nav-link.active { color: var(--accent); text-shadow: 0 0 10px var(--accent-glow); }
-    .nav-badge { background: var(--gold-grad); color: #0b0b0c; font-size: .7rem; padding: 3px 8px; border-radius: 6px; font-weight: 700; letter-spacing: 0.1em; box-shadow: 0 0 10px var(--primary-glow); }
+    .nav-link { color: var(--text-muted); font-size: .9rem; font-weight: 600; display:flex; align-items:center; gap:.5rem; }
+    .nav-link:hover, .nav-link.active { color: #38bdf8; text-shadow: 0 0 10px var(--accent-glow); }
+    .nav-badge { background: var(--blue-grad); color: #fff; font-size: .68rem; padding: 3px 8px; border-radius: 6px; font-weight: 800; letter-spacing: 0.12em; box-shadow: 0 0 12px var(--primary-glow); }
     
-    /* ── Layout ── */
-    .page-wrapper { max-width: 1100px; margin: 0 auto; padding: 4rem 1.5rem; }
-    .page-header { margin-bottom: 3rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 1.5rem; }
-    .page-title { font-size: 2rem; text-shadow: 0 0 20px rgba(255,255,255,0.2); }
-    .page-subtitle { color: var(--accent); font-size: 1rem; margin-top: .5rem; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; }
+    /* ── Layout Dashboard ── */
+    .page-wrapper { max-width: 1200px; margin: 0 auto; padding: 2.5rem 1.5rem 6rem; }
+    .page-header { margin-bottom: 2.5rem; border-bottom: 1px solid var(--border-soft); padding-bottom: 1.25rem; }
+    .page-title { font-size: 2.25rem; font-weight: 800; letter-spacing: -0.03em; }
+    .page-subtitle { color: #38bdf8; font-size: 0.78rem; margin-top: .4rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
 
     /* ── Cards & UI Elements ── */
     .card { 
@@ -150,84 +139,82 @@
       backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
       border: 1px solid var(--border); 
       border-radius: var(--radius); 
-      padding: 2rem; 
+      padding: 1.75rem; 
       transition: all var(--transition);
-      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
     }
-    .card:hover { transform:none !important; 
-      border-color: rgba(212,175,55,0.25); 
-      transform: translateY(-4px);
-      box-shadow: 0 15px 50px rgba(0,0,0,0.6), 0 0 0 transparent;
+    .card:hover { 
+      border-color: rgba(56, 189, 248, 0.4); 
+      box-shadow: 0 15px 40px rgba(0,0,0,0.5), 0 0 20px rgba(56, 189, 248, 0.08);
     }
-    .card-title { font-size: 1.25rem; margin-bottom: 1.5rem; font-weight: 600; color: #fff; }
+    .card-title { font-size: 1.2rem; margin-bottom: 1.25rem; font-weight: 700; color: #fff; }
     
     /* ── Formularios ── */
-    .form-group { margin-bottom: 1.5rem; }
-    .form-label { display: block; font-size: .85rem; font-weight: 600; color: var(--text-muted); margin-bottom: .5rem; letter-spacing: 0.05em; text-transform: uppercase; }
+    .form-group { margin-bottom: 1.25rem; }
+    .form-label { display: block; font-size: .75rem; font-weight: 700; color: var(--text-muted); margin-bottom: .4rem; letter-spacing: 0.06em; text-transform: uppercase; }
     .form-control {
-      width: 100%; padding: .85rem 1rem;
+      width: 100%; padding: .75rem 1rem;
       background: var(--bg-input); border: 1px solid var(--border);
-      border-radius: var(--radius); color: #fff;
-      font-family: inherit; font-size: 1rem;
+      border-radius: var(--radius-sm); color: #fff;
+      font-family: inherit; font-size: .95rem;
       transition: all var(--transition);
     }
-    .form-control:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 15px var(--accent-glow); background: rgba(255,255,255,0.1); }
+    .form-control:focus { outline: none; border-color: #38bdf8; box-shadow: 0 0 15px var(--accent-glow); background: rgba(15, 23, 42, 0.95); }
     
-    /* ── Botones Grandes y Vibrantes ── */
+    /* ── Botones ── */
     .btn {
-      display: inline-flex; align-items: center; justify-content: center; gap: .75rem;
-      padding: .85rem 1.75rem; border: 1px solid transparent; border-radius: var(--radius);
-      font-family: inherit; font-size: 1.05rem; font-weight: 600; letter-spacing: 0.02em;
+      display: inline-flex; align-items: center; justify-content: center; gap: .6rem;
+      padding: .75rem 1.5rem; border: 1px solid transparent; border-radius: var(--radius-sm);
+      font-family: inherit; font-size: .95rem; font-weight: 700; letter-spacing: 0.01em;
       cursor: pointer; transition: all var(--transition);
       position: relative; overflow: hidden;
     }
     .btn-primary { 
-      background: var(--gold-grad); 
-      color: #0b0b0c; border: 0;
-      box-shadow: 0 4px 15px var(--primary-glow);
+      background: var(--blue-grad); 
+      color: #fff; border: 0;
+      box-shadow: 0 4px 18px var(--primary-glow);
     }
     .btn-primary:hover { 
-      box-shadow: 0 8px 25px var(--primary-glow), inset 0 0 15px rgba(255,255,255,0.3); 
-      transform: translateY(-1px); color: #0b0b0c;
+      box-shadow: 0 8px 25px rgba(37, 99, 235, 0.45); 
+      transform: translateY(-1px); color: #fff;
     }
     
-    .btn-ghost { background: transparent; border-color: var(--border); color: var(--text); }
+    .btn-ghost { background: transparent; border-color: var(--border); color: var(--text-muted); }
     .btn-ghost:hover { 
-      background: rgba(212,175,55,0.06); 
-      border-color: var(--accent); 
-      color: var(--accent);
-      box-shadow: 0 0 20px var(--accent-glow);
+      background: rgba(56, 189, 248, 0.08); 
+      border-color: #38bdf8; 
+      color: #fff;
     }
     
-    .btn-success { background: rgba(0,255,102,0.1); color: var(--success); border-color: var(--success); }
-    .btn-success:hover { background: var(--success); color: #000; box-shadow: 0 0 20px rgba(0,255,102,0.5); transform: translateY(-2px); }
+    .btn-success { background: rgba(16, 185, 129, 0.15); color: #34d399; border-color: rgba(16, 185, 129, 0.3); }
+    .btn-success:hover { background: #10b981; color: #fff; box-shadow: 0 0 15px rgba(16, 185, 129, 0.4); }
     
-    .btn-danger { background: transparent; border-color: rgba(244,63,94,0.2); color: #fb7185; }
-    .btn-danger:hover { background: rgba(244,63,94,0.1); color: #fda4af; }
+    .btn-danger { background: rgba(244, 63, 94, 0.1); border-color: rgba(244, 63, 94, 0.3); color: #fb7185; }
+    .btn-danger:hover { background: rgba(244, 63, 94, 0.2); color: #fff; }
     
-    /* ── Badges Brillantes ── */
+    /* ── Badges ── */
     .badge {
-      display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 20px;
-      font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid;
+      display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 20px;
+      font-size: .7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; border: 1px solid;
     }
-    .badge-pendiente { border-color: #ffaa00; color: #ffaa00; background: rgba(255,170,0,0.1); box-shadow: 0 0 10px rgba(255,170,0,0.2); }
-    .badge-confirmado { border-color: var(--success); color: var(--success); background: rgba(0,255,102,0.1); box-shadow: 0 0 10px rgba(0,255,102,0.2); }
+    .badge-pendiente { border-color: rgba(56, 189, 248, 0.4); color: #38bdf8; background: rgba(56, 189, 248, 0.1); }
+    .badge-confirmado { border-color: rgba(16, 185, 129, 0.4); color: #34d399; background: rgba(16, 185, 129, 0.1); }
     .badge-cancelado { border-color: var(--border); color: var(--text-muted); background: var(--bg-input); }
 
     /* ── Layout Utilities ── */
-    .grid { display: grid; gap: 2rem; }
-    .grid-2 { grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); }
-    .divider { height: 1px; background: rgba(255,255,255,0.05); margin: 2rem 0; }
-    .text-muted { color: var(--text-muted); font-size: .9rem; }
-    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+    .grid { display: grid; gap: 1.5rem; }
+    .grid-2 { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+    .divider { height: 1px; background: var(--border-soft); margin: 1.5rem 0; }
+    .text-muted { color: var(--text-muted); font-size: .875rem; }
+    .tabular-nums { font-variant-numeric: tabular-nums; }
   </style>
   {% block extra_css %}{% endblock %}
 </head>
-<body>
+<body class="font-['Plus_Jakarta_Sans',sans-serif] antialiased tracking-tight text-slate-100 bg-[#080c14]">
 <div id="cursor-glow"></div>
 
 <nav class="navbar">
-{% if request.endpoint and request.endpoint.startswith('cliente.') %}
+  {% if request.endpoint and request.endpoint.startswith('cliente.') %}
     <a href="{{ url_for('cliente.solicitar_turno', url_id=url_id) }}" class="navbar-brand">
   {% elif session.get('rol') == 'admin' %}
     <a href="{{ url_for('admin.dashboard') }}" class="navbar-brand">
@@ -237,9 +224,9 @@
     <a href="/" class="navbar-brand">
   {% endif %}
     {% if config and config.logo_url %}
-      <img src="{{ config.logo_url }}" alt="Logo" style="height: 32px; border-radius: 4px;" />
+      <img src="{{ config.logo_url }}" alt="Logo" style="height: 32px; border-radius: 6px; object-fit: cover;" />
     {% else %}
-      <i data-lucide="calendar-check" fill="none" style="width: 22px; height: 22px; color: var(--accent);"></i>
+      <i data-lucide="calendar" style="width: 22px; height: 22px; color: #38bdf8;"></i>
     {% endif %}
     {{ config.nombre if config else 'Turnify' }}
   </a>
@@ -268,17 +255,15 @@
 
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
-    <div style="max-width: 600px; margin: 1.5rem auto 0; padding: 0 1rem;">
+    <div style="max-width: 650px; margin: 1.5rem auto 0; padding: 0 1.25rem;">
       {% for category, message in messages %}
-        <div style="padding: 1rem 1.25rem; border-radius: var(--radius); margin-bottom: 1rem; font-size: 0.95rem; font-weight: 500; display: flex; align-items: center; gap: 0.75rem; 
+        <div style="padding: 1rem 1.25rem; border-radius: var(--radius-sm); margin-bottom: 1rem; font-size: 0.9rem; font-weight: 600; display: flex; align-items: center; gap: 0.75rem; 
           {% if category == 'danger' %}
-            background: rgba(255, 0, 60, 0.15); border: 1px solid var(--danger); color: #ff6685;
-          {% elif category == 'success' %}
-            background: rgba(0, 255, 102, 0.15); border: 1px solid var(--success); color: #00ff66;
+            background: rgba(244, 63, 94, 0.15); border: 1px solid var(--danger); color: #fca5a5;
           {% else %}
-            background: rgba(255, 170, 0, 0.15); border: 1px solid #ffaa00; color: #ffaa00;
+            background: rgba(16, 185, 129, 0.15); border: 1px solid var(--success); color: #6ee7b7;
           {% endif %}">
-          <i data-lucide="{% if category == 'danger' %}alert-circle{% elif category == 'success' %}check-circle{% else %}info{% endif %}" style="width: 20px; height: 20px; flex-shrink: 0;"></i>
+          <i data-lucide="info" style="width: 18px; flex-shrink: 0;"></i>
           <span>{{ message }}</span>
         </div>
       {% endfor %}
@@ -288,29 +273,20 @@
 
 {% block content %}{% endblock %}
 
-<script>
-  // Inicializar íconos Lucide
-  lucide.createIcons();
-
-  // Cursor Glow (Aura Effect)
-  const cursorGlow = document.getElementById('cursor-glow');
-  let isMoving = false;
-  
-  document.addEventListener('mousemove', (e) => {
-    if(!isMoving) {
-      cursorGlow.style.opacity = '1';
-      isMoving = true;
-    }
-    // Centrar el aura en el cursor
-    cursorGlow.style.left = e.clientX + 'px';
-    cursorGlow.style.top = e.clientY + 'px';
-  });
-
-  document.addEventListener('mouseleave', () => {
-    cursorGlow.style.opacity = '0';
-    isMoving = false;
-  });
-</script>
 {% block extra_js %}{% endblock %}
+<script>
+  lucide.createIcons();
+  
+  // Aura de cursor reactiva
+  const glow = document.getElementById('cursor-glow');
+  if (glow) {
+    window.addEventListener('mousemove', (e) => {
+      glow.style.left = e.clientX + 'px';
+      glow.style.top = e.clientY + 'px';
+      glow.style.opacity = '1';
+    });
+    document.addEventListener('mouseleave', () => { glow.style.opacity = '0'; });
+  }
+</script>
 </body>
 </html>
