@@ -143,10 +143,20 @@ def get_slots_disponibles(fecha_str: str, servicio_id: str, negocio_id: str) -> 
         t for t in load_turnos(negocio_id)
         if t["fecha"] == fecha_str and t["estado"] in ("pendiente", "confirmado")
     ]
-    ocupados_bloques = [
-        (_parse_time(t["hora_inicio"]), _parse_time(t["hora_fin"]))
-        for t in turnos_ocupados
-    ]
+    ocupados_bloques = []
+    for t in turnos_ocupados:
+        try:
+            t_ini = _parse_time(t["hora_inicio"])
+            if t.get("hora_fin"):
+                t_fin = _parse_time(t["hora_fin"])
+            else:
+                srv_id = t.get("servicio_id")
+                t_dur = servicios.get(srv_id, {}).get("duracion_min") if srv_id else None
+                t_dur = int(t_dur) if t_dur else intervalo
+                t_fin = t_ini + timedelta(minutes=t_dur)
+            ocupados_bloques.append((t_ini, t_fin))
+        except Exception:
+            continue
 
     disponibles = []
     for slot in slots_validos:
@@ -245,10 +255,20 @@ def get_slots_disponibles_excluyendo(fecha_str: str, servicio_id: str, excluir_t
         and t["id"] != excluir_turno_id
     ]
 
-    ocupados_bloques = [
-        (_parse_time(t["hora_inicio"]), _parse_time(t["hora_fin"]))
-        for t in turnos_ocupados
-    ]
+    ocupados_bloques = []
+    for t in turnos_ocupados:
+        try:
+            t_ini = _parse_time(t["hora_inicio"])
+            if t.get("hora_fin"):
+                t_fin = _parse_time(t["hora_fin"])
+            else:
+                srv_id = t.get("servicio_id")
+                t_dur = servicios.get(srv_id, {}).get("duracion_min") if srv_id else None
+                t_dur = int(t_dur) if t_dur else intervalo
+                t_fin = t_ini + timedelta(minutes=t_dur)
+            ocupados_bloques.append((t_ini, t_fin))
+        except Exception:
+            continue
 
     disponibles = []
     for slot in slots_validos:

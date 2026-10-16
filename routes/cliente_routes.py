@@ -84,7 +84,16 @@ def solicitar_turno(url_id):
             return redirect(url_for("cliente.solicitar_turno", url_id=url_id))
 
         import uuid
+        from datetime import datetime as dt, timedelta
         from core.persistence import upsert_turno
+
+        duracion_min = int(srv.get("duracion_min", cfg.get("intervalo_turno_min", 30)))
+        try:
+            h_ini_dt = dt.strptime(hora, "%H:%M")
+            hora_fin = (h_ini_dt + timedelta(minutes=duracion_min)).strftime("%H:%M")
+        except Exception:
+            hora_fin = hora
+
         nuevo_turno = {
             "id": str(uuid.uuid4()),
             "negocio_id": url_id,
@@ -93,6 +102,8 @@ def solicitar_turno(url_id):
             "servicio_nombre": srv["nombre"],
             "fecha": fecha,
             "hora_inicio": hora,
+            "hora_fin": hora_fin,
+            "duracion_min": duracion_min,
             "precio": srv.get("precio", 0.0),
             "estado": "pendiente",
             "creado_el": date.today().isoformat(),

@@ -53,6 +53,15 @@ def reprogramar_turno(turno_id: str, nueva_fecha: str, nueva_hora: str, negocio_
 
     t["fecha"] = nueva_fecha
     t["hora_inicio"] = nueva_hora
+    cfg = load_config(negocio_id)
+    servicios = {s["id"]: s for s in cfg.get("servicios", [])}
+    dur_min = int(servicios.get(t.get("servicio_id"), {}).get("duracion_min", cfg.get("intervalo_turno_min", 30)))
+    try:
+        from datetime import datetime as dt, timedelta
+        h_ini_dt = dt.strptime(nueva_hora, "%H:%M")
+        t["hora_fin"] = (h_ini_dt + timedelta(minutes=dur_min)).strftime("%H:%M")
+    except Exception:
+        pass
     t["estado"] = "pendiente" # Vuelve a pendiente por el cambio de horario
     upsert_turno(t)
     return True, f"Turno reprogramado exitosamente para el {nueva_fecha} a las {nueva_hora}."

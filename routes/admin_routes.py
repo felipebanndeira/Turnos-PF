@@ -170,6 +170,31 @@ def reprogramar(turno_id):
         flash(msg, "danger")
     return redirect(url_for("admin.detalle_turno", turno_id=turno_id))
 
+@admin_bp.route("/horarios")
+@require_admin
+def admin_horarios():
+    nid = session["negocio_id"]
+    fecha = request.args.get("fecha")
+    turno_id = request.args.get("turno_id")
+    servicio_id = request.args.get("servicio_id")
+    
+    if not fecha:
+        return jsonify({"slots": []})
+        
+    if turno_id:
+        t = get_turno_by_id(turno_id, nid)
+        if t:
+            s_id = servicio_id or t.get("servicio_id")
+            slots = get_slots_disponibles_excluyendo(fecha, s_id, turno_id, nid)
+            return jsonify({"slots": slots})
+            
+    if servicio_id:
+        from core.disponibilidad import get_slots_disponibles
+        slots = get_slots_disponibles(fecha, servicio_id, nid)
+        return jsonify({"slots": slots})
+        
+    return jsonify({"slots": []})
+
 @admin_bp.route("/api/slots_reprogramar")
 @require_admin
 def api_slots_reprogramar():
