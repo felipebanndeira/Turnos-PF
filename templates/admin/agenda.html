@@ -218,6 +218,18 @@
                 {{ t.estado }}
               </span>
 
+              <!-- Botón Recordatorio WhatsApp Directo -->
+              {% if t.cliente and t.cliente.telefono and t.estado != 'cancelado' %}
+                {% set wphone = t.cliente.telefono|replace(' ', '')|replace('-', '')|replace('+', '') %}
+                {% set wmsg = "Hola " ~ t.cliente.nombre ~ "! Te recordamos tu turno para " ~ t.servicio_nombre ~ " el día " ~ t.fecha ~ " a las " ~ t.hora_inicio ~ "hs en " ~ (config.nombre if config else 'Turnify') ~ "." %}
+                <a href="https://wa.me/{{ wphone }}?text={{ wmsg|urlencode }}" target="_blank"
+                   class="px-2.5 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/25 text-xs font-semibold inline-flex items-center gap-1 transition"
+                   title="Enviar recordatorio por WhatsApp">
+                  <i data-lucide="message-circle" class="w-3.5 h-3.5 stroke-[2]"></i>
+                  <span class="hidden md:inline">WhatsApp</span>
+                </a>
+              {% endif %}
+
               <!-- Botón Cobrar Rápido (si está Confirmado o Atendido) -->
               {% if t.estado in ['confirmado', 'pendiente', 'atendido'] and t.estado != 'cobrado' and t.estado != 'cancelado' %}
                 <button type="button" 
@@ -226,6 +238,18 @@
                   <i data-lucide="dollar-sign" class="w-3.5 h-3.5"></i>
                   <span>Cobrar</span>
                 </button>
+              {% endif %}
+
+              <!-- Botón Cancelar Rápido (si no está cancelado) -->
+              {% if t.estado != 'cancelado' and t.estado != 'cobrado' %}
+                <form method="POST" action="{{ url_for('admin.cambiar_estado_turno', turno_id=t.id) }}" onsubmit="return confirm('¿Confirmas la cancelación de este turno?');" class="inline">
+                  <input type="hidden" name="accion" value="cancelar" />
+                  <button type="submit" 
+                          class="p-1.5 rounded-lg bg-slate-900 hover:bg-rose-500/10 text-slate-400 hover:text-rose-400 border border-slate-800 hover:border-rose-500/30 transition"
+                          title="Cancelar turno">
+                    <i data-lucide="x-circle" class="w-4 h-4 stroke-[1.5]"></i>
+                  </button>
+                </form>
               {% endif %}
 
               <a href="{{ url_for('admin.detalle_turno', turno_id=t.id) }}" 
