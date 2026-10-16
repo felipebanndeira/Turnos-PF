@@ -122,13 +122,24 @@ def get_slots_disponibles(fecha_str: str, servicio_id: str, negocio_id: str) -> 
     bloqueos_del_dia = [b for b in bloqueos if b.get("fecha") == fecha_str]
     
     for b in bloqueos_del_dia:
-        b_desde = b.get("hora_desde", "")
-        b_hasta = b.get("hora_hasta", "")
+        b_desde = (b.get("hora_desde") or "").strip()
+        b_hasta = (b.get("hora_hasta") or "").strip()
+        # Si no especificó horarios o ambos están vacíos, se bloquea el día completo
         if not b_desde and not b_hasta:
             return []
             
-        b_inicio_dt = _parse_time(b_desde)
-        b_fin_dt    = _parse_time(b_hasta)
+        try:
+            if b_desde and not b_hasta:
+                b_inicio_dt = _parse_time(b_desde)
+                b_fin_dt    = _parse_time("23:59")
+            elif not b_desde and b_hasta:
+                b_inicio_dt = _parse_time("00:00")
+                b_fin_dt    = _parse_time(b_hasta)
+            else:
+                b_inicio_dt = _parse_time(b_desde)
+                b_fin_dt    = _parse_time(b_hasta)
+        except Exception:
+            return []
         
         slots_no_bloqueados = []
         for slot in slots_validos:
@@ -234,12 +245,22 @@ def get_slots_disponibles_excluyendo(fecha_str: str, servicio_id: str, excluir_t
     bloqueos = config.get("bloqueos", [])
     bloqueos_del_dia = [b for b in bloqueos if b.get("fecha") == fecha_str]
     for b in bloqueos_del_dia:
-        b_desde = b.get("hora_desde", "")
-        b_hasta = b.get("hora_hasta", "")
+        b_desde = (b.get("hora_desde") or "").strip()
+        b_hasta = (b.get("hora_hasta") or "").strip()
         if not b_desde and not b_hasta:
             return []
-        b_inicio_dt = _parse_time(b_desde)
-        b_fin_dt    = _parse_time(b_hasta)
+        try:
+            if b_desde and not b_hasta:
+                b_inicio_dt = _parse_time(b_desde)
+                b_fin_dt    = _parse_time("23:59")
+            elif not b_desde and b_hasta:
+                b_inicio_dt = _parse_time("00:00")
+                b_fin_dt    = _parse_time(b_hasta)
+            else:
+                b_inicio_dt = _parse_time(b_desde)
+                b_fin_dt    = _parse_time(b_hasta)
+        except Exception:
+            return []
         slots_no_bloqueados = []
         for slot in slots_validos:
             s_ini = _parse_time(slot)
