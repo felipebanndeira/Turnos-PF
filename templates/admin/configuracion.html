@@ -3,6 +3,35 @@
 
 {% set DIAS = {'lunes':'Lunes','martes':'Martes','miercoles':'Miércoles','miércoles':'Miércoles','jueves':'Jueves','viernes':'Viernes','sabado':'Sábado','sábado':'Sábado','domingo':'Domingo'} %}
 
+{% block extra_css %}
+<style>
+  /* Calendario / Selector de fecha oscuro nativo visible y táctil */
+  input[type="date"], input[type="time"] {
+    color-scheme: dark;
+    position: relative;
+    cursor: pointer;
+  }
+  input[type="date"]::-webkit-calendar-picker-indicator,
+  input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.8) sepia(1) saturate(5) hue-rotate(175deg);
+    cursor: pointer;
+    opacity: 0.9;
+    padding: 4px;
+    border-radius: 6px;
+    transition: transform 0.15s ease, opacity 0.15s ease;
+  }
+  input[type="date"]::-webkit-calendar-picker-indicator:hover,
+  input[type="time"]::-webkit-calendar-picker-indicator:hover {
+    transform: scale(1.15);
+    opacity: 1;
+    filter: invert(1) drop-shadow(0 0 4px rgba(56, 189, 248, 0.6));
+  }
+  .date-picker-trigger {
+    cursor: pointer;
+  }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="max-w-4xl mx-auto px-4 py-8 pb-28 sm:pb-32">
   
@@ -405,23 +434,47 @@
 
       <div class="space-y-3" id="bloqueo-list">
         {% for b in config.bloqueos %}
-        <div class="row-entry flex flex-col sm:flex-row sm:items-end gap-3 p-3.5 bg-slate-900/80 border border-slate-800 rounded-xl">
+        <div class="row-entry flex flex-col sm:flex-row sm:items-end gap-3 p-3.5 bg-slate-900/80 border border-slate-800 rounded-xl hover:border-slate-700/80 transition-colors">
           <div class="flex-[1.5] min-w-0">
-            <label class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1 block">Fecha a Bloquear</label>
-            <input type="date" name="bloqueo_fecha[]" value="{{ b.fecha }}" required 
-                   class="w-full block bg-slate-950 border border-slate-700/70 focus:border-emerald-500 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none" />
+            <label class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5 flex items-center gap-1.5">
+              <i data-lucide="calendar" class="w-3.5 h-3.5 text-emerald-400"></i>
+              <span>Fecha a Bloquear</span>
+            </label>
+            <div class="relative flex items-center cursor-pointer" onclick="openPicker(this)">
+              <input type="date" name="bloqueo_fecha[]" value="{{ b.fecha }}" required 
+                     class="w-full block bg-slate-950 border border-slate-700/70 focus:border-emerald-500 rounded-lg pl-3 pr-9 py-2 text-xs text-slate-100 font-mono tracking-tight outline-none cursor-pointer" />
+              <button type="button" tabindex="-1" class="absolute right-2.5 text-slate-400 hover:text-emerald-400 pointer-events-none transition-colors">
+                <i data-lucide="calendar" class="w-4 h-4"></i>
+              </button>
+            </div>
           </div>
 
           <div class="flex-1 min-w-0">
-            <label class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1 block">Desde (Opcional)</label>
-            <input type="time" name="bloqueo_desde[]" value="{{ b.hora_desde }}" 
-                   class="w-full block bg-slate-950 border border-slate-700/70 focus:border-emerald-500 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none" />
+            <label class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5 flex items-center gap-1.5">
+              <i data-lucide="clock" class="w-3.5 h-3.5 text-slate-500"></i>
+              <span>Desde (Opcional)</span>
+            </label>
+            <div class="relative flex items-center cursor-pointer" onclick="openPicker(this)">
+              <input type="time" name="bloqueo_desde[]" value="{{ b.hora_desde }}" 
+                     class="w-full block bg-slate-950 border border-slate-700/70 focus:border-emerald-500 rounded-lg pl-3 pr-8 py-2 text-xs text-slate-100 font-mono outline-none cursor-pointer" />
+              <button type="button" tabindex="-1" class="absolute right-2 text-slate-500 pointer-events-none">
+                <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
           </div>
 
           <div class="flex-1 min-w-0">
-            <label class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1 block">Hasta (Opcional)</label>
-            <input type="time" name="bloqueo_hasta[]" value="{{ b.hora_hasta }}" 
-                   class="w-full block bg-slate-950 border border-slate-700/70 focus:border-emerald-500 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none" />
+            <label class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5 flex items-center gap-1.5">
+              <i data-lucide="clock" class="w-3.5 h-3.5 text-slate-500"></i>
+              <span>Hasta (Opcional)</span>
+            </label>
+            <div class="relative flex items-center cursor-pointer" onclick="openPicker(this)">
+              <input type="time" name="bloqueo_hasta[]" value="{{ b.hora_hasta }}" 
+                     class="w-full block bg-slate-950 border border-slate-700/70 focus:border-emerald-500 rounded-lg pl-3 pr-8 py-2 text-xs text-slate-100 font-mono outline-none cursor-pointer" />
+              <button type="button" tabindex="-1" class="absolute right-2 text-slate-500 pointer-events-none">
+                <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
           </div>
 
           <button type="button" onclick="removeDynamicItem(this)" title="Eliminar bloqueo"
@@ -533,18 +586,45 @@
 </template>
 
 <template id="tpl-bloqueo">
-  <div class="row-entry flex flex-col sm:flex-row sm:items-end gap-3 p-3.5 bg-slate-900/80 border border-slate-800 rounded-xl">
+  <div class="row-entry flex flex-col sm:flex-row sm:items-end gap-3 p-3.5 bg-slate-900/80 border border-slate-800 rounded-xl hover:border-slate-700/80 transition-colors">
     <div class="flex-[1.5] min-w-0">
-      <label class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1 block">Fecha</label>
-      <input type="date" name="bloqueo_fecha[]" required class="w-full block bg-slate-950 border border-slate-700/70 focus:border-emerald-500 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none" />
+      <label class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5 flex items-center gap-1.5">
+        <i data-lucide="calendar" class="w-3.5 h-3.5 text-emerald-400"></i>
+        <span>Fecha a Bloquear</span>
+      </label>
+      <div class="relative flex items-center cursor-pointer" onclick="openPicker(this)">
+        <input type="date" name="bloqueo_fecha[]" required 
+               class="w-full block bg-slate-950 border border-slate-700/70 focus:border-emerald-500 rounded-lg pl-3 pr-9 py-2 text-xs text-slate-100 font-mono tracking-tight outline-none cursor-pointer" />
+        <button type="button" tabindex="-1" class="absolute right-2.5 text-slate-400 hover:text-emerald-400 pointer-events-none transition-colors">
+          <i data-lucide="calendar" class="w-4 h-4"></i>
+        </button>
+      </div>
     </div>
     <div class="flex-1 min-w-0">
-      <label class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1 block">Desde (Opcional)</label>
-      <input type="time" name="bloqueo_desde[]" class="w-full block bg-slate-950 border border-slate-700/70 focus:border-emerald-500 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none" />
+      <label class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5 flex items-center gap-1.5">
+        <i data-lucide="clock" class="w-3.5 h-3.5 text-slate-500"></i>
+        <span>Desde (Opcional)</span>
+      </label>
+      <div class="relative flex items-center cursor-pointer" onclick="openPicker(this)">
+        <input type="time" name="bloqueo_desde[]" 
+               class="w-full block bg-slate-950 border border-slate-700/70 focus:border-emerald-500 rounded-lg pl-3 pr-8 py-2 text-xs text-slate-100 font-mono outline-none cursor-pointer" />
+        <button type="button" tabindex="-1" class="absolute right-2 text-slate-500 pointer-events-none">
+          <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+        </button>
+      </div>
     </div>
     <div class="flex-1 min-w-0">
-      <label class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1 block">Hasta (Opcional)</label>
-      <input type="time" name="bloqueo_hasta[]" class="w-full block bg-slate-950 border border-slate-700/70 focus:border-emerald-500 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none" />
+      <label class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5 flex items-center gap-1.5">
+        <i data-lucide="clock" class="w-3.5 h-3.5 text-slate-500"></i>
+        <span>Hasta (Opcional)</span>
+      </label>
+      <div class="relative flex items-center cursor-pointer" onclick="openPicker(this)">
+        <input type="time" name="bloqueo_hasta[]" 
+               class="w-full block bg-slate-950 border border-slate-700/70 focus:border-emerald-500 rounded-lg pl-3 pr-8 py-2 text-xs text-slate-100 font-mono outline-none cursor-pointer" />
+        <button type="button" tabindex="-1" class="absolute right-2 text-slate-500 pointer-events-none">
+          <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+        </button>
+      </div>
     </div>
     <button type="button" onclick="removeDynamicItem(this)" class="text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 border border-rose-500/20 rounded-xl p-2 transition-colors shrink-0 flex items-center justify-center h-9 sm:h-9 w-full sm:w-9">
       <i data-lucide="trash-2" class="w-4 h-4"></i>
@@ -611,6 +691,19 @@
     }
   }
 
+  function openPicker(container) {
+    const input = container.querySelector('input');
+    if (input) {
+      if (typeof input.showPicker === 'function') {
+        try {
+          input.showPicker();
+          return;
+        } catch (err) {}
+      }
+      input.focus();
+    }
+  }
+
   function appendDynamicItem(kind) {
     const tpl = document.getElementById('tpl-' + kind);
     const list = document.getElementById(kind + '-list');
@@ -620,7 +713,12 @@
       lucide.createIcons();
       markChangesPending();
       const first = list.lastElementChild.querySelector('input:not([type=hidden]), select');
-      if (first) first.focus();
+      if (first) {
+        first.focus();
+        if (kind === 'bloqueo' && typeof first.showPicker === 'function') {
+          try { first.showPicker(); } catch (err) {}
+        }
+      }
     }
   }
 
