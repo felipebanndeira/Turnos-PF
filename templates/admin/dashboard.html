@@ -13,51 +13,59 @@
     </div>
   </div>
 
-  <!-- Rediseño de las Tarjetas de Métricas (KPI Cards Modernas) -->
-  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
+  <!-- Rediseño Profesional de las Tarjetas de Métricas (KPI Cards) -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 my-6">
     
     <!-- 1. Turnos Hoy -->
-    <div class="bg-[#0f172a]/70 border border-slate-800/80 rounded-2xl p-4 shadow-sm backdrop-blur-sm hover:border-slate-700 transition">
-      <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-        Turnos Hoy
+    <div class="relative overflow-hidden bg-slate-900/60 hover:bg-slate-900/90 border border-slate-800/80 hover:border-slate-700/80 rounded-2xl p-5 sm:p-6 transition-all duration-200 shadow-lg shadow-black/20 flex flex-col justify-between">
+      <div class="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-3">
+        TURNOS HOY
       </div>
-      <div class="text-3xl font-extrabold tracking-tight text-blue-400 font-mono mt-1 tabular-nums">
+      <div class="text-3xl sm:text-4xl font-extrabold tracking-tight font-mono text-blue-400 tabular-nums">
         {{ agenda_hoy|length }}
       </div>
-      <p class="text-[10px] sm:text-[11px] text-slate-500 mt-1">Citas agendadas hoy</p>
+      <div class="text-[11px] text-slate-500 font-medium mt-2">
+        Agendados para la fecha
+      </div>
     </div>
 
     <!-- 2. Confirmados -->
-    <div class="bg-[#0f172a]/70 border border-slate-800/80 rounded-2xl p-4 shadow-sm backdrop-blur-sm hover:border-slate-700 transition">
-      <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-        Confirmados
+    <div class="relative overflow-hidden bg-slate-900/60 hover:bg-slate-900/90 border border-slate-800/80 hover:border-slate-700/80 rounded-2xl p-5 sm:p-6 transition-all duration-200 shadow-lg shadow-black/20 flex flex-col justify-between">
+      <div class="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-3">
+        CONFIRMADOS
       </div>
-      <div class="text-3xl font-extrabold tracking-tight text-emerald-400 font-mono mt-1 tabular-nums">
+      <div class="text-3xl sm:text-4xl font-extrabold tracking-tight font-mono text-emerald-400 tabular-nums">
         {{ stats.confirmados }}
       </div>
-      <p class="text-[10px] sm:text-[11px] text-slate-500 mt-1">Total activos</p>
+      <div class="text-[11px] text-slate-500 font-medium mt-2">
+        Citas activas verificadas
+      </div>
     </div>
 
     <!-- 3. Pendientes -->
-    <div class="bg-[#0f172a]/70 border border-slate-800/80 rounded-2xl p-4 shadow-sm backdrop-blur-sm hover:border-slate-700 transition">
-      <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-        Turnos Pendientes
+    <div class="relative overflow-hidden bg-slate-900/60 hover:bg-slate-900/90 border border-slate-800/80 hover:border-slate-700/80 rounded-2xl p-5 sm:p-6 transition-all duration-200 shadow-lg shadow-black/20 flex flex-col justify-between">
+      <div class="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-3">
+        PENDIENTES
       </div>
-      <div class="text-3xl font-extrabold tracking-tight text-amber-400 font-mono mt-1 tabular-nums">
+      <div class="text-3xl sm:text-4xl font-extrabold tracking-tight font-mono text-amber-400 tabular-nums">
         {{ stats.pendientes }}
       </div>
-      <p class="text-[10px] sm:text-[11px] text-slate-500 mt-1">Por confirmar</p>
+      <div class="text-[11px] text-slate-500 font-medium mt-2">
+        A la espera de atención
+      </div>
     </div>
 
-    <!-- 4. Clientes Registrados -->
-    <div class="bg-[#0f172a]/70 border border-slate-800/80 rounded-2xl p-4 shadow-sm backdrop-blur-sm hover:border-slate-700 transition">
-      <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-        Clientes
+    <!-- 4. Clientes Totales -->
+    <div class="relative overflow-hidden bg-slate-900/60 hover:bg-slate-900/90 border border-slate-800/80 hover:border-slate-700/80 rounded-2xl p-5 sm:p-6 transition-all duration-200 shadow-lg shadow-black/20 flex flex-col justify-between">
+      <div class="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-3">
+        CLIENTES TOTALES
       </div>
-      <div class="text-3xl font-extrabold tracking-tight text-white font-mono mt-1 tabular-nums">
+      <div class="text-3xl sm:text-4xl font-extrabold tracking-tight font-mono text-white tabular-nums">
         {{ total_clientes }}
       </div>
-      <p class="text-[10px] sm:text-[11px] text-slate-500 mt-1">Base de contactos</p>
+      <div class="text-[11px] text-slate-500 font-medium mt-2">
+        En base de datos
+      </div>
     </div>
 
   </div>

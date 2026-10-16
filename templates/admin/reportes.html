@@ -29,22 +29,58 @@
     <p class="page-subtitle">Estadísticas generales de citas e ingresos</p>
   </div>
 
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-    <div class="card stat-card">
-      <div class="text-3xl font-extrabold font-mono text-white tabular-nums">{{ stats.total }}</div>
-      <div class="text-xs uppercase tracking-wider text-slate-400 font-bold mt-1">Total Histórico</div>
+  <!-- Grid de Métricas / KPIs Profesionales -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 my-6">
+    <!-- 1. Total Histórico -->
+    <div class="relative overflow-hidden bg-slate-900/60 hover:bg-slate-900/90 border border-slate-800/80 hover:border-slate-700/80 rounded-2xl p-5 sm:p-6 transition-all duration-200 shadow-lg shadow-black/20 flex flex-col justify-between">
+      <div class="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-3">
+        TOTAL HISTÓRICO
+      </div>
+      <div class="text-3xl sm:text-4xl font-extrabold tracking-tight font-mono text-white tabular-nums">
+        {{ stats.total }}
+      </div>
+      <div class="text-[11px] text-slate-500 font-medium mt-2">
+        Citas acumuladas
+      </div>
     </div>
-    <div class="card stat-card">
-      <div class="text-3xl font-extrabold font-mono text-emerald-400 tabular-nums">{{ stats.confirmados }}</div>
-      <div class="text-xs uppercase tracking-wider text-slate-400 font-bold mt-1">Confirmados</div>
+
+    <!-- 2. Confirmados -->
+    <div class="relative overflow-hidden bg-slate-900/60 hover:bg-slate-900/90 border border-slate-800/80 hover:border-slate-700/80 rounded-2xl p-5 sm:p-6 transition-all duration-200 shadow-lg shadow-black/20 flex flex-col justify-between">
+      <div class="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-3">
+        CONFIRMADOS
+      </div>
+      <div class="text-3xl sm:text-4xl font-extrabold tracking-tight font-mono text-emerald-400 tabular-nums">
+        {{ stats.confirmados }}
+      </div>
+      <div class="text-[11px] text-slate-500 font-medium mt-2">
+        Atendidos o verificados
+      </div>
     </div>
-    <div class="card stat-card">
-      <div class="text-3xl font-extrabold font-mono text-sky-400 tabular-nums">{{ stats.pendientes }}</div>
-      <div class="text-xs uppercase tracking-wider text-slate-400 font-bold mt-1">Pendientes</div>
+
+    <!-- 3. Pendientes -->
+    <div class="relative overflow-hidden bg-slate-900/60 hover:bg-slate-900/90 border border-slate-800/80 hover:border-slate-700/80 rounded-2xl p-5 sm:p-6 transition-all duration-200 shadow-lg shadow-black/20 flex flex-col justify-between">
+      <div class="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-3">
+        PENDIENTES
+      </div>
+      <div class="text-3xl sm:text-4xl font-extrabold tracking-tight font-mono text-amber-400 tabular-nums">
+        {{ stats.pendientes }}
+      </div>
+      <div class="text-[11px] text-slate-500 font-medium mt-2">
+        A la espera de confirmación
+      </div>
     </div>
-    <div class="card stat-card">
-      <div class="text-3xl font-extrabold font-mono text-rose-400 tabular-nums">{{ stats.cancelados }}</div>
-      <div class="text-xs uppercase tracking-wider text-slate-400 font-bold mt-1">Cancelados</div>
+
+    <!-- 4. Cancelados -->
+    <div class="relative overflow-hidden bg-slate-900/60 hover:bg-slate-900/90 border border-slate-800/80 hover:border-slate-700/80 rounded-2xl p-5 sm:p-6 transition-all duration-200 shadow-lg shadow-black/20 flex flex-col justify-between">
+      <div class="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-3">
+        CANCELADOS
+      </div>
+      <div class="text-3xl sm:text-4xl font-extrabold tracking-tight font-mono text-rose-400 tabular-nums">
+        {{ stats.cancelados }}
+      </div>
+      <div class="text-[11px] text-slate-500 font-medium mt-2">
+        Turnos dados de baja
+      </div>
     </div>
   </div>
 
