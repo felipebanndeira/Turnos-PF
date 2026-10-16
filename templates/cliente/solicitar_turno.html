@@ -1,339 +1,271 @@
-{% extends "base.html" %}
-{% block title %}Pedir turno{% endblock %}
+{% extends "cliente/_cliente_base.html" %}
+{% block title %}Reservar turno{% endblock %}
 
 {% block extra_css %}
 <style>
-/* ── Stepper ───────────────────────────────────────────────── */
-.stepper {
-  display: flex; align-items: center; gap: 0;
-  margin-bottom: 2.5rem;
-}
-.step {
-  display: flex; align-items: center; gap: .5rem;
-  flex: 1;
-}
-.step-num {
-  width: 32px; height: 32px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: .78rem; font-weight: 700;
-  background: var(--bg-input); border: 2px solid var(--border);
-  color: var(--text-dim); flex-shrink: 0;
-  transition: all .25s;
-}
-.step.active   .step-num { background: var(--indigo); border-color: var(--indigo); color: #fff; }
-.step.done     .step-num { background: var(--emerald); border-color: var(--emerald); color: #fff; }
-.step-label { font-size: .8rem; font-weight: 500; color: var(--text-dim); }
-.step.active .step-label, .step.done .step-label { color: var(--text); }
-.step-line { flex: 1; height: 2px; background: var(--border); max-width: 60px; }
-.step-line.done { background: var(--emerald); }
+  /* Stepper segmentado */
+  .prog{margin-bottom:22px}
+  .segs{display:flex;gap:6px}
+  .seg{flex:1;height:4px;border-radius:4px;background:var(--seg);transition:background .35s,box-shadow .35s}
+  .seg.on{background:var(--gold-grad);box-shadow:0 0 8px var(--gold-glow)}
+  .prog-lbl{margin-top:10px;font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
 
-/* ── Servicios grid ────────────────────────────────────────── */
-.service-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px,1fr)); gap: 1rem; }
-.service-card {
-  border: 2px solid var(--border-soft);
-  border-radius: var(--radius); padding: 1.25rem;
-  cursor: pointer; transition: all .18s;
-  background: var(--bg-card);
-  user-select: none;
-}
-.service-card:hover    { border-color: var(--indigo); background: var(--indigo-glow); }
-.service-card.selected { border-color: var(--indigo); background: var(--indigo-glow); box-shadow: 0 0 0 3px var(--indigo-glow); }
-.service-card .svc-name  { font-weight: 600; font-size: .95rem; margin-bottom: .3rem; }
-.service-card .svc-meta  { color: var(--text-muted); font-size: .8rem; display: flex; gap: .75rem; }
+  .step{display:none;animation:fade .35s ease}
+  .step.on{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 
-/* ── Slot grid ──────────────────────────────────────────────── */
-.slot-grid { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1rem; }
-.slot-btn {
-  padding: .45rem 1rem; border-radius: var(--radius-sm);
-  border: 1.5px solid var(--border); background: var(--bg-input);
-  color: var(--text); font-size: .875rem; font-weight: 500;
-  cursor: pointer; transition: all .15s;
-}
-.slot-btn:hover    { border-color: var(--indigo); color: var(--indigo); background: var(--indigo-glow); }
-.slot-btn.selected { border-color: var(--indigo); background: var(--indigo); color: #fff; }
+  /* Servicios */
+  .svcs{display:flex;flex-direction:column;gap:14px}
+  .svc{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px;background:var(--card);border:1px solid rgba(255,255,255,.05);border-radius:var(--r);cursor:pointer;user-select:none;transition:border-color .2s,background .2s,transform .12s}
+  .svc:active{transform:scale(.985)}
+  .svc .n{font-weight:600;font-size:.98rem;color:#fff;line-height:1.3}
+  .svc .d{font-size:.75rem;color:#a3a3a3;margin-top:4px;display:flex;align-items:center;gap:4px}
+  .svc .r{display:flex;align-items:center;gap:8px;flex-shrink:0}
+  .svc .p{font-weight:700;color:#f5c94c;font-size:.98rem;white-space:nowrap}
+  .svc .ck{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:var(--gold-grad);color:#0b0b0c;opacity:0;transform:scale(.5);transition:all .2s}
+  .svc.sel{border-color:var(--gold);background:linear-gradient(135deg,#1c1a14,#17171a);box-shadow:0 0 0 1px var(--gold),0 8px 24px rgba(212,175,55,.08)}
+  .svc.sel .ck{opacity:1;transform:scale(1)}
 
-/* ── Resumen ────────────────────────────────────────────────── */
-.resumen-box {
-  background: var(--bg-input); border-radius: var(--radius-sm);
-  padding: 1rem 1.25rem; margin-top: 1.25rem;
-}
-.resumen-row { display: flex; justify-content: space-between; font-size: .875rem; padding: .3rem 0; }
-.resumen-row span:first-child { color: var(--text-muted); }
-.resumen-row span:last-child  { font-weight: 600; }
+  /* Fecha */
+  .days{display:flex;gap:10px;overflow-x:auto;padding:2px 2px 10px;margin:0 -16px 18px;padding-left:16px;padding-right:16px;scroll-snap-type:x mandatory;scrollbar-width:none}
+  .days::-webkit-scrollbar{display:none}
+  .day{flex:0 0 62px;scroll-snap-align:start;padding:12px 0;border-radius:14px;background:var(--card);border:1px solid rgba(255,255,255,.05);text-align:center;cursor:pointer;transition:all .2s}
+  .day .w{font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+  .day .num{font-size:1.25rem;font-weight:800;margin-top:2px}
+  .day .m{font-size:.65rem;color:var(--muted);text-transform:uppercase}
+  .day.sel{background:var(--gold-grad);border-color:transparent;color:#0b0b0c;box-shadow:0 6px 18px var(--gold-glow)}
+  .day.sel .w,.day.sel .m{color:#3a2e0a}
+  .other-date{display:flex;align-items:center;gap:8px;font-size:.8rem;color:var(--dim);margin:-6px 0 18px}
+  .other-date input{background:var(--card);border:1px solid var(--line);color:#fff;border-radius:10px;padding:8px 10px;font-family:inherit;color-scheme:dark}
 
-.loading-spinner {
-  display: none; align-items: center; gap: .5rem;
-  color: var(--text-muted); font-size: .875rem;
-}
-.loading-spinner.visible { display: flex; }
-.spinner { width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: var(--indigo); border-radius: 50%; animation: spin .6s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
+  .slots{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .slot{padding:13px 0;border-radius:12px;background:var(--card);border:1px solid rgba(255,255,255,.06);color:#fff;font-weight:600;font-size:.92rem;cursor:pointer;transition:all .15s}
+  .slot:active{transform:scale(.96)}
+  .slot.sel{background:var(--gold-grad);color:#0b0b0c;border-color:transparent;box-shadow:0 6px 18px var(--gold-glow)}
+  .empty{grid-column:1/-1;text-align:center;color:var(--muted);font-size:.88rem;padding:22px 0;background:var(--card);border-radius:var(--r);border:1px dashed var(--line)}
+  .spin{grid-column:1/-1;display:flex;justify-content:center;padding:22px 0}
+  .spin i{width:22px;height:22px;border:2px solid var(--line);border-top-color:var(--gold);border-radius:50%;animation:rot .7s linear infinite}
+  @keyframes rot{to{transform:rotate(360deg)}}
 
-.no-slots { color: var(--text-muted); font-size: .875rem; padding: .75rem 0; }
+  /* Resumen */
+  .sum{background:var(--card);border:1px solid rgba(255,255,255,.05);border-radius:var(--r);padding:6px 16px;margin-bottom:20px}
+  .row{display:flex;justify-content:space-between;gap:12px;padding:12px 0;font-size:.88rem;border-bottom:1px solid rgba(255,255,255,.05)}
+  .row:last-child{border-bottom:0}
+  .row span:first-child{color:var(--muted)}
+  .row span:last-child{font-weight:600;text-align:right}
+
+  .senia{background:linear-gradient(135deg,#1c1a14,#161619);border:1px solid rgba(212,175,55,.3);border-radius:var(--r);padding:16px;margin-bottom:20px;font-size:.85rem;color:var(--dim);line-height:1.55}
+  .senia h4{color:var(--gold-2);font-size:.9rem;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+  .senia .datos{background:rgba(0,0,0,.35);border-radius:10px;padding:10px 12px;margin:10px 0;color:#fff;word-break:break-word}
+  .wa{display:flex;align-items:center;justify-content:center;gap:8px;color:#25D366;font-weight:600;font-size:.88rem;padding:14px;border:1px solid rgba(37,211,102,.25);border-radius:14px;margin-top:6px}
+  .hint{font-size:.75rem;color:var(--muted);margin-top:6px}
+
+  /* Bottom bar */
+  .bar{position:fixed;left:0;right:0;bottom:0;z-index:50;background:rgba(0,0,0,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid rgba(255,255,255,.08);padding:14px 16px calc(14px + env(safe-area-inset-bottom))}
+  .bar-in{max-width:448px;margin:0 auto;display:flex;align-items:center;gap:10px}
+  .bar .tot{margin-left:auto;text-align:right;line-height:1.1}
+  .bar .tot small{display:block;font-size:.65rem;letter-spacing:.16em;color:var(--muted);font-weight:600}
+  .bar .tot b{font-size:1.35rem;font-weight:800;color:#fff}
+  .bar .btn-gold{min-width:132px}
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="page-wrapper" style="max-width:760px;">
-  <div class="page-header">
-    <h1 class="page-title">Reservar turno</h1>
-    <p class="page-subtitle">{{ config.nombre }}</p>
+  <div class="prog">
+    <div class="segs"><div class="seg on" id="sg1"></div><div class="seg" id="sg2"></div><div class="seg" id="sg3"></div></div>
+    <div class="prog-lbl" id="prog-lbl">Paso 1 de 3 — Servicios</div>
   </div>
 
-  <!-- Stepper -->
-  <div class="stepper" id="stepper">
-    <div class="step active" id="step-ind-1">
-      <div class="step-num">1</div>
-      <div class="step-label">Servicio</div>
-    </div>
-    <div class="step-line" id="line-1"></div>
-    <div class="step" id="step-ind-2">
-      <div class="step-num">2</div>
-      <div class="step-label">Fecha y hora</div>
-    </div>
-    <div class="step-line" id="line-2"></div>
-    <div class="step" id="step-ind-3">
-      <div class="step-num">3</div>
-      <div class="step-label">Confirmar</div>
-    </div>
-  </div>
-
-  <!-- ── PASO 1: Elegir servicio ── -->
-  <div id="step-1">
-    <div class="card">
-      <h3 class="card-title">¿Qué servicio necesitás?</h3>
-      {% if servicios %}
-        <div class="service-grid">
-          {% for s in servicios %}
-          <div class="service-card" data-id="{{ s.id }}" data-nombre="{{ s.nombre }}" data-duracion="{{ s.duracion_min }}" data-precio="{{ s.precio }}" onclick="selectService(this)">
-            <div class="svc-name">{{ s.nombre }}</div>
-            <div class="svc-meta">
-              <span>⏱ {{ s.duracion_min }} min</span>
-              {% if s.precio %}<span>{{ s.precio | pesos }}</span>{% endif %}
-            </div>
+  <!-- PASO 1 -->
+  <section class="step on" id="step-1">
+    <h2 class="h2">Servicios disponibles</h2>
+    {% if servicios %}
+      <div class="svcs">
+        {% for s in servicios %}
+        <div class="svc" data-id="{{ s.id }}" data-nombre="{{ s.nombre }}" data-duracion="{{ s.duracion_min }}" data-precio="{{ s.precio or 0 }}" onclick="selectService(this)">
+          <div style="min-width:0">
+            <div class="n">{{ s.nombre }}</div>
+            {% if s.duracion_min %}<div class="d"><i data-lucide="clock" style="width:12px"></i>{{ s.duracion_min }} min</div>{% endif %}
           </div>
-          {% endfor %}
-        </div>
-      {% else %}
-        <p class="text-muted">El negocio aún no tiene servicios configurados.</p>
-      {% endif %}
-    </div>
-  </div>
-
-  <!-- ── PASO 2: Fecha y hora ── -->
-  <div id="step-2" style="display:none;">
-    <div class="card">
-      <h3 class="card-title" id="step2-title">Elegí fecha y horario</h3>
-      <div class="form-group">
-        <label class="form-label">Fecha</label>
-        <input type="date" id="fecha-input" class="form-control" style="max-width:240px;" />
-      </div>
-
-      <div style="display:flex; align-items:center; gap:1rem; margin-bottom:.5rem;">
-        <label class="form-label" style="margin:0;">Horarios disponibles</label>
-        <div class="loading-spinner" id="loading">
-          <div class="spinner"></div> Cargando...
-        </div>
-      </div>
-      <div class="slot-grid" id="slot-grid"></div>
-      <p class="no-slots" id="no-slots" style="display:none;">No hay horarios disponibles para esta fecha.</p>
-
-      <div style="margin-top:1.25rem; display:flex; gap:.75rem;">
-        <button type="button" class="btn btn-ghost" onclick="goStep(1)">← Atrás</button>
-        <button type="button" class="btn btn-primary" id="btn-step3" disabled onclick="goStep(3)">Continuar →</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── PASO 3: Confirmar ── -->
-  <div id="step-3" style="display:none;">
-    <div class="card">
-      <h3 class="card-title">Confirmá tu turno</h3>
-      <div class="resumen-box">
-        <div class="resumen-row"><span>Servicio</span>    <span id="res-servicio">—</span></div>
-        <div class="resumen-row"><span>Fecha</span>       <span id="res-fecha">—</span></div>
-        <div class="resumen-row"><span>Horario</span>     <span id="res-hora">—</span></div>
-        <div class="resumen-row"><span>Duración</span>    <span id="res-duracion">—</span></div>
-        <div class="resumen-row"><span>Precio</span>      <span id="res-precio">—</span></div>
-      </div>
-
-      {% if config.requiere_senia %}
-      <div class="animate-up" style="background:rgba(255,255,255,0.03); border:1px solid var(--border); padding:1.25rem; border-radius:var(--radius); margin-top:1.5rem; animation-delay: 0.1s;">
-        <h4 style="color:var(--text); font-size:.9rem; margin-bottom:.75rem; display:flex; align-items:center; gap:.5rem; font-weight:500;">
-          <i data-lucide="info" style="width:16px;"></i> Requiere pago previo
-        </h4>
-        <p style="font-size:.85rem; color:var(--text-muted); margin-bottom:.75rem;">
-          Para que tu turno quede <strong>confirmado</strong>, debés transferir el <strong>{{ config.porcentaje_senia }}%</strong> del valor. 
-          Una vez transferido, enviá el comprobante por WhatsApp haciendo clic en el botón debajo.
-        </p>
-        
-        <div style="font-family:'Inter', sans-serif; background:rgba(0,0,0,0.5); padding:.75rem; border-radius:var(--radius); font-size:.85rem; border: 1px solid var(--border); margin-bottom: 1rem;">
-          <div style="margin-bottom: .25rem; color: var(--text-muted);">Titular: <span style="color:var(--accent);">{{ config.titular_pago }}</span></div>
-          <div>{{ config.datos_pago }}</div>
-        </div>
-
-        {% set whatsapp_num = config.whatsapp_pago | default('3755802727') %}
-        <a href="https://wa.me/{{ whatsapp_num }}?text=Hola,%20adjunto%20el%20comprobante%20de%20mi%20turno." target="_blank" class="btn btn-ghost" style="width: 100%; border-color:#2e6f40; color:#4ade80;">
-          <i data-lucide="message-circle" style="width:16px;"></i> Enviar comprobante al {{ whatsapp_num }}
-        </a>
-      </div>
-      {% endif %}
-
-      <form method="POST" action="{{ url_for('cliente.solicitar_turno', url_id=url_id) }}" id="confirm-form" style="margin-top:1.5rem;">
-        <div class="animate-up" style="margin-bottom: 1.5rem; background: var(--bg-input); padding: 1.25rem; border-radius: var(--radius-sm); border: 1px solid var(--border);">
-          <h4 style="margin-bottom: 1rem; font-size: 0.95rem; color:var(--text); font-weight:600;">Información del cliente</h4>
-          <div class="form-group">
-            <label class="form-label">Nombre completo</label>
-            <input type="text" name="cliente_nombre" class="form-control" placeholder="Ej: Juan Pérez" value="{{ cliente.nombre if cliente else '' }}" required />
-          </div>
-          <div class="form-group" style="margin-bottom: 0;">
-            <label class="form-label">Teléfono celular</label>
-            <input type="tel" name="cliente_telefono" class="form-control" placeholder="Ej: 3755 123456" value="{{ cliente.telefono if cliente else '' }}" required />
-            <small class="text-muted" style="margin-top:0.25rem; display:block;">Usarás este número para consultar o cancelar tu reserva en "Mis Reservas".</small>
+          <div class="r">
+            <span class="p">{% if s.precio %}{{ s.precio | pesos }}{% else %}A convenir{% endif %}</span>
+            <span class="ck"><i data-lucide="check" style="width:13px;stroke-width:3"></i></span>
           </div>
         </div>
-        
-        <input type="hidden" name="servicio_id"  id="h-servicio-id" />
-        <input type="hidden" name="fecha"         id="h-fecha" />
-        <input type="hidden" name="hora_inicio"   id="h-hora" />
-        
-        <div style="display:flex; gap:.75rem; margin-bottom: 2rem;">
-          <button type="button" class="btn btn-ghost" onclick="goStep(2)">← Atrás</button>
-          <button type="submit" class="btn btn-success" style="flex:1;">✓ Confirmar turno</button>
-        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty">El negocio aún no tiene servicios configurados.</div>
+    {% endif %}
+  </section>
 
-        {% set wa_contacto = config.whatsapp_pago | default('3755283261') %}
-        <div style="text-align: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border);">
-          <p style="font-size: 0.9rem; color: var(--text-muted);">
-            ¿Preferís agendar por mensaje o tenés dudas?<br>
-            <a href="https://wa.me/{{ wa_contacto }}?text=Hola,%20tengo%20una%20consulta%20sobre%20los%20turnos" target="_blank" style="color: #25D366; text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 0.35rem; margin-top: 0.5rem;">
-              <i data-lucide="message-circle" style="width: 16px;"></i> Escribinos al WhatsApp
-            </a>
-          </p>
-        </div>
-      </form>
+  <!-- PASO 2 -->
+  <section class="step" id="step-2">
+    <h2 class="h2">Elegí día y horario</h2>
+    <div class="days" id="days"></div>
+    <label class="other-date"><i data-lucide="calendar" style="width:14px"></i> Otra fecha:
+      <input type="date" id="fecha-input" />
+    </label>
+    <div class="lbl">Horarios disponibles</div>
+    <div class="slots" id="slots"><div class="empty">Elegí una fecha.</div></div>
+  </section>
+
+  <!-- PASO 3 -->
+  <section class="step" id="step-3">
+    <h2 class="h2">Tus datos</h2>
+    <div class="sum">
+      <div class="row"><span>Servicio</span><span id="res-servicio">—</span></div>
+      <div class="row"><span>Fecha</span><span id="res-fecha">—</span></div>
+      <div class="row"><span>Horario</span><span id="res-hora">—</span></div>
+      <div class="row"><span>Duración</span><span id="res-duracion">—</span></div>
     </div>
-  </div>
 
+    {% set wa = (config.whatsapp_pago or '') if config else '' %}
+    {% if config.requiere_senia %}
+    <div class="senia">
+      <h4><i data-lucide="shield-check" style="width:16px"></i> Requiere seña del {{ config.porcentaje_senia }}%</h4>
+      Para confirmar tu turno transferí la seña y enviá el comprobante por WhatsApp.
+      <div class="datos">
+        {% if config.titular_pago %}<div style="color:var(--muted);font-size:.78rem">Titular: <span style="color:var(--gold-2)">{{ config.titular_pago }}</span></div>{% endif %}
+        {{ config.datos_pago }}
+      </div>
+      {% if wa %}<a class="wa" target="_blank" href="https://wa.me/{{ wa }}?text=Hola,%20adjunto%20el%20comprobante%20de%20mi%20turno."><i data-lucide="message-circle" style="width:16px"></i> Enviar comprobante</a>{% endif %}
+    </div>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('cliente.solicitar_turno', url_id=url_id) }}" id="confirm-form">
+      <div class="fg">
+        <label class="lbl">Nombre</label>
+        <input class="inp" type="text" name="cliente_nombre" id="in-nombre" placeholder="Ej: Juan Pérez" value="{{ cliente.nombre if cliente else '' }}" required autocomplete="name" />
+      </div>
+      <div class="fg">
+        <label class="lbl">Teléfono</label>
+        <input class="inp" type="tel" name="cliente_telefono" id="in-tel" placeholder="Ej: 3755 123456" value="{{ cliente.telefono if cliente else '' }}" required autocomplete="tel" inputmode="tel" />
+        <div class="hint">Con este número podés ver o cancelar tu turno en "Mis Turnos".</div>
+      </div>
+      <input type="hidden" name="servicio_id" id="h-servicio-id" />
+      <input type="hidden" name="fecha" id="h-fecha" />
+      <input type="hidden" name="hora_inicio" id="h-hora" />
+    </form>
+
+    {% if wa %}
+    <a class="wa" target="_blank" href="https://wa.me/{{ wa }}?text=Hola,%20tengo%20una%20consulta%20sobre%20los%20turnos" style="border:0;margin-top:14px">
+      <i data-lucide="message-circle" style="width:16px"></i> ¿Dudas? Escribinos al WhatsApp
+    </a>
+    {% endif %}
+  </section>
+{% endblock %}
+
+{% block bottom %}
+<div class="bar">
+  <div class="bar-in">
+    <button type="button" class="btn-out" id="btn-prev" style="display:none" onclick="prev()"><i data-lucide="chevron-left" style="width:18px"></i></button>
+    <button type="button" class="btn-gold" id="btn-next" disabled onclick="next()">Siguiente <i data-lucide="chevron-right" style="width:18px"></i></button>
+    <div class="tot"><small>TOTAL</small><b id="total">$0</b></div>
+  </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-  // ── Estado ─────────────────────────────────────────────────────────────────
-  const state = { servicioId: null, servicioNombre: '', duracion: 0, precio: 0, fecha: '', hora: '' };
+  const S = { step:1, id:null, nombre:'', dur:0, precio:0, fecha:'', hora:'' };
+  const LBL = {1:'Servicios', 2:'Fecha y hora', 3:'Confirmación'};
+  const $ = id => document.getElementById(id);
+  const fmt = n => '$' + Math.round(Number(n)||0).toLocaleString('es-AR');
+  const iso = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 
-  // ── Stepper ────────────────────────────────────────────────────────────────
-  function goStep(n) {
-    [1,2,3].forEach(i => {
-      document.getElementById('step-' + i).style.display = i === n ? 'block' : 'none';
-      const ind = document.getElementById('step-ind-' + i);
-      ind.className = 'step ' + (i < n ? 'done' : i === n ? 'active' : '');
-    });
-    [1,2].forEach(i => {
-      const line = document.getElementById('line-' + i);
-      if (line) line.className = 'step-line ' + (i < n ? 'done' : '');
-    });
-    window.scrollTo({top: 0, behavior:'smooth'});
+  function canNext(){
+    if (S.step===1) return !!S.id;
+    if (S.step===2) return !!S.hora;
+    return true;
+  }
+  function render(){
+    [1,2,3].forEach(i=>{ $('step-'+i).classList.toggle('on', i===S.step); $('sg'+i).classList.toggle('on', i<=S.step); });
+    $('prog-lbl').textContent = `Paso ${S.step} de 3 — ${LBL[S.step]}`;
+    $('btn-prev').style.display = S.step>1 ? 'inline-flex' : 'none';
+    const b = $('btn-next');
+    b.innerHTML = S.step===3 ? 'Confirmar <i data-lucide="check" style="width:18px"></i>' : 'Siguiente <i data-lucide="chevron-right" style="width:18px"></i>';
+    b.disabled = !canNext();
+    $('total').textContent = fmt(S.precio);
+    lucide.createIcons({attrs:{'stroke-width':1.75}});
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+  function next(){
+    if (!canNext()) return;
+    if (S.step===3){
+      const f = $('confirm-form');
+      if (!f.reportValidity()) return;
+      $('btn-next').disabled = true;
+      f.submit(); return;
+    }
+    S.step++;
+    if (S.step===2 && !S.fecha) pickDate(iso(new Date()));
+    if (S.step===3) fillSummary();
+    render();
+  }
+  function prev(){ if (S.step>1){ S.step--; render(); } }
+
+  function selectService(el){
+    document.querySelectorAll('.svc').forEach(c=>c.classList.remove('sel'));
+    el.classList.add('sel');
+    S.id = el.dataset.id; S.nombre = el.dataset.nombre; S.dur = el.dataset.duracion; S.precio = parseFloat(el.dataset.precio)||0;
+    S.hora = '';
+    render();
   }
 
-  // ── Seleccionar servicio ───────────────────────────────────────────────────
-  function selectService(el) {
-    document.querySelectorAll('.service-card').forEach(c => c.classList.remove('selected'));
-    el.classList.add('selected');
-    state.servicioId     = el.dataset.id;
-    state.servicioNombre = el.dataset.nombre;
-    state.duracion       = el.dataset.duracion;
-    state.precio         = el.dataset.precio;
-    document.getElementById('step2-title').textContent = 'Fecha y horario — ' + state.servicioNombre;
+  // Días (próximos 14)
+  (function buildDays(){
+    const box = $('days'), today = new Date();
+    const W = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'], M = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    for (let i=0;i<14;i++){
+      const d = new Date(today); d.setDate(today.getDate()+i);
+      const el = document.createElement('div');
+      el.className='day'; el.dataset.f = iso(d);
+      el.innerHTML = `<div class="w">${i===0?'Hoy':W[d.getDay()]}</div><div class="num">${d.getDate()}</div><div class="m">${M[d.getMonth()]}</div>`;
+      el.onclick = ()=>pickDate(el.dataset.f);
+      box.appendChild(el);
+    }
+    $('fecha-input').min = iso(today);
+    $('fecha-input').addEventListener('change', e=>{ if (e.target.value) pickDate(e.target.value); });
+  })();
 
-    // Poner fecha mínima hoy
-    const today = new Date().toISOString().split('T')[0];
-    const fi = document.getElementById('fecha-input');
-    fi.min = today;
-    if (!fi.value || fi.value < today) fi.value = today;
-
-    goStep(2);
+  function pickDate(f){
+    S.fecha = f; S.hora = '';
+    document.querySelectorAll('.day').forEach(d=>d.classList.toggle('sel', d.dataset.f===f));
+    const sel = document.querySelector('.day.sel'); if (sel) sel.scrollIntoView({inline:'center', block:'nearest', behavior:'smooth'});
+    $('fecha-input').value = f;
+    $('btn-next').disabled = true;
     fetchSlots();
   }
 
-  // ── Cambio de fecha ────────────────────────────────────────────────────────
-  document.getElementById('fecha-input').addEventListener('change', fetchSlots);
-
-  // ── Fetch horarios (AJAX) ──────────────────────────────────────────────────
-  function fetchSlots() {
-    const fecha = document.getElementById('fecha-input').value;
-    if (!fecha || !state.servicioId) return;
-    state.fecha = fecha;
-    state.hora  = '';
-    document.getElementById('btn-step3').disabled = true;
-
-    const grid    = document.getElementById('slot-grid');
-    const noSlots = document.getElementById('no-slots');
-    const loading = document.getElementById('loading');
-
-    grid.innerHTML = '';
-    noSlots.style.display = 'none';
-    loading.classList.add('visible');
-
-    fetch(`/b/{{ url_id }}/horarios?fecha=${fecha}&servicio_id=${state.servicioId}`)
-      .then(r => r.json())
-      .then(data => {
-        loading.classList.remove('visible');
-        if (!data.slots || data.slots.length === 0) {
-          noSlots.style.display = 'block';
-          return;
-        }
-        data.slots.forEach(slot => {
-          const btn = document.createElement('button');
-          btn.type      = 'button';
-          btn.className = 'slot-btn';
-          btn.textContent = slot;
-          btn.onclick = () => selectSlot(btn, slot);
-          grid.appendChild(btn);
+  function fetchSlots(){
+    const box = $('slots');
+    if (!S.fecha || !S.id) return;
+    box.innerHTML = '<div class="spin"><i></i></div>';
+    fetch(`/b/{{ url_id }}/horarios?fecha=${S.fecha}&servicio_id=${S.id}`)
+      .then(r=>r.json())
+      .then(data=>{
+        box.innerHTML = '';
+        if (!data.slots || !data.slots.length){ box.innerHTML = '<div class="empty">No hay horarios para este día.</div>'; return; }
+        data.slots.forEach(h=>{
+          const b = document.createElement('button');
+          b.type='button'; b.className='slot'; b.textContent=h;
+          b.onclick = ()=>{ document.querySelectorAll('.slot').forEach(x=>x.classList.remove('sel')); b.classList.add('sel'); S.hora=h; $('btn-next').disabled=false; };
+          box.appendChild(b);
         });
       })
-      .catch(() => {
-        loading.classList.remove('visible');
-        noSlots.style.display = 'block';
-      });
+      .catch(()=>{ box.innerHTML = '<div class="empty">No se pudieron cargar los horarios.</div>'; });
   }
 
-  // ── Seleccionar horario ────────────────────────────────────────────────────
-  function selectSlot(btn, hora) {
-    document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('selected'));
-    btn.classList.add('selected');
-    state.hora = hora;
-    document.getElementById('btn-step3').disabled = false;
+  function fillSummary(){
+    const d = new Date(S.fecha+'T00:00:00');
+    $('res-servicio').textContent = S.nombre;
+    $('res-fecha').textContent = d.toLocaleDateString('es-AR',{weekday:'long', day:'numeric', month:'long'});
+    $('res-hora').textContent = S.hora + ' hs';
+    $('res-duracion').textContent = S.dur ? S.dur+' min' : '—';
+    $('h-servicio-id').value = S.id; $('h-fecha').value = S.fecha; $('h-hora').value = S.hora;
   }
 
-  // ── Ir al paso 3 ──────────────────────────────────────────────────────────
-  const origGoStep = goStep;
-  function goStep(n) {
-    if (n === 3) {
-      // Rellenar resumen
-      const fechaObj = new Date(state.fecha + 'T00:00:00');
-      const opciones = { weekday:'long', year:'numeric', month:'long', day:'numeric' };
-      document.getElementById('res-servicio').textContent = state.servicioNombre;
-      document.getElementById('res-fecha').textContent    = fechaObj.toLocaleDateString('es-AR', opciones);
-      document.getElementById('res-hora').textContent     = state.hora;
-      document.getElementById('res-duracion').textContent = state.duracion + ' min';
-      document.getElementById('res-precio').textContent   = state.precio ? '$' + Number(state.precio).toLocaleString('es-AR') : 'A convenir';
-      // Campos hidden
-      document.getElementById('h-servicio-id').value = state.servicioId;
-      document.getElementById('h-fecha').value        = state.fecha;
-      document.getElementById('h-hora').value         = state.hora;
-    }
-    [1,2,3].forEach(i => {
-      document.getElementById('step-' + i).style.display = i === n ? 'block' : 'none';
-      const ind = document.getElementById('step-ind-' + i);
-      ind.className = 'step ' + (i < n ? 'done' : i === n ? 'active' : '');
-    });
-    [1,2].forEach(i => {
-      const line = document.getElementById('line-' + i);
-      if (line) line.className = 'step-line ' + (i < n ? 'done' : '');
-    });
-    window.scrollTo({top: 0, behavior:'smooth'});
-  }
+  render();
 </script>
 {% endblock %}

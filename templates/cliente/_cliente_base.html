@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0b0c" />
+  <title>{% block title %}Turnos{% endblock %} — {{ config.nombre if config else 'Turnify' }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root{
+      --bg:#0b0b0c; --card:#161619; --card-2:#1c1c20; --line:#2a2a2e; --seg:#28282b;
+      --text:#f5f5f5; --muted:#888888; --dim:#a3a3a3;
+      --gold:#d4af37; --gold-2:#f5d77f; --gold-grad:linear-gradient(135deg,#d4a341,#f5d77f);
+      --gold-glow:rgba(212,175,55,.25); --danger:#ef4444; --ok:#22c55e;
+      --r:16px; --r-sm:12px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+    html,body{background:var(--bg)}
+    body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+    a{color:inherit;text-decoration:none}
+    button{font-family:inherit}
+    .app{max-width:448px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;position:relative}
+
+    /* Header */
+    .hdr{position:sticky;top:0;z-index:40;background:rgba(11,11,12,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,.05);padding-top:env(safe-area-inset-top)}
+    .brand{display:flex;align-items:center;justify-content:center;gap:10px;padding:16px 16px 10px}
+    .brand img{width:36px;height:36px;border-radius:10px;object-fit:cover;border:1px solid var(--line)}
+    .brand .ph{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:var(--card);border:1px solid var(--line);color:var(--gold)}
+    .brand span{font-weight:800;font-size:.95rem;letter-spacing:.18em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70vw}
+    .tabs{display:flex;justify-content:center;gap:32px;padding:0 16px}
+    .tab{position:relative;padding:10px 2px 12px;font-size:.88rem;font-weight:600;color:var(--muted);transition:color .2s}
+    .tab.on{color:#fff}
+    .tab.on::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;border-radius:2px;background:var(--gold-grad);box-shadow:0 0 10px var(--gold-glow)}
+
+    main{flex:1;padding:20px 16px 140px}
+    .h2{font-size:1.25rem;font-weight:700;color:#fff;letter-spacing:-.01em;margin-bottom:14px}
+    .sub{font-size:.85rem;color:var(--muted);margin-bottom:16px}
+
+    /* Flash */
+    .flash{padding:12px 14px;border-radius:var(--r-sm);font-size:.85rem;margin-bottom:14px;border:1px solid var(--line);background:var(--card)}
+    .flash.danger{border-color:rgba(239,68,68,.4);color:#fca5a5}
+    .flash.success{border-color:rgba(34,197,94,.4);color:#86efac}
+
+    /* Inputs */
+    .lbl{display:block;font-size:.72rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin:0 0 8px}
+    .inp{width:100%;padding:14px 16px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-sm);color:#fff;font-size:1rem;font-family:inherit;transition:border-color .2s,box-shadow .2s}
+    .inp:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-glow)}
+    .fg{margin-bottom:16px}
+
+    .btn-gold{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:14px;padding:14px 22px;background:var(--gold-grad);color:#0b0b0c;font-weight:800;font-size:.95rem;cursor:pointer;transition:transform .15s,box-shadow .2s,opacity .2s;box-shadow:0 6px 20px var(--gold-glow)}
+    .btn-gold:active{transform:scale(.97)}
+    .btn-gold:disabled{opacity:.35;box-shadow:none;cursor:not-allowed}
+    .btn-out{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);border-radius:14px;padding:13px 16px;background:transparent;color:#fff;font-weight:600;font-size:.9rem;cursor:pointer}
+    .btn-out:active{transform:scale(.97)}
+
+    .foot{text-align:center;color:#555;font-size:.75rem;padding:28px 0 0}
+    .foot a{color:#777;border-bottom:1px solid #333}
+  </style>
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+<div class="app">
+  <header class="hdr">
+    <a class="brand" href="{{ url_for('cliente.solicitar_turno', url_id=url_id) }}">
+      {% if config and config.logo_url %}
+        <img src="{{ config.logo_url }}" alt="Logo" />
+      {% else %}
+        <div class="ph"><i data-lucide="scissors" style="width:18px"></i></div>
+      {% endif %}
+      <span>{{ config.nombre if config else 'Turnify' }}</span>
+    </a>
+    <nav class="tabs">
+      <a class="tab {% if request.endpoint == 'cliente.solicitar_turno' %}on{% endif %}" href="{{ url_for('cliente.solicitar_turno', url_id=url_id) }}">Turnos</a>
+      <a class="tab {% if request.endpoint == 'cliente.mis_turnos' %}on{% endif %}" href="{{ url_for('cliente.mis_turnos', url_id=url_id) }}">Mis Turnos</a>
+    </nav>
+  </header>
+
+  <main>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+    <div class="foot">Reservas con <a href="/">Turnify</a></div>
+  </main>
+
+  {% block bottom %}{% endblock %}
+</div>
+{% block extra_js %}{% endblock %}
+<script>lucide.createIcons({attrs:{'stroke-width':1.75}});</script>
+</body>
+</html>
