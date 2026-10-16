@@ -109,6 +109,14 @@ def upsert_cliente(cliente: dict) -> None:
     db = get_db()
     db.collection("clientes").document(cliente["id"]).set(cliente)
 
+def delete_cliente(cliente_id: str, negocio_id: str) -> bool:
+    db = get_db()
+    doc = db.collection("clientes").document(cliente_id).get()
+    if doc.exists and doc.to_dict().get("negocio_id") == negocio_id:
+        db.collection("clientes").document(cliente_id).delete()
+        return True
+    return False
+
 
 # ─── Turnos ──────────────────────────────────────────────────────────────────
 

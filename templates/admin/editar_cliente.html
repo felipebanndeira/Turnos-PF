@@ -1,57 +1,77 @@
 {% extends "base.html" %}
-{% block title %}Editar Cliente{% endblock %}
+{% block title %}Editar Cliente — Admin{% endblock %}
 
 {% block content %}
-<div class="page-wrapper" style="max-width:600px;">
+<div class="max-w-2xl mx-auto px-4 sm:px-6 py-8 pb-28 sm:pb-32">
   
-  <div style="margin-bottom: 1.5rem;">
-    <a href="{{ url_for('admin.clientes') }}" class="btn btn-ghost btn-sm">← Volver a clientes</a>
+  <div class="mb-6">
+    <a href="{{ url_for('admin.clientes') }}" class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-white transition">
+      <i data-lucide="arrow-left" class="w-4 h-4"></i>
+      <span>Volver a Clientes</span>
+    </a>
   </div>
 
-  <div class="card">
-    <h2 class="card-title">Editar Cliente</h2>
+  <!-- Tarjeta Principal de Edición -->
+  <div class="bg-[#0f172a]/70 border border-slate-800/80 rounded-2xl p-6 sm:p-8 shadow-xl backdrop-blur-sm mb-6">
+    <div class="flex items-center justify-between pb-4 mb-6 border-b border-slate-800">
+      <div>
+        <h1 class="text-xl sm:text-2xl font-extrabold text-white tracking-tight">Editar Cliente</h1>
+        <p class="text-xs text-slate-400 mt-0.5">Modificación de datos de contacto y estado del perfil.</p>
+      </div>
+      <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border
+        {% if cliente.activo %}bg-emerald-500/10 text-emerald-400 border-emerald-500/25{% else %}bg-slate-800 text-slate-400 border-slate-700{% endif %}">
+        {{ 'Activo' if cliente.activo else 'Inactivo' }}
+      </span>
+    </div>
 
-    <form method="POST" action="{{ url_for('admin.editar_cliente', cliente_id=cliente.id) }}">
-      <div class="form-group">
-        <label class="form-label">Nombre completo</label>
-        <input type="text" name="nombre" class="form-control" value="{{ cliente.nombre }}" required />
+    <form method="POST" action="{{ url_for('admin.editar_cliente', cliente_id=cliente.id) }}" class="space-y-4">
+      <div>
+        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Nombre Completo <span class="text-blue-400">*</span></label>
+        <input type="text" name="nombre" class="w-full bg-slate-950 border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:border-blue-500 transition" value="{{ cliente.nombre or '' }}" required />
       </div>
       
-      <div class="form-group">
-        <label class="form-label">Email</label>
-        <input type="email" name="email" class="form-control" value="{{ cliente.email }}" required />
-      </div>
-      
-      <div class="form-group">
-        <label class="form-label">Teléfono</label>
-        <input type="text" name="telefono" class="form-control" value="{{ cliente.telefono }}" required />
+      <div>
+        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Teléfono / WhatsApp <span class="text-blue-400">*</span></label>
+        <input type="text" name="telefono" class="w-full bg-slate-950 border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm font-mono text-white placeholder-slate-500 outline-none focus:border-blue-500 transition" value="{{ cliente.telefono or '' }}" required />
       </div>
 
-      <div class="form-group" style="margin-top:1.5rem;">
-        <label style="display:flex; align-items:center; gap:.5rem; cursor:pointer;">
-          <input type="checkbox" name="activo" value="1" {% if cliente.activo %}checked{% endif %} style="width:18px; height:18px; accent-color:var(--indigo);" />
-          <span style="font-weight:500;">Cuenta Activa</span>
+      <div>
+        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Correo Electrónico (Opcional)</label>
+        <input type="email" name="email" class="w-full bg-slate-950 border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:border-blue-500 transition" value="{{ cliente.email or '' }}" placeholder="ejemplo@correo.com" />
+      </div>
+
+      <div class="pt-2">
+        <label class="flex items-center gap-2.5 cursor-pointer p-3 rounded-xl bg-slate-950/60 border border-slate-800 hover:border-slate-700 transition">
+          <input type="checkbox" name="activo" value="1" {% if cliente.activo %}checked{% endif %} class="w-4 h-4 rounded bg-slate-900 border-slate-700 text-blue-600 focus:ring-0 cursor-pointer" />
+          <div>
+            <span class="text-xs font-bold text-white block">Cliente Activo</span>
+            <span class="text-[11px] text-slate-500 block">Indica si el cliente se encuentra habilitado para operar.</span>
+          </div>
         </label>
-        <p style="font-size:.8rem; color:var(--text-muted); margin-top:.25rem; margin-left:1.75rem;">
-          Si desmarcás esta opción, el cliente no podrá iniciar sesión en el sistema.
-        </p>
       </div>
 
-      <div class="divider"></div>
-
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <button type="submit" class="btn btn-primary">Guardar cambios</button>
+      <div class="pt-4 border-t border-slate-800 flex justify-end">
+        <button type="submit" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-bold shadow-lg shadow-blue-500/20 transition flex items-center gap-1.5">
+          <i data-lucide="check" class="w-4 h-4"></i>
+          <span>Guardar Cambios</span>
+        </button>
       </div>
     </form>
   </div>
 
-  <div class="card mt-3" style="border-color:var(--red-glow);">
-    <h3 class="card-title" style="color:var(--red); font-size:1rem;">Zona de Peligro</h3>
-    <p style="font-size:.85rem; color:var(--text-muted); margin-bottom:1rem;">
-      Eliminar un cliente borrará su acceso de forma permanente, aunque sus turnos pasados quedarán en el historial como referencia.
+  <!-- Zona de Peligro: Eliminar Cliente -->
+  <div class="bg-rose-950/10 border border-rose-500/20 rounded-2xl p-5 sm:p-6 shadow-sm">
+    <h3 class="text-sm font-bold text-rose-400 mb-1 flex items-center gap-1.5">
+      <i data-lucide="alert-triangle" class="w-4 h-4 stroke-[1.5]"></i>
+      <span>Zona de Peligro</span>
+    </h3>
+    <p class="text-xs text-slate-400 mb-4 leading-relaxed">
+      Eliminar un cliente borrará su ficha de la base de datos de forma permanente. Los turnos históricos ya asentados se conservarán para auditoría contable.
     </p>
-    <form method="POST" action="{{ url_for('admin.eliminar_cliente', cliente_id=cliente.id) }}" onsubmit="return confirm('¿Estás COMPLETAMENTE seguro de eliminar este cliente?');">
-      <button type="submit" class="btn btn-danger btn-sm">Eliminar cliente</button>
+    <form method="POST" action="{{ url_for('admin.eliminar_cliente', cliente_id=cliente.id) }}" onsubmit="return confirm('¿Estás COMPLETAMENTE seguro de eliminar este cliente? Esta acción no se puede deshacer.');">
+      <button type="submit" class="px-4 py-2 rounded-xl bg-rose-600/15 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/30 text-xs font-bold transition">
+        Eliminar Cliente
+      </button>
     </form>
   </div>
 

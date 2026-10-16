@@ -8,7 +8,7 @@ from core.auth import require_admin
 from core.persistence import (
     load_turnos, get_turno_by_id, upsert_turno,
     load_config, save_config, load_clientes,
-    get_cliente_by_id, upsert_cliente, load_cierres_caja
+    get_cliente_by_id, upsert_cliente, delete_cliente, load_cierres_caja
 )
 from core.turnos_service import (
     get_agenda, confirmar_turno, cancelar_turno, reprogramar_turno,
@@ -202,11 +202,15 @@ def editar_cliente(cliente_id):
         
     if request.method == "POST":
         nombre = request.form.get("nombre", "").strip()
+        email = request.form.get("email", "").strip()
         telefono = request.form.get("telefono", "").strip()
+        activo = request.form.get("activo") == "1"
         
         if nombre:
             cliente["nombre"] = nombre
+            cliente["email"] = email
             cliente["telefono"] = telefono
+            cliente["activo"] = activo
             upsert_cliente(cliente)
             flash("Cliente actualizado correctamente.", "success")
             return redirect(url_for("admin.clientes"))
@@ -214,6 +218,17 @@ def editar_cliente(cliente_id):
             flash("El nombre es obligatorio.", "warning")
             
     return render_template("admin/editar_cliente.html", config=cfg, cliente=cliente)
+
+@admin_bp.route("/clientes/<cliente_id>/eliminar", methods=["POST"])
+@require_admin
+def eliminar_cliente(cliente_id):
+    nid = session["negocio_id"]
+    ok = delete_cliente(cliente_id, nid)
+    if ok:
+        flash("Cliente eliminado correctamente.", "success")
+    else:
+        flash("No se pudo eliminar el cliente o no fue encontrado.", "danger")
+    return redirect(url_for("admin.clientes"))
 
 @admin_bp.route("/configuracion", methods=["GET", "POST"])
 @require_admin
