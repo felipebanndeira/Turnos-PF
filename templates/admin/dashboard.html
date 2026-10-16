@@ -1,116 +1,186 @@
 {% extends "base.html" %}
-{% block title %}Admin — Dashboard{% endblock %}
+{% block title %}Panel de Control — Admin{% endblock %}
 
 {% block content %}
-<div class="page-wrapper">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 pb-28 sm:pb-32">
   
-  <div class="page-header animate-up" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
-    <div>
-      <h1 class="page-title">Panel de Control</h1>
-      <p class="page-subtitle">{{ config.nombre }}</p>
-    </div>
-    <div style="font-size:.9rem; color:var(--text-muted);">
-      Hoy: <strong style="color:var(--text);">{{ hoy | fecha_es }}</strong>
-    </div>
-  </div>
-
-  <!-- Stats rápidas -->
-  <div class="grid grid-4 animate-up" style="margin-bottom: 2rem; animation-delay: 0.1s;">
-    <div class="card stat-card">
-      <div class="stat-value" style="color:var(--text);">{{ stats.pendientes }}</div>
-      <div class="stat-label">Pendientes</div>
-    </div>
-    <div class="card stat-card">
-      <div class="stat-value" style="color:var(--success-text);">{{ stats.confirmados }}</div>
-      <div class="stat-label">Confirmados</div>
-    </div>
-    <div class="card stat-card">
-      <div class="stat-value" style="color:var(--warning-text);">{{ agenda_hoy|length }}</div>
-      <div class="stat-label">Turnos hoy</div>
-    </div>
-    <div class="card stat-card">
-      <div class="stat-value">{{ total_clientes }}</div>
-      <div class="stat-label">Clientes regs.</div>
+  <!-- Header Limpio y Jerarquizado -->
+  <div class="mb-6 sm:mb-8 pb-4 border-b border-slate-800/80">
+    <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Panel de Control</h1>
+    <div class="flex items-center gap-1.5 text-xs text-slate-400 font-medium mt-1">
+      <i data-lucide="calendar" class="w-3.5 h-3.5 text-slate-500 stroke-[1.5]"></i>
+      <span class="capitalize">{{ hoy | dia_semana }}, {{ hoy | fecha_es }}</span>
     </div>
   </div>
 
-  <div class="grid grid-2 animate-up" style="align-items:start; animation-delay: 0.2s;">
+  <!-- Rediseño de las Tarjetas de Métricas (KPI Cards Modernas) -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
+    
+    <!-- 1. Turnos Hoy -->
+    <div class="bg-[#0f172a]/70 border border-slate-800/80 rounded-2xl p-4 shadow-sm backdrop-blur-sm hover:border-slate-700 transition">
+      <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+        Turnos Hoy
+      </div>
+      <div class="text-3xl font-extrabold tracking-tight text-blue-400 font-mono mt-1 tabular-nums">
+        {{ agenda_hoy|length }}
+      </div>
+      <p class="text-[10px] sm:text-[11px] text-slate-500 mt-1">Citas agendadas hoy</p>
+    </div>
+
+    <!-- 2. Confirmados -->
+    <div class="bg-[#0f172a]/70 border border-slate-800/80 rounded-2xl p-4 shadow-sm backdrop-blur-sm hover:border-slate-700 transition">
+      <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+        Confirmados
+      </div>
+      <div class="text-3xl font-extrabold tracking-tight text-emerald-400 font-mono mt-1 tabular-nums">
+        {{ stats.confirmados }}
+      </div>
+      <p class="text-[10px] sm:text-[11px] text-slate-500 mt-1">Total activos</p>
+    </div>
+
+    <!-- 3. Pendientes -->
+    <div class="bg-[#0f172a]/70 border border-slate-800/80 rounded-2xl p-4 shadow-sm backdrop-blur-sm hover:border-slate-700 transition">
+      <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+        Turnos Pendientes
+      </div>
+      <div class="text-3xl font-extrabold tracking-tight text-amber-400 font-mono mt-1 tabular-nums">
+        {{ stats.pendientes }}
+      </div>
+      <p class="text-[10px] sm:text-[11px] text-slate-500 mt-1">Por confirmar</p>
+    </div>
+
+    <!-- 4. Clientes Registrados -->
+    <div class="bg-[#0f172a]/70 border border-slate-800/80 rounded-2xl p-4 shadow-sm backdrop-blur-sm hover:border-slate-700 transition">
+      <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+        Clientes
+      </div>
+      <div class="text-3xl font-extrabold tracking-tight text-white font-mono mt-1 tabular-nums">
+        {{ total_clientes }}
+      </div>
+      <p class="text-[10px] sm:text-[11px] text-slate-500 mt-1">Base de contactos</p>
+    </div>
+
+  </div>
+
+  <!-- Layout Principal: Agenda de Hoy + Enlace y Acciones Rápidas -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+    
     <!-- Agenda de Hoy (Resumen) -->
-    <div class="card">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
-        <h3 class="card-title" style="margin:0;">Agenda de hoy</h3>
-        <a href="{{ url_for('admin.agenda') }}" class="btn btn-ghost btn-sm">Ver completa <i data-lucide="arrow-right" style="width:14px;"></i></a>
+    <div class="lg:col-span-2 bg-[#0f172a]/70 border border-slate-800/80 rounded-2xl p-5 sm:p-6 shadow-sm backdrop-blur-sm">
+      <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-800/80">
+        <h3 class="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+          <span>Agenda de Hoy</span>
+          <span class="text-xs font-mono font-normal text-slate-400">({{ agenda_hoy|length }})</span>
+        </h3>
+        <a href="{{ url_for('admin.agenda') }}" class="text-xs font-semibold text-blue-400 hover:text-blue-300 flex items-center gap-1 transition">
+          <span>Ver completa</span>
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5 stroke-[1.5]"></i>
+        </a>
       </div>
       
       {% if agenda_hoy %}
-        <div style="display:flex; flex-direction:column; gap:.75rem;">
+        <div class="space-y-2.5">
           {% for t in agenda_hoy %}
-          <div style="display:flex; gap:1rem; padding-bottom:.75rem; border-bottom:1px solid var(--border);">
-            <div style="width:60px; text-align:right; font-weight:700; color:var(--text-muted);">
-              {{ t.hora_inicio }}
+          <div class="flex items-center justify-between p-3 rounded-xl bg-slate-900/60 border border-slate-800 hover:border-slate-700 transition">
+            <div class="flex items-center gap-3 min-w-0">
+              <div class="px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-800 font-mono text-xs font-bold text-white shrink-0">
+                {{ t.hora_inicio }}
+              </div>
+              <div class="min-w-0">
+                <a href="{{ url_for('admin.detalle_turno', turno_id=t.id) }}" class="text-xs sm:text-sm font-semibold text-white hover:text-blue-400 transition truncate block">
+                  {{ t.servicio_nombre }}
+                </a>
+                <span class="text-[11px] text-slate-400 block truncate">
+                  {{ t.cliente.nombre if t.cliente else (t.cliente_nombre or 'Cliente') }}
+                </span>
+              </div>
             </div>
-            <div style="flex:1;">
-              <div style="font-weight:600; font-size:.95rem;">
-                <a href="{{ url_for('admin.detalle_turno', turno_id=t.id) }}" style="color:var(--text);">{{ t.servicio_nombre }}</a>
-              </div>
-              <div style="font-size:.8rem; color:var(--text-muted); display:flex; justify-content:space-between;">
-                <span>Ver detalles para gestionar</span>
-                <span class="badge badge-{{ t.estado }}" style="transform:scale(0.85); transform-origin:right;">{{ t.estado }}</span>
-              </div>
+            
+            <div class="flex items-center gap-2 shrink-0">
+              <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border
+                {% if t.estado == 'cobrado' %}bg-cyan-500/10 text-cyan-400 border-cyan-500/20
+                {% elif t.estado == 'confirmado' %}bg-emerald-500/10 text-emerald-400 border-emerald-500/20
+                {% elif t.estado == 'pendiente' %}bg-amber-500/10 text-amber-400 border-amber-500/20
+                {% else %}bg-slate-800 text-slate-400 border-slate-700{% endif %}">
+                {{ t.estado }}
+              </span>
+              <a href="{{ url_for('admin.detalle_turno', turno_id=t.id) }}" class="text-slate-400 hover:text-white p-1">
+                <i data-lucide="chevron-right" class="w-4 h-4 stroke-[1.5]"></i>
+              </a>
             </div>
           </div>
           {% endfor %}
         </div>
       {% else %}
-        <div class="text-center text-muted" style="padding:2rem 0;">
-          No hay turnos registrados para el día de hoy.
+        <div class="text-center py-10 px-4 border border-dashed border-slate-800/80 rounded-xl">
+          <i data-lucide="calendar-x" class="w-8 h-8 text-slate-600 mx-auto mb-2 stroke-[1.5]"></i>
+          <h4 class="text-xs font-semibold text-slate-300">Sin turnos para hoy</h4>
+          <p class="text-[11px] text-slate-500 mt-0.5">No hay citas registradas en la jornada de hoy.</p>
         </div>
       {% endif %}
     </div>
 
-    <!-- Link Público -->
-    <div style="display:flex; flex-direction:column; gap:1.5rem;">
-      <div class="card" style="border-color:var(--accent);">
-        <h3 class="card-title" style="display:flex; align-items:center; gap:.5rem;"><i data-lucide="link" style="width:20px; color:var(--accent);"></i> Tu Link para Clientes</h3>
-        <p style="font-size:.85rem; color:var(--text-muted); margin-bottom:1rem;">Compartí este enlace en tus redes o WhatsApp para que tus clientes pidan turnos.</p>
+    <!-- Columna Derecha: Link Público y Accesos Rápidos -->
+    <div class="space-y-4">
+      
+      <!-- Link Público del Negocio -->
+      <div class="bg-[#0f172a]/70 border border-slate-800/80 rounded-2xl p-5 shadow-sm backdrop-blur-sm">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 mb-1 flex items-center gap-1.5">
+          <i data-lucide="link" class="w-3.5 h-3.5 text-blue-400 stroke-[1.5]"></i>
+          <span>Link de Reservas</span>
+        </h3>
+        <p class="text-[11px] text-slate-400 mb-3">Enlace directo para compartir con tus clientes.</p>
         
-        <div style="display:flex; gap:.5rem; align-items:center;">
-          <input type="text" id="public-link" class="form-control" readonly value="{{ url_for('cliente.solicitar_turno', url_id=session.get('negocio_id'), _external=True) }}" style="font-size:.85rem; color:var(--accent); background:rgba(255,0,60,0.05); border-color:var(--accent-glow);" />
-          <button class="btn btn-primary" onclick="copyLink()" style="padding:.5rem 1rem;" title="Copiar Link">
-            <i data-lucide="copy" style="width:18px;"></i>
+        <div class="flex gap-2 items-center">
+          <input type="text" id="public-link" readonly 
+                 value="{{ url_for('cliente.solicitar_turno', url_id=session.get('negocio_id'), _external=True) }}" 
+                 class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-mono text-blue-400 focus:outline-none" />
+          <button type="button" onclick="copyLink()" 
+                  class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold shrink-0 transition" title="Copiar Link">
+            <i data-lucide="copy" class="w-4 h-4 stroke-[1.5]"></i>
           </button>
         </div>
-        <script>
-          function copyLink() {
-            var copyText = document.getElementById("public-link");
-            copyText.select();
-            copyText.setSelectionRange(0, 99999);
-            navigator.clipboard.writeText(copyText.value);
-            alert("¡Link copiado al portapapeles!");
-          }
-        </script>
+        <div id="copy-feedback" class="text-[11px] text-emerald-400 mt-2 font-medium hidden">
+          ✓ Enlace copiado al portapapeles
+        </div>
       </div>
 
-      <!-- Accesos Rápidos -->
-    <div class="card">
-      <h3 class="card-title">Accesos Rápidos</h3>
-      <div style="display:flex; flex-direction:column; gap:.5rem;">
-        <a href="{{ url_for('admin.agenda') }}" class="btn btn-ghost" style="justify-content:flex-start;">
-          <i data-lucide="calendar" style="width:18px;"></i> Gestionar agenda completa
-        </a>
-        <a href="{{ url_for('admin.clientes') }}" class="btn btn-ghost" style="justify-content:flex-start;">
-          <i data-lucide="users" style="width:18px;"></i> Administrar base de clientes
-        </a>
-        <a href="{{ url_for('admin.configuracion') }}" class="btn btn-ghost" style="justify-content:flex-start;">
-          <i data-lucide="settings-2" style="width:18px;"></i> Modificar servicios y horarios
-        </a>
-        <a href="{{ url_for('admin.reportes') }}" class="btn btn-ghost" style="justify-content:flex-start;">
-          <i data-lucide="bar-chart-3" style="width:18px;"></i> Ver reportes y estadísticas
-        </a>
+      <!-- Accesos Directos -->
+      <div class="bg-[#0f172a]/70 border border-slate-800/80 rounded-2xl p-5 shadow-sm backdrop-blur-sm">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 mb-3">Accesos Directos</h3>
+        <div class="space-y-2">
+          <a href="{{ url_for('admin.agenda') }}" class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 hover:border-slate-700 text-xs text-slate-300 hover:text-white transition">
+            <span>Ver Agenda Completa</span>
+            <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-500"></i>
+          </a>
+          <a href="{{ url_for('admin.caja_view') }}" class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 hover:border-slate-700 text-xs text-slate-300 hover:text-white transition">
+            <span>Arqueo de Caja y Cobros</span>
+            <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-500"></i>
+          </a>
+          <a href="{{ url_for('admin.reportes') }}" class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 hover:border-slate-700 text-xs text-slate-300 hover:text-white transition">
+            <span>Reportes y Métricas</span>
+            <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-500"></i>
+          </a>
+        </div>
       </div>
+
     </div>
-  </div> <!-- Fin de columna derecha -->
-</div> <!-- Fin grid-2 -->
+
+  </div>
 
 </div>
+
+<script>
+  function copyLink() {
+    var copyText = document.getElementById("public-link");
+    copyText.select();
+    copyText.setSelectionRange(0, 99999);
+    navigator.clipboard.writeText(copyText.value);
+    var feedback = document.getElementById("copy-feedback");
+    feedback.classList.remove("hidden");
+    setTimeout(function() {
+      feedback.classList.add("hidden");
+    }, 2500);
+  }
+</script>
 {% endblock %}

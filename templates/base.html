@@ -127,6 +127,9 @@
     .nav-link:hover, .nav-link.active { color: #38bdf8; text-shadow: 0 0 10px var(--accent-glow); }
     .nav-badge { background: var(--blue-grad); color: #fff; font-size: .68rem; padding: 3px 8px; border-radius: 6px; font-weight: 800; letter-spacing: 0.12em; box-shadow: 0 0 12px var(--primary-glow); }
     
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    
     /* ── Layout Dashboard ── */
     .page-wrapper { max-width: 1200px; margin: 0 auto; padding: 2.5rem 1.5rem 6rem; }
     .page-header { margin-bottom: 2.5rem; border-bottom: 1px solid var(--border-soft); padding-bottom: 1.25rem; }
@@ -231,45 +234,25 @@
     {{ config.nombre if config else 'Turnify' }}
   </a>
 
-  <div class="navbar-links">
+  <div class="navbar-links flex items-center gap-2 overflow-x-auto no-scrollbar py-2 px-1 text-xs font-medium text-slate-400">
     {% if request.endpoint and request.endpoint.startswith('cliente.') %}
-      <a href="{{ url_for('cliente.solicitar_turno', url_id=url_id) }}" class="nav-link {% if request.endpoint == 'cliente.solicitar_turno' %}active{% endif %}">Nuevo Turno</a>
-      <a href="{{ url_for('cliente.mis_turnos', url_id=url_id) }}" class="nav-link {% if request.endpoint == 'cliente.mis_turnos' %}active{% endif %}">Mis Turnos</a>
+      <a href="{{ url_for('cliente.solicitar_turno', url_id=url_id) }}" class="{% if request.endpoint == 'cliente.solicitar_turno' %}bg-blue-600/15 text-blue-400 border border-blue-500/30 px-3 py-1.5 rounded-full font-semibold shrink-0{% else %}hover:text-slate-200 px-3 py-1.5 shrink-0 transition-colors{% endif %}">Nuevo Turno</a>
+      <a href="{{ url_for('cliente.mis_turnos', url_id=url_id) }}" class="{% if request.endpoint == 'cliente.mis_turnos' %}bg-blue-600/15 text-blue-400 border border-blue-500/30 px-3 py-1.5 rounded-full font-semibold shrink-0{% else %}hover:text-slate-200 px-3 py-1.5 shrink-0 transition-colors{% endif %}">Mis Turnos</a>
     {% elif session.get('rol') == 'admin' %}
-      <a href="{{ url_for('admin.agenda') }}" class="nav-link {% if request.endpoint == 'admin.agenda' %}active{% endif %}">
-        <i data-lucide="calendar" class="w-4 h-4 text-slate-400 stroke-[1.5]"></i>
-        <span>Turnos</span>
-      </a>
-      <a href="{{ url_for('admin.clientes') }}" class="nav-link {% if request.endpoint == 'admin.clientes' %}active{% endif %}">
-        <i data-lucide="users" class="w-4 h-4 text-slate-400 stroke-[1.5]"></i>
-        <span>Clientes</span>
-      </a>
-      <a href="{{ url_for('admin.reportes') }}" class="nav-link {% if request.endpoint == 'admin.reportes' %}active{% endif %}">
-        <i data-lucide="bar-chart-3" class="w-4 h-4 text-slate-400 stroke-[1.5]"></i>
-        <span>Métricas</span>
-      </a>
-      <a href="{{ url_for('admin.caja_view') }}" class="nav-link {% if request.endpoint == 'admin.caja_view' %}active{% endif %}">
-        <i data-lucide="wallet" class="w-4 h-4 text-slate-400 stroke-[1.5]"></i>
-        <span>Caja</span>
-      </a>
-      <a href="{{ url_for('admin.configuracion') }}" class="nav-link {% if request.endpoint == 'admin.configuracion' %}active{% endif %}">
-        <i data-lucide="settings" class="w-4 h-4 text-slate-400 stroke-[1.5]"></i>
-        <span>Configuración</span>
-      </a>
-      <span class="nav-sep"></span>
-      <a href="{{ url_for('cliente.solicitar_turno', url_id=session.get('negocio_id')) }}" target="_blank" class="nav-link" title="Ver página pública">
-        <i data-lucide="external-link" class="w-4 h-4 text-slate-400 stroke-[1.5]"></i>
-        <span>Mi página</span>
-      </a>
-      <span class="nav-badge">ADMIN</span>
-      <a href="{{ url_for('auth.logout') }}" class="nav-link" title="Cerrar sesión">
-        <i data-lucide="log-out" class="w-4 h-4 text-slate-400 stroke-[1.5]"></i>
-      </a>
+      <a href="{{ url_for('admin.agenda') }}" class="{% if request.endpoint == 'admin.agenda' %}bg-blue-600/15 text-blue-400 border border-blue-500/30 px-3 py-1.5 rounded-full font-semibold shrink-0{% else %}hover:text-slate-200 px-3 py-1.5 shrink-0 transition-colors{% endif %}">Turnos</a>
+      <a href="{{ url_for('admin.clientes') }}" class="{% if request.endpoint == 'admin.clientes' %}bg-blue-600/15 text-blue-400 border border-blue-500/30 px-3 py-1.5 rounded-full font-semibold shrink-0{% else %}hover:text-slate-200 px-3 py-1.5 shrink-0 transition-colors{% endif %}">Clientes</a>
+      <a href="{{ url_for('admin.reportes') }}" class="{% if request.endpoint == 'admin.reportes' %}bg-blue-600/15 text-blue-400 border border-blue-500/30 px-3 py-1.5 rounded-full font-semibold shrink-0{% else %}hover:text-slate-200 px-3 py-1.5 shrink-0 transition-colors{% endif %}">Métricas</a>
+      <a href="{{ url_for('admin.caja_view') }}" class="{% if request.endpoint == 'admin.caja_view' %}bg-blue-600/15 text-blue-400 border border-blue-500/30 px-3 py-1.5 rounded-full font-semibold shrink-0{% else %}hover:text-slate-200 px-3 py-1.5 shrink-0 transition-colors{% endif %}">Caja</a>
+      <a href="{{ url_for('admin.configuracion') }}" class="{% if request.endpoint == 'admin.configuracion' %}bg-blue-600/15 text-blue-400 border border-blue-500/30 px-3 py-1.5 rounded-full font-semibold shrink-0{% else %}hover:text-slate-200 px-3 py-1.5 shrink-0 transition-colors{% endif %}">Configuración</a>
+      <span class="w-px h-4 bg-slate-800 shrink-0 mx-1"></span>
+      <a href="{{ url_for('cliente.solicitar_turno', url_id=session.get('negocio_id')) }}" target="_blank" class="hover:text-slate-200 px-3 py-1.5 shrink-0 transition-colors" title="Ver página pública">Mi página</a>
+      <span class="nav-badge shrink-0">ADMIN</span>
+      <a href="{{ url_for('auth.logout') }}" class="hover:text-rose-400 px-2 py-1.5 shrink-0 transition-colors" title="Cerrar sesión">Salir</a>
     {% elif url_id %}
-      <a href="{{ url_for('cliente.solicitar_turno', url_id=url_id) }}" class="nav-link {% if request.endpoint == 'cliente.solicitar_turno' %}active{% endif %}">Nuevo Turno</a>
-      <a href="{{ url_for('cliente.mis_turnos', url_id=url_id) }}" class="nav-link {% if request.endpoint == 'cliente.mis_turnos' %}active{% endif %}">Mis Turnos</a>
+      <a href="{{ url_for('cliente.solicitar_turno', url_id=url_id) }}" class="{% if request.endpoint == 'cliente.solicitar_turno' %}bg-blue-600/15 text-blue-400 border border-blue-500/30 px-3 py-1.5 rounded-full font-semibold shrink-0{% else %}hover:text-slate-200 px-3 py-1.5 shrink-0 transition-colors{% endif %}">Nuevo Turno</a>
+      <a href="{{ url_for('cliente.mis_turnos', url_id=url_id) }}" class="{% if request.endpoint == 'cliente.mis_turnos' %}bg-blue-600/15 text-blue-400 border border-blue-500/30 px-3 py-1.5 rounded-full font-semibold shrink-0{% else %}hover:text-slate-200 px-3 py-1.5 shrink-0 transition-colors{% endif %}">Mis Turnos</a>
     {% else %}
-      <a href="{{ url_for('auth.login_admin_view') }}" class="nav-link">Acceso Negocios</a>
+      <a href="{{ url_for('auth.login_admin_view') }}" class="hover:text-slate-200 px-3 py-1.5 shrink-0 transition-colors">Acceso Negocios</a>
     {% endif %}
   </div>
 </nav>
