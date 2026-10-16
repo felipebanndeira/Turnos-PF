@@ -39,7 +39,7 @@ def solicitar_turno(url_id):
     if request.method == "POST":
         servicio_id = request.form.get("servicio_id")
         fecha       = request.form.get("fecha")
-        hora        = request.form.get("hora")
+        hora        = request.form.get("hora_inicio") or request.form.get("hora")
 
         if not all([servicio_id, fecha, hora]):
             flash("Faltan datos para confirmar el turno.", "danger")
