@@ -35,15 +35,15 @@
       <div class="stat-label">Total Histórico</div>
     </div>
     <div class="card stat-card">
-      <div class="stat-value" style="color:var(--emerald);">{{ stats.confirmados }}</div>
+      <div class="stat-value" style="color:var(--success);">{{ stats.confirmados }}</div>
       <div class="stat-label">Confirmados</div>
     </div>
     <div class="card stat-card">
-      <div class="stat-value" style="color:var(--amber);">{{ stats.pendientes }}</div>
+      <div class="stat-value" style="color:var(--warning-text);">{{ stats.pendientes }}</div>
       <div class="stat-label">Pendientes</div>
     </div>
     <div class="card stat-card">
-      <div class="stat-value" style="color:var(--red);">{{ stats.cancelados }}</div>
+      <div class="stat-value" style="color:var(--danger);">{{ stats.cancelados }}</div>
       <div class="stat-label">Cancelados</div>
     </div>
   </div>
@@ -68,9 +68,9 @@
 {% block extra_js %}
 <script>
 // Configuración común de tema oscuro para Chart.js
-Chart.defaults.color = '#8892a4';
-Chart.defaults.borderColor = '#1e2334';
-Chart.defaults.font.family = 'Inter';
+Chart.defaults.color = '#a1a1aa';
+Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.07)';
+Chart.defaults.font.family = 'Inter, sans-serif';
 
 // Datos de backend a JS
 const datosPorDia = {{ stats.por_dia | tojson }};
@@ -88,13 +88,13 @@ new Chart(ctxDias, {
     datasets: [{
       label: 'Turnos (no cancelados)',
       data: Object.values(datosPorDia),
-      borderColor: '#6366f1',
-      backgroundColor: 'rgba(99,102,241,0.2)',
-      borderWidth: 3,
-      tension: 0.3,
+      borderColor: '#d4af37',
+      backgroundColor: 'rgba(212, 175, 55, 0.15)',
+      borderWidth: 2.5,
+      tension: 0.35,
       fill: true,
-      pointBackgroundColor: '#0f1117',
-      pointBorderColor: '#6366f1',
+      pointBackgroundColor: '#0b0b0c',
+      pointBorderColor: '#d4af37',
       pointRadius: 4
     }]
   },
@@ -118,12 +118,12 @@ new Chart(ctxServicios, {
       label: 'Cantidad',
       data: Object.values(datosPorServicio),
       backgroundColor: [
-        'rgba(16,185,129,0.8)',
-        'rgba(99,102,241,0.8)',
-        'rgba(245,158,11,0.8)',
-        'rgba(236,72,153,0.8)'
+        'rgba(212, 175, 55, 0.85)',
+        'rgba(245, 215, 127, 0.85)',
+        'rgba(197, 154, 63, 0.85)',
+        'rgba(230, 194, 117, 0.85)'
       ],
-      borderRadius: 4
+      borderRadius: 6
     }]
   },
   options: {
