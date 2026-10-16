@@ -45,32 +45,34 @@ def solicitar_turno(url_id):
             flash("Faltan datos para confirmar el turno.", "danger")
             return redirect(url_for("cliente.solicitar_turno", url_id=url_id))
             
-        # Si no hay cliente, capturamos los datos del formulario y lo creamos
+        # Si no hay cliente en sesión, capturamos Nombre y Teléfono (igual que Alejo Barber)
         if not c:
             nombre = request.form.get("cliente_nombre", "").strip()
-            email = request.form.get("cliente_email", "").strip()
             telefono = request.form.get("cliente_telefono", "").strip()
             
-            if not nombre or not email:
-                flash("Tu Nombre y Email son obligatorios para reservar.", "warning")
+            if not nombre or not telefono:
+                flash("Tu Nombre y Teléfono son obligatorios para reservar.", "warning")
                 return redirect(url_for("cliente.solicitar_turno", url_id=url_id))
                 
-            from core.persistence import get_cliente_by_email, upsert_cliente
-            # Buscar si ya existe
-            c = get_cliente_by_email(email, url_id)
+            from core.persistence import get_cliente_by_telefono, upsert_cliente
+            # Buscar por teléfono si ya existe en este negocio
+            c = get_cliente_by_telefono(telefono, url_id)
             if not c:
                 import uuid
                 c = {
                     "id": str(uuid.uuid4()),
                     "negocio_id": url_id,
                     "nombre": nombre,
-                    "email": email,
                     "telefono": telefono,
-                    "password": "" # Guest account, no password initially (or set securely)
+                    "email": request.form.get("cliente_email", "").strip()
                 }
                 upsert_cliente(c)
+            else:
+                # Si cambió el nombre, actualizarlo
+                if c.get("nombre") != nombre:
+                    c["nombre"] = nombre
+                    upsert_cliente(c)
             
-            # Auto-login silencioso
             session["rol"] = "cliente"
             session["cliente_id"] = c["id"]
             session["negocio_id"] = url_id

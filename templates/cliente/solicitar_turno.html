@@ -180,30 +180,36 @@
       {% endif %}
 
       <form method="POST" action="{{ url_for('cliente.solicitar_turno', url_id=url_id) }}" id="confirm-form" style="margin-top:1.5rem;">
-        {% if not cliente %}
         <div class="animate-up" style="margin-bottom: 1.5rem; background: var(--bg-input); padding: 1.25rem; border-radius: var(--radius-sm); border: 1px solid var(--border);">
-          <h4 style="margin-bottom: 1rem; font-size: 0.95rem;">Tus Datos</h4>
+          <h4 style="margin-bottom: 1rem; font-size: 0.95rem; color:var(--text); font-weight:600;">Información del cliente</h4>
           <div class="form-group">
             <label class="form-label">Nombre completo</label>
-            <input type="text" name="cliente_nombre" class="form-control" placeholder="Juan Pérez" required />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Email</label>
-            <input type="email" name="cliente_email" class="form-control" placeholder="juan@email.com" required />
+            <input type="text" name="cliente_nombre" class="form-control" placeholder="Ej: Juan Pérez" value="{{ cliente.nombre if cliente else '' }}" required />
           </div>
           <div class="form-group" style="margin-bottom: 0;">
-            <label class="form-label">Teléfono (opcional)</label>
-            <input type="text" name="cliente_telefono" class="form-control" placeholder="+54 9 11 1234-5678" />
+            <label class="form-label">Teléfono celular</label>
+            <input type="tel" name="cliente_telefono" class="form-control" placeholder="Ej: 3755 123456" value="{{ cliente.telefono if cliente else '' }}" required />
+            <small class="text-muted" style="margin-top:0.25rem; display:block;">Usarás este número para consultar o cancelar tu reserva en "Mis Reservas".</small>
           </div>
         </div>
-        {% endif %}
         
         <input type="hidden" name="servicio_id"  id="h-servicio-id" />
         <input type="hidden" name="fecha"         id="h-fecha" />
         <input type="hidden" name="hora_inicio"   id="h-hora" />
-        <div style="display:flex; gap:.75rem;">
+        
+        <div style="display:flex; gap:.75rem; margin-bottom: 2rem;">
           <button type="button" class="btn btn-ghost" onclick="goStep(2)">← Atrás</button>
-          <button type="submit" class="btn btn-success">✓ Confirmar turno</button>
+          <button type="submit" class="btn btn-success" style="flex:1;">✓ Confirmar turno</button>
+        </div>
+
+        {% set wa_contacto = config.whatsapp_pago | default('3755283261') %}
+        <div style="text-align: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border);">
+          <p style="font-size: 0.9rem; color: var(--text-muted);">
+            ¿Preferís agendar por mensaje o tenés dudas?<br>
+            <a href="https://wa.me/{{ wa_contacto }}?text=Hola,%20tengo%20una%20consulta%20sobre%20los%20turnos" target="_blank" style="color: #25D366; text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 0.35rem; margin-top: 0.5rem;">
+              <i data-lucide="message-circle" style="width: 16px;"></i> Escribinos al WhatsApp
+            </a>
+          </p>
         </div>
       </form>
     </div>
