@@ -8,11 +8,12 @@ from core.auth import require_admin
 from core.persistence import (
     load_turnos, get_turno_by_id, upsert_turno,
     load_config, save_config, load_clientes,
-    get_cliente_by_id, upsert_cliente
+    get_cliente_by_id, upsert_cliente, load_cierres_caja
 )
 from core.turnos_service import (
     get_agenda, confirmar_turno, cancelar_turno, reprogramar_turno,
-    get_estadisticas, registrar_pago
+    get_estadisticas, registrar_pago, cobrar_turno,
+    get_balance_caja_hoy, cerrar_caja_diaria
 )
 from core.disponibilidad import get_slots_disponibles_excluyendo
 
@@ -47,16 +48,70 @@ def agenda():
     nid = session["negocio_id"]
     cfg = load_config(nid)
     
-    fecha_str = request.args.get("fecha")
-    if not fecha_str:
-        fecha_str = date.today().isoformat()
-        
-    turnos_dia = get_agenda(fecha_str, nid)
+    hoy_str = date.today().isoformat()
+    filtro_vista = request.args.get("filtro", "").lower()
+    filtro_estado = request.args.get("estado", "todos").lower()
+    fecha_param = request.args.get("fecha")
+    
+    # Determinar vista por defecto
+    if not filtro_vista:
+        if fecha_param and fecha_param != hoy_str:
+            filtro_vista = "fecha"
+        else:
+            filtro_vista = "hoy"
+            
+    fecha_actual = fecha_param if (filtro_vista == "fecha" and fecha_param) else hoy_str
+    
+    todos_turnos = load_turnos(nid)
+    # Enriquecer turnos con datos de cliente
+    for t in todos_turnos:
+        if "cliente" not in t and t.get("cliente_id"):
+            c = get_cliente_by_id(t["cliente_id"], nid)
+            if c:
+                t["cliente"] = c
+                
+    # 1. Filtrar por Vista (Hoy | Próximos | Todos | Por Fecha)
+    if filtro_vista == "hoy":
+        turnos_filtrados = [t for t in todos_turnos if t.get("fecha") == hoy_str]
+        turnos_filtrados.sort(key=lambda x: x.get("hora_inicio", ""))
+    elif filtro_vista == "proximos":
+        turnos_filtrados = [t for t in todos_turnos if t.get("fecha", "") >= hoy_str and t.get("estado") != "cancelado"]
+        turnos_filtrados.sort(key=lambda x: (x.get("fecha", ""), x.get("hora_inicio", "")))
+    elif filtro_vista == "todos":
+        turnos_filtrados = list(todos_turnos)
+        turnos_filtrados.sort(key=lambda x: (x.get("fecha", ""), x.get("hora_inicio", "")), reverse=True)
+    elif filtro_vista == "fecha":
+        turnos_filtrados = [t for t in todos_turnos if t.get("fecha") == fecha_actual]
+        turnos_filtrados.sort(key=lambda x: x.get("hora_inicio", ""))
+    else:
+        turnos_filtrados = [t for t in todos_turnos if t.get("fecha") == hoy_str]
+        turnos_filtrados.sort(key=lambda x: x.get("hora_inicio", ""))
+        filtro_vista = "hoy"
+
+    # Conteo de estados sobre la vista actual (antes de filtrar por estado específico)
+    total_vista = len(turnos_filtrados)
+    conteo_estados = {
+        "todos": total_vista,
+        "confirmado": sum(1 for t in turnos_filtrados if t.get("estado") == "confirmado"),
+        "pendiente": sum(1 for t in turnos_filtrados if t.get("estado") == "pendiente"),
+        "cancelado": sum(1 for t in turnos_filtrados if t.get("estado") == "cancelado"),
+        "cobrado": sum(1 for t in turnos_filtrados if t.get("estado") == "cobrado"),
+    }
+
+    # 2. Filtrar por Estado específico si fue solicitado
+    if filtro_estado and filtro_estado != "todos":
+        turnos_filtrados = [t for t in turnos_filtrados if t.get("estado") == filtro_estado]
+
     return render_template(
         "admin/agenda.html",
         config=cfg,
-        turnos=turnos_dia,
-        fecha_actual=fecha_str
+        turnos=turnos_filtrados,
+        fecha_actual=fecha_actual,
+        fecha=fecha_actual,
+        filtro_vista=filtro_vista,
+        filtro_estado=filtro_estado,
+        conteo_estados=conteo_estados,
+        hoy=hoy_str
     )
 
 @admin_bp.route("/turnos/<turno_id>")
@@ -305,3 +360,58 @@ def reportes():
     cfg = load_config(nid)
     stats = get_estadisticas(nid)
     return render_template("admin/reportes.html", config=cfg, stats=stats)
+
+
+# ─── Módulo de Caja y Arqueo Diario ──────────────────────────────────────────
+
+@admin_bp.route("/turnos/<turno_id>/cobrar", methods=["POST"])
+@require_admin
+def cobrar_turno_view(turno_id):
+    nid = session["negocio_id"]
+    metodo = request.form.get("metodo", "efectivo")
+    monto_raw = request.form.get("monto", "0")
+    detalle = request.form.get("detalle", "").strip()
+
+    try:
+        monto = float(str(monto_raw).replace("$", "").replace(" ", "").replace(".", "").replace(",", "."))
+    except Exception:
+        monto = 0.0
+
+    ok, msg = cobrar_turno(turno_id, metodo, monto, detalle, nid)
+    if ok:
+        flash(msg, "success")
+    else:
+        flash(msg, "danger")
+
+    # Si la petición vino con origen específico o desde la agenda
+    redirect_to = request.form.get("next") or request.referrer or url_for("admin.agenda")
+    return redirect(redirect_to)
+
+
+@admin_bp.route("/caja")
+@require_admin
+def caja_view():
+    nid = session["negocio_id"]
+    cfg = load_config(nid)
+    balance = get_balance_caja_hoy(nid)
+    historial_cierres = load_cierres_caja(nid)
+    return render_template(
+        "admin/caja.html",
+        config=cfg,
+        balance=balance,
+        cierres=historial_cierres[:10],
+        hoy=date.today().isoformat()
+    )
+
+
+@admin_bp.route("/caja/reiniciar", methods=["POST"])
+@require_admin
+def reiniciar_caja_view():
+    nid = session["negocio_id"]
+    usuario = session.get("nombre") or "Administrador"
+    ok, msg, cierre = cerrar_caja_diaria(nid, usuario)
+    if ok:
+        flash(f"Arqueo cerrado con éxito. Total archivado: ${cierre['total_recaudado']:,.0f}. Caja reiniciada.", "success")
+    else:
+        flash(msg, "danger")
+    return redirect(url_for("admin.caja_view"))

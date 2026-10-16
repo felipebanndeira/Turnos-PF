@@ -1,4 +1,5 @@
 import os
+import uuid
 import firebase_admin
 from firebase_admin import credentials, firestore
 
@@ -128,3 +129,19 @@ def get_turno_by_id(turno_id: str, negocio_id: str) -> dict | None:
 def upsert_turno(turno: dict) -> None:
     db = get_db()
     db.collection("turnos").document(turno["id"]).set(turno)
+
+
+# ─── Cierres de Caja (Auditoría Financiera) ──────────────────────────────────
+
+def load_cierres_caja(negocio_id: str) -> list:
+    db = get_db()
+    docs = db.collection("cierres_caja").where("negocio_id", "==", negocio_id).stream()
+    cierres = [doc.to_dict() for doc in docs]
+    cierres.sort(key=lambda x: x.get("fecha_hora", ""), reverse=True)
+    return cierres
+
+def registrar_cierre_caja(cierre: dict) -> None:
+    db = get_db()
+    cid = cierre.get("id") or str(uuid.uuid4())
+    cierre["id"] = cid
+    db.collection("cierres_caja").document(cid).set(cierre)

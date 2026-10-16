@@ -239,6 +239,7 @@
       <a href="{{ url_for('admin.agenda') }}" class="nav-link {% if request.endpoint == 'admin.agenda' %}active{% endif %}"><i data-lucide="calendar" style="width:16px"></i>Turnos</a>
       <a href="{{ url_for('admin.clientes') }}" class="nav-link {% if request.endpoint == 'admin.clientes' %}active{% endif %}"><i data-lucide="users" style="width:16px"></i>Clientes</a>
       <a href="{{ url_for('admin.reportes') }}" class="nav-link {% if request.endpoint == 'admin.reportes' %}active{% endif %}"><i data-lucide="bar-chart-3" style="width:16px"></i>Métricas</a>
+      <a href="{{ url_for('admin.caja_view') }}" class="nav-link {% if request.endpoint == 'admin.caja_view' %}active{% endif %}"><i data-lucide="wallet" style="width:16px"></i>Caja</a>
       <a href="{{ url_for('admin.configuracion') }}" class="nav-link {% if request.endpoint == 'admin.configuracion' %}active{% endif %}"><i data-lucide="settings" style="width:16px"></i>Configuración</a>
       <span class="nav-sep"></span>
       <a href="{{ url_for('cliente.solicitar_turno', url_id=session.get('negocio_id')) }}" target="_blank" class="nav-link" title="Ver página pública"><i data-lucide="external-link" style="width:16px"></i>Mi página</a>
