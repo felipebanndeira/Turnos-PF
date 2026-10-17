@@ -14,7 +14,7 @@ def dev_login_admin():
     from flask import session, redirect, url_for
     session['rol'] = 'admin'
     session['negocio_id'] = 'barberia-pepe'
-    session['negocio_nombre'] = 'Barberia pepe'
+    session['negocio_nombre'] = 'Golden Barber Studio'
     session['admin_email'] = 'bandeirafeli06@icloud.com'
     return redirect(url_for('admin.agenda'))
 
