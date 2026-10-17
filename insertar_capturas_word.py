@@ -176,16 +176,17 @@ def add_screenshots_to_word():
         current_element.addnext(p_nota._element)
         current_element = p_nota._element
 
-    doc.save(DOC_OUT)
-    print(f"Documento generado exitosamente como '{DOC_OUT}'.")
+    target_final = "Carpeta_Turnify_Final_Oficial_IPET1308_Golden_Barberia.docx"
+    doc.save(target_final)
+    print(f"Documento generado exitosamente como '{target_final}'.")
 
-    # Intentar sobrescribir Carpeta_Turnify_Final_Oficial_IPET1308_Definitiva.docx si no está bloqueada
-    try:
-        import shutil
-        shutil.copyfile(DOC_OUT, "Carpeta_Turnify_Final_Oficial_IPET1308_Definitiva.docx")
-        print("También se actualizó 'Carpeta_Turnify_Final_Oficial_IPET1308_Definitiva.docx'.")
-    except Exception as e:
-        print("Nota: 'Carpeta_Turnify_Final_Oficial_IPET1308_Definitiva.docx' está abierta en Word. Cierre Word para sobrescribirla automáticamente.")
+    import shutil
+    for fname in ["Carpeta_Turnify_Final_Oficial_IPET1308_Definitiva.docx", "Carpeta_Turnify_Final_Oficial_IPET1308_Definitiva_Con_Pantallas.docx"]:
+        try:
+            shutil.copyfile(target_final, fname)
+            print(f"También se actualizó exitosamente '{fname}'.")
+        except Exception:
+            print(f"Nota: '{fname}' está abierto en Microsoft Word. El archivo actualizado quedó disponible en '{target_final}'.")
 
 if __name__ == "__main__":
     add_screenshots_to_word()
