@@ -16,20 +16,20 @@ pantallas_data = [
             "habituales sin requerir registro previo, y un enlace de autenticación segura exclusivo para el administrador."
         ),
         "img": "capturas_pantallas/p01_landing.png",
-        "width": Inches(5.8),
-        "nota": "Nota. Interfaz pública principal de bienvenida y acceso al sistema."
+        "width": Inches(5.2),
+        "nota": "Nota. Interfaz pública principal de bienvenida y acceso al sistema en entorno web de escritorio."
     },
     {
         "num": "Figura 5",
-        "titulo": "Pantalla P-02: Flujo de Reserva Mobile-First para Clientes",
+        "titulo": "Pantalla P-02: Flujo de Selección de Servicios y Horarios para Clientes",
         "desc": (
-            "Pantalla P-02 (Solicitud de Turno - Reserva Cliente): Proceso de reserva mobile-first guiado en 3 pasos con "
+            "Pantalla P-02 (Solicitud de Turno - Reserva Cliente): Proceso de reserva ágil guiado en pasos con "
             "barra de progreso e indicadores visuales. Incluye selector interactivo de servicios con tarifas y duraciones, "
             "carrusel horizontal de fechas con validación de horarios en tiempo real contra Firestore, y barra flotante de conversión."
         ),
         "img": "capturas_pantallas/p02_solicitar_turno.png",
-        "width": Inches(3.2),  # mobile view
-        "nota": "Nota. Vista interactiva en dispositivo móvil optimizada para reserva ágil en 3 pasos."
+        "width": Inches(5.2),
+        "nota": "Nota. Vista del proceso de reserva online con catálogo de servicios y turnos disponibles."
     },
     {
         "num": "Figura 6",
@@ -40,8 +40,8 @@ pantallas_data = [
             "y autogestionar la cancelación anticipada respetando las políticas horarias configuradas por el comercio."
         ),
         "img": "capturas_pantallas/p03_mis_turnos.png",
-        "width": Inches(3.2),  # mobile view
-        "nota": "Nota. Módulo de autoservicio y seguimiento de reservas para el cliente."
+        "width": Inches(5.2),
+        "nota": "Nota. Módulo de autoservicio y seguimiento de reservas para clientes."
     },
     {
         "num": "Figura 7",
@@ -52,7 +52,7 @@ pantallas_data = [
             "fecha y horario con verificación automática de solapamientos, enviar recordatorios por WhatsApp y registrar pagos."
         ),
         "img": "capturas_pantallas/p04_agenda.png",
-        "width": Inches(5.8),
+        "width": Inches(5.2),
         "nota": "Nota. Panel de gestión operativa de turnos con métricas de estado y acciones rápidas."
     },
     {
@@ -64,7 +64,7 @@ pantallas_data = [
             "de cobro y auditoría histórica con opción de snapshot y reinicio diario."
         ),
         "img": "capturas_pantallas/p05_caja.png",
-        "width": Inches(5.8),
+        "width": Inches(5.2),
         "nota": "Nota. Panel de control de caja diaria y conciliación de métodos de pago."
     },
     {
@@ -76,7 +76,7 @@ pantallas_data = [
             "franjas de atención semanal, descansos periódicos y bloqueo de feriados con selector de calendario interactivo."
         ),
         "img": "capturas_pantallas/p06_configuracion.png",
-        "width": Inches(5.8),
+        "width": Inches(5.2),
         "nota": "Nota. Panel de configuración comercial integral sin requerir soporte técnico."
     }
 ]
@@ -128,21 +128,25 @@ def add_screenshots_to_word():
     current_element = doc.paragraphs[idx_start + 1]._element
 
     # Insertar cada pantalla con su título APA, descripción, imagen y nota
-    for pdata in pantallas_data:
+    # Configuramos keep_with_next = True en el título e imagen para que Word NUNCA separe
+    # el título de la imagen ni deje títulos huérfanos al pie de página con fotos en la siguiente.
+    for idx, pdata in enumerate(pantallas_data):
         # 1. Párrafo descriptivo
         p_desc = doc.add_paragraph()
-        p_desc.paragraph_format.space_before = Pt(8)
-        p_desc.paragraph_format.space_after = Pt(4)
+        p_desc.paragraph_format.space_before = Pt(6)
+        p_desc.paragraph_format.space_after = Pt(3)
+        p_desc.paragraph_format.keep_with_next = True
         run_desc = p_desc.add_run(pdata["desc"])
         run_desc.font.name = "Calibri"
-        run_desc.font.size = Pt(11)
+        run_desc.font.size = Pt(10.5)
         current_element.addnext(p_desc._element)
         current_element = p_desc._element
 
         # 2. Título de Figura (APA 7)
         p_fig = doc.add_paragraph()
-        p_fig.paragraph_format.space_before = Pt(6)
+        p_fig.paragraph_format.space_before = Pt(4)
         p_fig.paragraph_format.space_after = Pt(2)
+        p_fig.paragraph_format.keep_with_next = True
         r1 = p_fig.add_run(pdata["num"])
         r1.font.name = "Calibri"
         r1.font.bold = True
@@ -155,20 +159,24 @@ def add_screenshots_to_word():
         current_element.addnext(p_fig._element)
         current_element = p_fig._element
 
-        # 3. Imagen centrada
+        # 3. Imagen centrada con keep_with_next para vincularla a su nota
         p_img = doc.add_paragraph()
         p_img.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        p_img.paragraph_format.space_before = Pt(4)
+        p_img.paragraph_format.space_before = Pt(3)
         p_img.paragraph_format.space_after = Pt(2)
+        p_img.paragraph_format.keep_with_next = True
         r_img = p_img.add_run()
-        r_img.add_picture(pdata["img"], width=pdata["width"])
+        # Con ancho 4.8 pulgadas (relación 16:10), la altura es ~3.07 pulgadas.
+        # Esto permite que una figura completa (desc + título + imagen + nota) quepa en ~4.3 pulgadas,
+        # posibilitando exactamente 2 figuras por página o un flujo continuo perfecto sin espacios vacíos.
+        r_img.add_picture(pdata["img"], width=Inches(4.8))
         current_element.addnext(p_img._element)
         current_element = p_img._element
 
         # 4. Nota al pie de figura (APA 7)
         p_nota = doc.add_paragraph()
         p_nota.paragraph_format.space_before = Pt(2)
-        p_nota.paragraph_format.space_after = Pt(12)
+        p_nota.paragraph_format.space_after = Pt(10)
         r_nota = p_nota.add_run(pdata["nota"])
         r_nota.font.name = "Calibri"
         r_nota.font.size = Pt(9)

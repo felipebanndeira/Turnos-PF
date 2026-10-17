@@ -63,30 +63,19 @@ def take_all_screenshots():
         page_d.wait_for_timeout(1000)
         page_d.screenshot(path=os.path.join(OUTPUT_DIR, "p06_configuracion.png"))
 
+        # P-02: Solicitud de Turno (Reserva Cliente en PC)
+        print("Capturando P-02: Solicitud de Turno en PC...")
+        page_d.goto("http://127.0.0.1:5015/b/barberia-pepe/solicitar", wait_until="networkidle")
+        page_d.wait_for_timeout(1000)
+        page_d.screenshot(path=os.path.join(OUTPUT_DIR, "p02_solicitar_turno.png"))
+
+        # P-03: Mis Turnos (en PC)
+        print("Capturando P-03: Mis Turnos en PC...")
+        page_d.goto("http://127.0.0.1:5015/b/barberia-pepe/mis-turnos", wait_until="networkidle")
+        page_d.wait_for_timeout(1000)
+        page_d.screenshot(path=os.path.join(OUTPUT_DIR, "p03_mis_turnos.png"))
+
         ctx_desktop.close()
-
-        # 2. Mobile Context para Flujo de Cliente (390x844 - iPhone 14 / Smartphone estándar)
-        ctx_mobile = browser.new_context(
-            viewport={'width': 420, 'height': 820},
-            device_scale_factor=2,
-            is_mobile=True,
-            has_touch=True
-        )
-        page_m = ctx_mobile.new_page()
-
-        # P-02: Solicitud de Turno (Reserva Cliente)
-        print("Capturando P-02: Solicitud de Turno...")
-        page_m.goto("http://127.0.0.1:5015/b/barberia-pepe/solicitar", wait_until="networkidle")
-        page_m.wait_for_timeout(1200)
-        page_m.screenshot(path=os.path.join(OUTPUT_DIR, "p02_solicitar_turno.png"))
-
-        # P-03: Mis Turnos
-        print("Capturando P-03: Mis Turnos...")
-        page_m.goto("http://127.0.0.1:5015/b/barberia-pepe/mis-turnos", wait_until="networkidle")
-        page_m.wait_for_timeout(1000)
-        page_m.screenshot(path=os.path.join(OUTPUT_DIR, "p03_mis_turnos.png"))
-
-        ctx_mobile.close()
         browser.close()
 
     print("\n¡Todas las capturas se generaron exitosamente en 'capturas_pantallas'!")
