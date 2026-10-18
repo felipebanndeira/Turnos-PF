@@ -112,6 +112,11 @@ def solicitar_turno(url_id):
             except Exception as e:
                 print(f"Error procesando comprobante: {e}")
 
+        # Si el negocio no pide seña, el turno se confirma automáticamente.
+        # Si pide seña, queda pendiente de recepción de comprobante.
+        estado_inicial = "pendiente" if (requiere_senia and monto_senia > 0) else "confirmado"
+
+        ahora_iso = datetime.now().isoformat()
         nuevo_turno = {
             "id": str(uuid.uuid4()),
             "negocio_id": url_id,
@@ -129,12 +134,14 @@ def solicitar_turno(url_id):
             "monto_abonado": 0.0,
             "estado_pago": "pendiente",
             "comprobante_url": comprobante_b64,
-            "estado": "pendiente",
+            "estado": estado_inicial,
             "creado_el": date.today().isoformat(),
+            "creado_en": ahora_iso,
             "pagos": []
         }
         upsert_turno(nuevo_turno)
-        flash("Turno solicitado con éxito.", "success")
+        msg_exito = "Turno confirmado con éxito." if estado_inicial == "confirmado" else "Pre-reserva registrada con éxito. Tenés 10 minutos para subir tu comprobante."
+        flash(msg_exito, "success")
         return redirect(url_for("cliente.estado_turno", url_id=url_id, turno_id=nuevo_turno["id"]))
 
     hoy_str = date.today().isoformat()
@@ -215,8 +222,29 @@ def estado_turno(url_id, turno_id):
     if not t:
         return "Turno no encontrado", 404
         
-    c = get_cliente_by_id(t["cliente_id"], url_id)
-    
+    # Verificar si el turno requiere seña y venció el límite de 10 minutos para subir comprobante
+    segundos_restantes_senia = 0
+    if t["estado"] == "pendiente" and t.get("monto_senia", 0) > 0 and not t.get("comprobante_url"):
+        from datetime import datetime, timedelta
+        creado_raw = t.get("creado_en")
+        if creado_raw:
+            try:
+                # Soportar ISO formats
+                creado_dt = datetime.fromisoformat(creado_raw)
+                expira_dt = creado_dt + timedelta(minutes=10)
+                ahora_dt = datetime.now()
+                diff_seg = int((expira_dt - ahora_dt).total_seconds())
+                if diff_seg <= 0:
+                    # El tiempo expiró -> Cancelar automáticamente el turno y liberar el horario
+                    t["estado"] = "cancelado"
+                    t["motivo_cancelacion"] = "Tiempo límite de 10 minutos para abonar seña expirado."
+                    upsert_turno(t)
+                    flash("El tiempo límite de 10 minutos para adjuntar el comprobante expiró. Tu reserva fue cancelada automáticamente.", "warning")
+                else:
+                    segundos_restantes_senia = diff_seg
+            except Exception as e:
+                print(f"Error calculando expiración de seña: {e}")
+
     # Calcular si se puede cancelar
     from core.disponibilidad import ahora_argentina
     
@@ -237,7 +265,8 @@ def estado_turno(url_id, turno_id):
         cliente=c, 
         url_id=url_id,
         puede_cancelar=puede_cancelar,
-        horas_minimas=horas_minimas
+        horas_minimas=horas_minimas,
+        segundos_restantes_senia=segundos_restantes_senia
     )
 
 

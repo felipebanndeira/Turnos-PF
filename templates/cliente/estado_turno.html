@@ -64,24 +64,58 @@
 
     <!-- Si el turno requiere seña y no adjuntó comprobante aún -->
     {% if turno.estado == 'pendiente' and turno.monto_senia and turno.monto_senia > 0 and not turno.comprobante_url %}
-      <div class="bg-amber-950/20 border border-amber-500/30 rounded-xl p-4 text-left mb-5">
-        <h4 class="text-xs font-bold text-amber-300 mb-1 flex items-center gap-1.5">
-          <i data-lucide="alert-circle" class="w-4 h-4"></i> Adjuntar Comprobante de Seña
-        </h4>
-        <p class="text-[11px] text-slate-400 mb-3">
-          Datos de transferencia: <span class="font-mono text-cyan-300">{{ config.datos_pago }}</span>
-          {% if config.titular_pago %} (Titular: {{ config.titular_pago }}){% endif %}
+      <div class="bg-gradient-to-br from-amber-950/30 via-slate-900 to-slate-900 border border-amber-500/40 rounded-2xl p-4 text-left mb-5 shadow-lg">
+        <div class="flex items-center justify-between mb-2">
+          <h4 class="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+            <i data-lucide="timer" class="w-4 h-4 text-amber-400 animate-pulse"></i> Tiempo para confirmar seña
+          </h4>
+          <span id="countdown-timer" class="font-mono font-extrabold text-amber-300 text-xs px-2.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/30 tabular-nums">
+            10:00
+          </span>
+        </div>
+        <p class="text-[11px] text-slate-300 leading-relaxed mb-3">
+          Tu lugar está pre-reservado temporalmente por <strong class="text-amber-200">10 minutos</strong>. Realizá la transferencia de la seña y adjuntá la foto del comprobante para asegurar tu turno antes de que expire y se libere el horario.
         </p>
+
+        <div class="bg-slate-950/80 rounded-xl p-3 text-xs border border-slate-800 mb-3 space-y-1">
+          {% if config.titular_pago %}
+            <div class="text-slate-400 text-[11px]">Titular: <span class="text-slate-200 font-semibold">{{ config.titular_pago }}</span></div>
+          {% endif %}
+          <div class="font-mono text-cyan-300 text-[11px] break-all select-all font-semibold">{{ config.datos_pago }}</div>
+        </div>
+
         <form method="POST" action="{{ url_for('cliente.subir_comprobante', url_id=url_id, turno_id=turno.id) }}" enctype="multipart/form-data" class="space-y-2">
-          <label class="cursor-pointer block py-2.5 px-3 rounded-xl bg-slate-900 border border-amber-500/30 text-amber-300 text-center text-xs font-bold hover:bg-amber-500/10 transition">
+          <label class="cursor-pointer block py-2.5 px-3 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-amber-500/30 text-amber-300 text-center text-xs font-bold transition">
             <span id="subir-lbl">Elegir foto del comprobante</span>
             <input type="file" name="comprobante_file" accept="image/*" class="hidden" onchange="document.getElementById('subir-lbl').textContent = '✓ ' + this.files[0].name; document.getElementById('btn-enviar-comp').style.display = 'block';" />
           </label>
-          <button type="submit" id="btn-enviar-comp" style="display:none;" class="w-full py-2 bg-gradient-to-r from-emerald-600 to-teal-500 text-white rounded-xl text-xs font-bold transition">
+          <button type="submit" id="btn-enviar-comp" style="display:none;" class="w-full py-2.5 bg-gradient-to-r from-emerald-600 to-teal-500 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-emerald-950/40">
             Subir y Notificar Comprobante
           </button>
         </form>
       </div>
+
+      <script>
+        (function() {
+          let timeLeft = parseInt("{{ segundos_restantes_senia or 600 }}");
+          const timerEl = document.getElementById('countdown-timer');
+          function updateTimer() {
+            if (timeLeft <= 0) {
+              timerEl.textContent = '00:00 (Expirado)';
+              timerEl.classList.remove('text-amber-300', 'bg-amber-500/20');
+              timerEl.classList.add('text-rose-400', 'bg-rose-500/20');
+              setTimeout(() => { window.location.reload(); }, 1500);
+              return;
+            }
+            const min = Math.floor(timeLeft / 60);
+            const sec = timeLeft % 60;
+            timerEl.textContent = `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+            timeLeft--;
+          }
+          updateTimer();
+          setInterval(updateTimer, 1000);
+        })();
+      </script>
     {% endif %}
 
     {% if turno.estado != 'cancelado' %}
