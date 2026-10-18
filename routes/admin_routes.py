@@ -126,6 +126,39 @@ def detalle_turno(turno_id):
     c = get_cliente_by_id(t["cliente_id"], nid)
     return render_template("admin/gestionar_turno.html", config=cfg, turno=t, cliente=c)
 
+@admin_bp.route("/turnos/<turno_id>/confirmar", methods=["POST"])
+@require_admin
+def confirmar(turno_id):
+    nid = session["negocio_id"]
+    t = get_turno_by_id(turno_id, nid)
+    if not t:
+        flash("Turno no encontrado.", "danger")
+        return redirect(url_for("admin.agenda"))
+    
+    # Confirmar turno
+    ok, msg = confirmar_turno(turno_id, nid)
+    
+    # Si tiene seña requerida y no fue abonada aún, marcar la seña como recibida
+    if ok and t.get("monto_senia", 0) > 0 and t.get("monto_abonado", 0) == 0:
+        registrar_pago(turno_id, float(t["monto_senia"]), "transferencia", nid, "Seña verificada y aprobada por el dueño")
+
+    if ok:
+        flash("¡Turno y comprobante de seña aprobados con éxito!", "success")
+    else:
+        flash(msg, "danger")
+    return redirect(url_for("admin.detalle_turno", turno_id=turno_id))
+
+@admin_bp.route("/turnos/<turno_id>/cancelar", methods=["POST"])
+@require_admin
+def cancelar(turno_id):
+    nid = session["negocio_id"]
+    ok, msg = cancelar_turno(turno_id, nid)
+    if ok:
+        flash("Turno cancelado exitosamente.", "success")
+    else:
+        flash(msg, "danger")
+    return redirect(url_for("admin.agenda"))
+
 @admin_bp.route("/turnos/<turno_id>/estado", methods=["POST"])
 @require_admin
 def cambiar_estado_turno(turno_id):
@@ -133,7 +166,10 @@ def cambiar_estado_turno(turno_id):
     accion = request.form.get("accion")
     
     if accion == "confirmar":
+        t = get_turno_by_id(turno_id, nid)
         ok, msg = confirmar_turno(turno_id, nid)
+        if ok and t and t.get("monto_senia", 0) > 0 and t.get("monto_abonado", 0) == 0:
+            registrar_pago(turno_id, float(t["monto_senia"]), "transferencia", nid, "Seña verificada")
     elif accion == "cancelar":
         ok, msg = cancelar_turno(turno_id, nid)
     elif accion == "registrar_pago":
@@ -146,7 +182,9 @@ def cambiar_estado_turno(turno_id):
         flash(msg, "success")
     else:
         flash(msg, "danger")
-    return redirect(url_for("admin.detalle_turno", turno_id=turno_id))
+    
+    next_url = request.form.get("next") or request.referrer or url_for("admin.detalle_turno", turno_id=turno_id)
+    return redirect(next_url)
 
 @admin_bp.route("/turnos/<turno_id>/reprogramar", methods=["POST"])
 @require_admin

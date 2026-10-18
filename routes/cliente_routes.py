@@ -1,5 +1,5 @@
 import uuid
-from datetime import date
+from datetime import date, datetime
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session
 from core.auth import get_current_cliente
 from core.persistence import load_config, upsert_turno, load_turnos, get_negocio_by_id
@@ -94,17 +94,41 @@ def solicitar_turno(url_id):
         except Exception:
             hora_fin = hora
 
+        precio_total = float(srv.get("precio", 0.0))
+        requiere_senia = bool(cfg.get("requiere_senia", False))
+        pct_senia = float(cfg.get("porcentaje_senia", 0.0) or 0.0)
+        monto_senia = round((precio_total * pct_senia) / 100.0, 2) if (requiere_senia and pct_senia > 0) else 0.0
+
+        # Procesar archivo comprobante si fue adjuntado
+        import base64
+        comprobante_b64 = ""
+        comprobante_file = request.files.get("comprobante_file")
+        if comprobante_file and comprobante_file.filename:
+            try:
+                f_bytes = comprobante_file.read()
+                if f_bytes:
+                    mime = comprobante_file.mimetype or "image/png"
+                    comprobante_b64 = f"data:{mime};base64,{base64.b64encode(f_bytes).decode('utf-8')}"
+            except Exception as e:
+                print(f"Error procesando comprobante: {e}")
+
         nuevo_turno = {
             "id": str(uuid.uuid4()),
             "negocio_id": url_id,
             "cliente_id": c["id"],
+            "cliente_nombre": c.get("nombre", ""),
             "servicio_id": srv["id"],
             "servicio_nombre": srv["nombre"],
             "fecha": fecha,
             "hora_inicio": hora,
             "hora_fin": hora_fin,
             "duracion_min": duracion_min,
-            "precio": srv.get("precio", 0.0),
+            "precio": precio_total,
+            "precio_total": precio_total,
+            "monto_senia": monto_senia,
+            "monto_abonado": 0.0,
+            "estado_pago": "pendiente",
+            "comprobante_url": comprobante_b64,
             "estado": "pendiente",
             "creado_el": date.today().isoformat(),
             "pagos": []
@@ -225,4 +249,30 @@ def cancelar(url_id, turno_id):
         flash("Turno cancelado.", "success")
     else:
         flash(msg, "danger")
+    return redirect(url_for("cliente.estado_turno", url_id=url_id, turno_id=turno_id))
+
+
+@cliente_bp.route("/turno/<turno_id>/comprobante", methods=["POST"])
+def subir_comprobante(url_id, turno_id):
+    from core.persistence import get_turno_by_id, upsert_turno
+    import base64
+    t = get_turno_by_id(turno_id, url_id)
+    if not t:
+        flash("Turno no encontrado.", "danger")
+        return redirect(url_for("cliente.solicitar_turno", url_id=url_id))
+        
+    comp_file = request.files.get("comprobante_file")
+    if comp_file and comp_file.filename:
+        try:
+            f_bytes = comp_file.read()
+            if f_bytes:
+                mime = comp_file.mimetype or "image/png"
+                t["comprobante_url"] = f"data:{mime};base64,{base64.b64encode(f_bytes).decode('utf-8')}"
+                upsert_turno(t)
+                flash("¡Comprobante adjuntado con éxito! El establecimiento lo verificará a la brevedad.", "success")
+        except Exception as e:
+            flash(f"Error al subir comprobante: {e}", "danger")
+    else:
+        flash("Por favor seleccioná una imagen para subir.", "warning")
+        
     return redirect(url_for("cliente.estado_turno", url_id=url_id, turno_id=turno_id))

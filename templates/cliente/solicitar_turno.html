@@ -101,30 +101,41 @@
     <!-- Módulo de Seña / Pago Previo -->
     {% set wa = (config.whatsapp_pago or '') if config else '' %}
     {% if config.requiere_senia %}
-      <div class="bg-gradient-to-br from-blue-950/40 to-slate-900/80 border border-blue-500/30 rounded-2xl p-4 mb-5 shadow-sm">
-        <h4 class="text-xs font-bold text-blue-300 flex items-center gap-1.5 mb-1.5">
-          <i data-lucide="shield-check" class="w-4 h-4 text-blue-400"></i> Requiere seña del {{ config.porcentaje_senia }}%
-        </h4>
-        <p class="text-xs text-slate-300 leading-relaxed mb-3">
-          Para confirmar la reserva, transferí el monto y enviá el comprobante vía WhatsApp.
-        </p>
-        <div class="bg-slate-950/80 rounded-xl p-3 text-xs border border-slate-800 mb-3">
-          {% if config.titular_pago %}
-            <div class="text-slate-400 text-[11px] mb-0.5">Titular: <span class="text-slate-200 font-semibold">{{ config.titular_pago }}</span></div>
-          {% endif %}
-          <div class="font-mono text-blue-300 text-[11px] break-all">{{ config.datos_pago }}</div>
+      <div class="bg-gradient-to-br from-amber-500/10 via-slate-900 to-slate-900 border border-amber-500/30 rounded-2xl p-4 mb-5 shadow-lg">
+        <div class="flex items-center justify-between mb-2">
+          <h4 class="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+            <i data-lucide="shield-alert" class="w-4 h-4 text-amber-400"></i> Seña Requerida ({{ config.porcentaje_senia }}%)
+          </h4>
+          <span id="monto-senia-calc" class="font-mono font-extrabold text-amber-300 text-sm">$0</span>
         </div>
-        {% if wa %}
-          <a href="https://wa.me/{{ wa }}?text=Hola,%20adjunto%20el%20comprobante%20de%20mi%20turno." target="_blank"
-             class="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 text-xs font-bold transition">
-            <i data-lucide="message-circle" class="w-4 h-4"></i> Enviar comprobante
-          </a>
-        {% endif %}
+        <p class="text-xs text-slate-300 leading-relaxed mb-3">
+          Para asegurar y confirmar tu lugar, realizá la transferencia de la seña y adjuntá el comprobante a continuación:
+        </p>
+        <div class="bg-slate-950/90 rounded-xl p-3 text-xs border border-slate-800 mb-3 space-y-1">
+          {% if config.titular_pago %}
+            <div class="text-slate-400 text-[11px]">Titular: <span class="text-slate-200 font-semibold">{{ config.titular_pago }}</span></div>
+          {% endif %}
+          <div class="font-mono text-cyan-300 text-[11px] break-all select-all font-semibold">{{ config.datos_pago }}</div>
+        </div>
+        
+        <!-- Input de comprobante -->
+        <div class="pt-2 border-t border-slate-800/80">
+          <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
+            Comprobante de Transferencia (Foto o Captura)
+          </label>
+          <div class="flex items-center gap-2">
+            <label for="comprobante_file" class="cursor-pointer flex-1 py-2.5 px-3 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 text-slate-200 text-xs font-medium flex items-center justify-center gap-2 transition">
+              <i data-lucide="upload" class="w-4 h-4 text-amber-400"></i>
+              <span id="comprobante-label">Seleccionar imagen del comprobante</span>
+            </label>
+          </div>
+          <span class="block text-[10px] text-slate-500 mt-1">Formatos: JPG, PNG, WEBP o PDF. El dueño validará la seña para aprobar el turno.</span>
+        </div>
       </div>
     {% endif %}
 
     <!-- Formulario POST hacia Flask -->
-    <form method="POST" action="{{ url_for('cliente.solicitar_turno', url_id=url_id) }}" id="confirm-form" class="space-y-4">
+    <form method="POST" action="{{ url_for('cliente.solicitar_turno', url_id=url_id) }}" id="confirm-form" enctype="multipart/form-data" class="space-y-4">
       <div>
         <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Nombre completo</label>
         <input type="text" name="cliente_nombre" id="in-nombre" placeholder="Ej: Juan Pérez" value="{{ cliente.nombre if cliente else '' }}" required autocomplete="name"
@@ -135,9 +146,10 @@
         <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Teléfono celular</label>
         <input type="tel" name="cliente_telefono" id="in-tel" placeholder="Ej: 3755 123456" value="{{ cliente.telefono if cliente else '' }}" required autocomplete="tel" inputmode="tel"
                class="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition" />
-        <span class="block text-[11px] text-slate-500 mt-1">Podrás gestionar o cancelar tu reserva en "Mis Turnos" con este número.</span>
+        <span class="block text-[11px] text-slate-500 mt-1">Podrás consultar el estado de tu turno en "Mis Turnos" con este número.</span>
       </div>
 
+      <input type="file" name="comprobante_file" id="comprobante_file" accept="image/*" class="hidden" onchange="previewComprobante(this)" />
       <input type="hidden" name="servicio_id" id="h-servicio-id" />
       <input type="hidden" name="fecha" id="h-fecha" />
       <input type="hidden" name="hora_inicio" id="h-hora" />
@@ -351,6 +363,26 @@
     $('h-servicio-id').value = S.id;
     $('h-fecha').value = S.fecha;
     $('h-hora').value = S.hora;
+
+    const elMontoSenia = $('monto-senia-calc');
+    if (elMontoSenia) {
+      const pct = parseFloat("{{ config.porcentaje_senia or 0 }}") || 0;
+      const calc = Math.round((S.precio * pct) / 100);
+      elMontoSenia.textContent = fmt(calc);
+    }
+  }
+
+  function previewComprobante(input) {
+    const lbl = $('comprobante-label');
+    if (input.files && input.files[0]) {
+      lbl.textContent = '✓ Comprobante: ' + input.files[0].name;
+      lbl.parentElement.classList.remove('bg-slate-800/80', 'border-slate-700');
+      lbl.parentElement.classList.add('bg-emerald-950/60', 'border-emerald-500/40', 'text-emerald-300');
+    } else {
+      lbl.textContent = 'Seleccionar imagen del comprobante';
+      lbl.parentElement.classList.remove('bg-emerald-950/60', 'border-emerald-500/40', 'text-emerald-300');
+      lbl.parentElement.classList.add('bg-slate-800/80', 'border-slate-700');
+    }
   }
 
   render();

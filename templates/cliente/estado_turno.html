@@ -5,17 +5,30 @@
 <div class="py-2">
   <div class="bg-slate-900/80 border border-slate-800/80 rounded-2xl p-5 text-center shadow-lg">
     {% if turno.estado == 'pendiente' %}
-      <div class="w-14 h-14 rounded-2xl bg-sky-500/10 border border-sky-500/20 text-sky-400 flex items-center justify-center mx-auto mb-3 shadow-sm">
-        <i data-lucide="clock" class="w-7 h-7"></i>
-      </div>
-      <h2 class="text-xl font-bold text-white mb-1">Turno Pendiente</h2>
-      <p class="text-xs text-slate-400 mb-5">Tu reserva fue registrada correctamente. Te esperamos.</p>
+      {% if turno.monto_senia and turno.monto_senia > 0 and turno.estado_pago != 'cobrado' %}
+        <div class="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/25 text-amber-400 flex items-center justify-center mx-auto mb-3 shadow-sm">
+          <i data-lucide="shield-alert" class="w-7 h-7"></i>
+        </div>
+        <h2 class="text-xl font-bold text-white mb-1">Pre-Reserva Registrada</h2>
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 text-[11px] font-bold uppercase tracking-wider mb-2">
+          Pendiente de Seña
+        </div>
+        <p class="text-xs text-slate-400 mb-5">
+          Tu lugar está pre-reservado. El establecimiento confirmará tu turno una vez verificado el comprobante.
+        </p>
+      {% else %}
+        <div class="w-14 h-14 rounded-2xl bg-sky-500/10 border border-sky-500/20 text-sky-400 flex items-center justify-center mx-auto mb-3 shadow-sm">
+          <i data-lucide="clock" class="w-7 h-7"></i>
+        </div>
+        <h2 class="text-xl font-bold text-white mb-1">Turno Pendiente</h2>
+        <p class="text-xs text-slate-400 mb-5">Tu reserva fue registrada correctamente. Te esperamos.</p>
+      {% endif %}
     {% elif turno.estado == 'confirmado' %}
       <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto mb-3 shadow-sm">
         <i data-lucide="check-circle" class="w-7 h-7"></i>
       </div>
       <h2 class="text-xl font-bold text-white mb-1">Turno Confirmado</h2>
-      <p class="text-xs text-slate-400 mb-5">¡Todo listo para tu atención!</p>
+      <p class="text-xs text-slate-400 mb-5">¡Comprobante verificado! Todo listo para tu atención.</p>
     {% elif turno.estado == 'cancelado' %}
       <div class="w-14 h-14 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center mx-auto mb-3 shadow-sm">
         <i data-lucide="x-circle" class="w-7 h-7"></i>
@@ -29,8 +42,47 @@
       <div class="flex justify-between text-xs pt-2"><span class="text-slate-400">Fecha</span><strong class="text-white">{{ turno.fecha | fecha_es }}</strong></div>
       <div class="flex justify-between text-xs pt-2"><span class="text-slate-400">Hora</span><strong class="text-cyan-400 font-mono">{{ turno.hora_inicio }} hs</strong></div>
       <div class="flex justify-between text-xs pt-2"><span class="text-slate-400">Cliente</span><strong class="text-white">{{ cliente.nombre }}</strong></div>
-      <div class="flex justify-between text-xs pt-2"><span class="text-slate-400">Arancel / Precio</span><strong class="text-blue-400 font-mono tabular-nums">{{ turno.precio | pesos }}</strong></div>
+      <div class="flex justify-between text-xs pt-2"><span class="text-slate-400">Total Servicio</span><strong class="text-blue-400 font-mono tabular-nums">{{ (turno.precio_total or turno.precio) | pesos }}</strong></div>
+      
+      {% if turno.monto_senia and turno.monto_senia > 0 %}
+      <div class="flex justify-between text-xs pt-2">
+        <span class="text-amber-400 font-semibold">Seña Solicitada</span>
+        <strong class="text-amber-300 font-mono tabular-nums">{{ turno.monto_senia | pesos }}</strong>
+      </div>
+      {% endif %}
+
+      {% if turno.comprobante_url %}
+      <div class="pt-2">
+        <span class="block text-slate-400 text-xs mb-1.5">Comprobante enviado:</span>
+        <a href="{{ turno.comprobante_url }}" target="_blank" class="inline-flex items-center gap-1.5 text-xs text-emerald-400 hover:text-emerald-300 font-semibold bg-emerald-950/40 border border-emerald-500/30 px-3 py-1.5 rounded-lg transition">
+          <i data-lucide="file-check" class="w-4 h-4"></i>
+          <span>Ver Comprobante Adjunto</span>
+        </a>
+      </div>
+      {% endif %}
     </div>
+
+    <!-- Si el turno requiere seña y no adjuntó comprobante aún -->
+    {% if turno.estado == 'pendiente' and turno.monto_senia and turno.monto_senia > 0 and not turno.comprobante_url %}
+      <div class="bg-amber-950/20 border border-amber-500/30 rounded-xl p-4 text-left mb-5">
+        <h4 class="text-xs font-bold text-amber-300 mb-1 flex items-center gap-1.5">
+          <i data-lucide="alert-circle" class="w-4 h-4"></i> Adjuntar Comprobante de Seña
+        </h4>
+        <p class="text-[11px] text-slate-400 mb-3">
+          Datos de transferencia: <span class="font-mono text-cyan-300">{{ config.datos_pago }}</span>
+          {% if config.titular_pago %} (Titular: {{ config.titular_pago }}){% endif %}
+        </p>
+        <form method="POST" action="{{ url_for('cliente.subir_comprobante', url_id=url_id, turno_id=turno.id) }}" enctype="multipart/form-data" class="space-y-2">
+          <label class="cursor-pointer block py-2.5 px-3 rounded-xl bg-slate-900 border border-amber-500/30 text-amber-300 text-center text-xs font-bold hover:bg-amber-500/10 transition">
+            <span id="subir-lbl">Elegir foto del comprobante</span>
+            <input type="file" name="comprobante_file" accept="image/*" class="hidden" onchange="document.getElementById('subir-lbl').textContent = '✓ ' + this.files[0].name; document.getElementById('btn-enviar-comp').style.display = 'block';" />
+          </label>
+          <button type="submit" id="btn-enviar-comp" style="display:none;" class="w-full py-2 bg-gradient-to-r from-emerald-600 to-teal-500 text-white rounded-xl text-xs font-bold transition">
+            Subir y Notificar Comprobante
+          </button>
+        </form>
+      </div>
+    {% endif %}
 
     {% if turno.estado != 'cancelado' %}
       <div class="pt-2 border-t border-slate-800/80">
@@ -45,8 +97,17 @@
           </form>
           <span class="block mt-2 text-[10px] text-slate-500">Se permite cancelar con hasta {{ horas_minimas }} horas de anticipación.</span>
         {% else %}
-          <div class="text-[11px] text-rose-400/90 bg-rose-950/20 border border-rose-900/30 rounded-xl p-2.5">
-            Faltan menos de {{ horas_minimas }} horas. Para cancelar comunícate de forma directa.
+          <div class="text-[11px] text-rose-300 bg-rose-950/20 border border-rose-900/30 rounded-xl p-3 text-center">
+            <span class="block font-semibold mb-1">Límite de cancelación web superado</span>
+            <span class="text-slate-400 block mb-2">Faltan menos de {{ horas_minimas }} horas para tu turno. Por políticas del negocio, comunícate de forma directa.</span>
+            {% set tel_negocio = config.whatsapp_pago or config.telefono or '' %}
+            {% if tel_negocio %}
+              {% set wa_clean = tel_negocio|replace(' ', '')|replace('-', '')|replace('+', '') %}
+              <a href="https://wa.me/{{ wa_clean }}?text=Hola,%20solicito%20cancelar%20mi%20turno%20de%20{{ turno.servicio_nombre }}%20del%20{{ turno.fecha }}%20a%20las%20{{ turno.hora_inicio }}hs." target="_blank"
+                 class="inline-flex items-center gap-1.5 text-xs text-emerald-400 font-semibold hover:underline">
+                <i data-lucide="message-circle" class="w-3.5 h-3.5"></i> Contactar por WhatsApp
+              </a>
+            {% endif %}
           </div>
         {% endif %}
       </div>

@@ -230,6 +230,19 @@
                 </a>
               {% endif %}
 
+              <!-- Botón Aprobar Seña Rápido (si está pendiente) -->
+              {% if t.estado == 'pendiente' %}
+                <form method="POST" action="{{ url_for('admin.confirmar', turno_id=t.id) }}" class="inline">
+                  <input type="hidden" name="next" value="{{ request.full_path }}" />
+                  <button type="submit" 
+                          class="px-2.5 py-1.5 rounded-lg bg-emerald-600/90 hover:bg-emerald-500 text-white text-xs font-bold inline-flex items-center gap-1 shadow-sm transition"
+                          title="Aprobar Turno y Validar Seña">
+                    <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                    <span>Aprobar{% if t.comprobante_url %} (Comp. listo){% endif %}</span>
+                  </button>
+                </form>
+              {% endif %}
+
               <!-- Botón Cobrar Rápido (si está Confirmado o Atendido) -->
               {% if t.estado in ['confirmado', 'pendiente', 'atendido'] and t.estado != 'cobrado' and t.estado != 'cancelado' %}
                 <button type="button" 
