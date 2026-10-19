@@ -39,6 +39,14 @@ def registro_negocio_view():
         flash(msg, "danger")
     return render_template("auth/registro_negocio.html")
 
+@auth_bp.route("/terminos")
+def terminos_view():
+    return render_template("legal/terminos.html")
+
+@auth_bp.route("/privacidad")
+def privacidad_view():
+    return render_template("legal/privacidad.html")
+
 @auth_bp.route("/logout")
 def logout():
     auth.logout()

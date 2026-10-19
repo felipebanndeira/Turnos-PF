@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8 text-slate-300">
+  <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-10 shadow-2xl backdrop-blur-xl">
+    <div class="mb-8 border-b border-slate-800 pb-6">
+      <a href="{{ url_for('auth.index') }}" class="text-xs font-semibold text-blue-400 hover:text-blue-300 flex items-center gap-1 mb-4">
+        ← Volver al inicio
+      </a>
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-white">Términos y Condiciones de Uso</h1>
+      <p class="text-xs text-slate-500 mt-1">Última actualización: Octubre 2026 · Turnify</p>
+    </div>
+
+    <div class="space-y-6 text-sm leading-relaxed text-slate-300">
+      <section>
+        <h2 class="text-lg font-bold text-white mb-2">1. Aceptación de los Términos</h2>
+        <p>Al acceder, navegar o utilizar la plataforma Turnify, usted declara haber leído, comprendido y aceptado regirse por los presentes Términos y Condiciones. Si no está de acuerdo con alguno de los puntos, le solicitamos no utilizar nuestros servicios.</p>
+      </section>
+
+      <section>
+        <h2 class="text-lg font-bold text-white mb-2">2. Transparencia sobre el Uso de Inteligencia Artificial (IA)</h2>
+        <p>Turnify puede integrar herramientas de Inteligencia Artificial y modelos de procesamiento de lenguaje natural y automatización para asistir en la organización de turnos, recordatorios, categorización y soporte técnico. Dichos componentes operan como asistentes automatizados. Las sugerencias y respuestas automatizadas no reemplazan el juicio humano ni garantizan ausencia total de imprecisiones.</p>
+      </section>
+
+      <section>
+        <h2 class="text-lg font-bold text-white mb-2">3. Contenido Subido por el Usuario y Política de Notificación y Baja (DMCA)</h2>
+        <p>Los negocios y usuarios son los únicos y exclusivos responsables por las imágenes, comprobantes de pago (señas), logos, nombres comerciales y datos subidos a la plataforma. El usuario garantiza que cuenta con todos los derechos y autorizaciones necesarias sobre dicho contenido.</p>
+        <p class="mt-2">Turnify actúa como mero intermediario técnico y rechaza cualquier tipo de infracción a derechos de autor o propiedad intelectual de terceros. Ante cualquier reclamo de presunta infracción de propiedad intelectual o DMCA, se puede remitir la notificación formal a <span class="text-blue-400 font-mono">legal@turnify.app</span>, procediéndose a la remoción inmediata del contenido cuestionado conforme a las normativas aplicables.</p>
+      </section>
+
+      <section>
+        <h2 class="text-lg font-bold text-white mb-2">4. Resolución de Disputas, Arbitraje y Renuncia a Demandas Colectivas</h2>
+        <p>Cualquier controversia, disputa o reclamo que surja de o esté relacionado con el uso de Turnify será resuelto preferentemente a través de mediación amistosa y negociación de buena fe. En caso de no arribarse a un acuerdo, las partes acuerdan someter la resolución a arbitraje individual vinculante conforme a los reglamentos de arbitraje comercial aplicables.</p>
+        <p class="mt-2 text-slate-400"><strong>Renuncia a demandas colectivas:</strong> Usted renuncia de manera expresa a iniciar, adherirse o formar parte de cualquier acción colectiva, demanda de grupo (class-action) o arbitraje colectivo en contra de Turnify y sus creadores.</p>
+      </section>
+
+      <section>
+        <h2 class="text-lg font-bold text-white mb-2">5. Limitación de Responsabilidad</h2>
+        <p>Turnify se proporciona "tal cual" y "según disponibilidad". En ningún caso los administradores o desarrolladores de Turnify serán responsables por daños indirectos, incidentales, pérdida de ingresos, interrupción de actividades comerciales o lucro cesante derivados de caídas técnicas, fallos de proveedores de hosting o uso indebido de las cuentas.</p>
+      </section>
+    </div>
+  </div>
+</div>
+{% endblock %}

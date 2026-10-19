@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8 text-slate-300">
+  <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-10 shadow-2xl backdrop-blur-xl">
+    <div class="mb-8 border-b border-slate-800 pb-6">
+      <a href="{{ url_for('auth.index') }}" class="text-xs font-semibold text-blue-400 hover:text-blue-300 flex items-center gap-1 mb-4">
+        ← Volver al inicio
+      </a>
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-white">Política de Privacidad y Tratamiento de Datos</h1>
+      <p class="text-xs text-slate-500 mt-1">Conformidad con estándares Google Play / Apple App Store / Regulaciones de Datos Personales</p>
+    </div>
+
+    <div class="space-y-6 text-sm leading-relaxed text-slate-300">
+      <section>
+        <h2 class="text-lg font-bold text-white mb-2">1. Compromiso de Privacidad</h2>
+        <p>En Turnify nos tomamos la privacidad muy en serio. Esta política detalla qué datos personales recopilamos, con qué finalidad y cómo los protegemos, de conformidad con los estándares de privacidad exigidos por plataformas móviles y navegadores modernos.</p>
+      </section>
+
+      <section>
+        <h2 class="text-lg font-bold text-white mb-2">2. Datos que Recopilamos y Finalidad (Privacy Nutrition Label)</h2>
+        <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-4 my-3">
+          <ul class="list-disc list-inside space-y-2 text-slate-300">
+            <li><strong class="text-white">Datos de Identificación y Contacto:</strong> Nombre, dirección de correo electrónico y número de teléfono (WhatsApp) exclusivamente para agendar turnos, enviar confirmaciones y gestionar recordatorios.</li>
+            <li><strong class="text-white">Comprobantes de Pago / Señas:</strong> Imágenes o documentos subidos por el cliente con el único propósito de validar la reserva ante el comercio.</li>
+            <li><strong class="text-white">Información Técnica y Diagnóstico:</strong> Registros de errores y métricas anónimas de rendimiento para garantizar la disponibilidad y seguridad del sistema.</li>
+          </ul>
+        </div>
+        <p class="text-xs text-slate-400">No recopilamos datos biométricos, información financiera sensible (números de tarjeta completos) ni datos de ubicación precisa en segundo plano.</p>
+      </section>
+
+      <section>
+        <h2 class="text-lg font-bold text-white mb-2">3. No Venta de Datos y Uso de Terceros</h2>
+        <p>Turnify no vende, alquila ni comercializa datos personales de usuarios a terceros con fines publicitarios. Los datos únicamente son procesados por proveedores de infraestructura en la nube indispensables para prestar el servicio (servidores, bases de datos seguras y gateways de pago homologados).</p>
+      </section>
+
+      <section>
+        <h2 class="text-lg font-bold text-white mb-2">4. Derechos de Acceso, Rectificación y Supresión</h2>
+        <p>Todo usuario o titular de datos tiene derecho a solicitar en cualquier momento el acceso, rectificación o eliminación total de sus datos almacenados en nuestros sistemas enviando una solicitud a <span class="text-blue-400 font-mono">privacidad@turnify.app</span>.</p>
+      </section>
+    </div>
+  </div>
+</div>
+{% endblock %}
