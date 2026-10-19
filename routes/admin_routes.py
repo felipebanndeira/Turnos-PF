@@ -13,7 +13,7 @@ from core.persistence import (
 from core.turnos_service import (
     get_agenda, confirmar_turno, cancelar_turno, reprogramar_turno,
     get_estadisticas, registrar_pago, cobrar_turno,
-    get_balance_caja_hoy, cerrar_caja_diaria
+    get_balance_caja_hoy, cerrar_caja_diaria, obtener_precio_y_saldo
 )
 from core.disponibilidad import get_slots_disponibles_excluyendo
 
@@ -63,12 +63,17 @@ def agenda():
     fecha_actual = fecha_param if (filtro_vista == "fecha" and fecha_param) else hoy_str
     
     todos_turnos = load_turnos(nid)
-    # Enriquecer turnos con datos de cliente
+    # Enriquecer turnos con datos de cliente y finanzas (precios, señas y saldos)
     for t in todos_turnos:
         if "cliente" not in t and t.get("cliente_id"):
             c = get_cliente_by_id(t["cliente_id"], nid)
             if c:
                 t["cliente"] = c
+        info_fin = obtener_precio_y_saldo(t, cfg)
+        t["precio_total"] = info_fin["precio_total"]
+        t["monto_abonado"] = info_fin["monto_abonado"]
+        t["monto_senia"] = info_fin["monto_senia"]
+        t["saldo_pendiente"] = info_fin["saldo_pendiente"]
                 
     # 1. Filtrar por Vista (Hoy | Próximos | Todos | Por Fecha)
     if filtro_vista == "hoy":
@@ -123,7 +128,16 @@ def detalle_turno(turno_id):
     if not t:
         flash("Turno no encontrado.", "danger")
         return redirect(url_for("admin.agenda"))
-    c = get_cliente_by_id(t["cliente_id"], nid)
+    if "cliente" not in t and t.get("cliente_id"):
+        t["cliente"] = get_cliente_by_id(t["cliente_id"], nid)
+        
+    info_fin = obtener_precio_y_saldo(t, cfg)
+    t["precio_total"] = info_fin["precio_total"]
+    t["monto_abonado"] = info_fin["monto_abonado"]
+    t["monto_senia"] = info_fin["monto_senia"]
+    t["saldo_pendiente"] = info_fin["saldo_pendiente"]
+
+    c = t.get("cliente")
     return render_template("admin/gestionar_turno.html", config=cfg, turno=t, cliente=c)
 
 @admin_bp.route("/turnos/<turno_id>/confirmar", methods=["POST"])
@@ -135,18 +149,15 @@ def confirmar(turno_id):
         flash("Turno no encontrado.", "danger")
         return redirect(url_for("admin.agenda"))
     
-    # Confirmar turno
+    # Confirmar turno y acreditar seña en caja si corresponde
     ok, msg = confirmar_turno(turno_id, nid)
-    
-    # Si tiene seña requerida y no fue abonada aún, marcar la seña como recibida
-    if ok and t.get("monto_senia", 0) > 0 and t.get("monto_abonado", 0) == 0:
-        registrar_pago(turno_id, float(t["monto_senia"]), "transferencia", nid, "Seña verificada y aprobada por el dueño")
-
     if ok:
-        flash("¡Turno y comprobante de seña aprobados con éxito!", "success")
+        flash("¡Turno aprobado y seña registrada con éxito!", "success")
     else:
         flash(msg, "danger")
-    return redirect(url_for("admin.detalle_turno", turno_id=turno_id))
+
+    redirect_to = request.form.get("next") or request.referrer or url_for("admin.detalle_turno", turno_id=turno_id)
+    return redirect(redirect_to)
 
 @admin_bp.route("/turnos/<turno_id>/cancelar", methods=["POST"])
 @require_admin

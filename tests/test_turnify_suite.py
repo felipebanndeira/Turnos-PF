@@ -245,6 +245,56 @@ class TestTurnifySuite(unittest.TestCase):
         self.assertEqual(snapshot["total_efectivo"], 6000)
         mock_reg_cierre.assert_called_once()
 
+    def test_11_obtener_precio_y_saldo_con_fallbacks(self):
+        """Verifica la detección automática del precio del catálogo y cálculo de saldo con seña."""
+        cfg = {
+            "servicios": [
+                {"id": "s1", "nombre": "Corte Clásico", "precio": 12000.0},
+                {"id": "s2", "nombre": "Barba", "precio": 6000.0}
+            ]
+        }
+        
+        # Caso 1: Turno con precio_total y seña previa abonada
+        t1 = {"precio_total": 12000.0, "monto_abonado": 3600.0, "monto_senia": 3600.0}
+        res1 = turnos_service.obtener_precio_y_saldo(t1, cfg)
+        self.assertEqual(res1["precio_total"], 12000.0)
+        self.assertEqual(res1["monto_abonado"], 3600.0)
+        self.assertEqual(res1["saldo_pendiente"], 8400.0)
+
+        # Caso 2: Turno antiguo sin precio_total pero con precio
+        t2 = {"precio": 6000.0, "monto_abonado": 0.0}
+        res2 = turnos_service.obtener_precio_y_saldo(t2, cfg)
+        self.assertEqual(res2["precio_total"], 6000.0)
+        self.assertEqual(res2["saldo_pendiente"], 6000.0)
+
+        # Caso 3: Turno sin ningún precio numérico, recurre a config por servicio_id
+        t3 = {"servicio_id": "s1", "monto_abonado": 0.0}
+        res3 = turnos_service.obtener_precio_y_saldo(t3, cfg)
+        self.assertEqual(res3["precio_total"], 12000.0)
+        self.assertEqual(res3["saldo_pendiente"], 12000.0)
+
+    @patch("core.turnos_service.upsert_turno")
+    @patch("core.turnos_service.get_turno_by_id")
+    def test_12_confirmar_turno_acredita_senia(self, mock_get_turno, mock_upsert):
+        """Valida que confirmar un turno con seña requerida registre automáticamente la seña en pagos."""
+        mock_get_turno.return_value = {
+            "id": "t_senia",
+            "estado": "pendiente",
+            "monto_senia": 3600.0,
+            "monto_abonado": 0.0,
+            "pagos": []
+        }
+        ok, msg = turnos_service.confirmar_turno("t_senia", self.negocio_id)
+        self.assertTrue(ok)
+        t_mod = mock_get_turno.return_value
+        self.assertEqual(t_mod["estado"], "confirmado")
+        self.assertEqual(t_mod["monto_abonado"], 3600.0)
+        self.assertEqual(t_mod["estado_pago"], "senia_pagada")
+        self.assertEqual(len(t_mod["pagos"]), 1)
+        self.assertEqual(t_mod["pagos"][0]["metodo"], "transferencia")
+        self.assertEqual(t_mod["pagos"][0]["monto"], 3600.0)
+
 
 if __name__ == "__main__":
     unittest.main()
+

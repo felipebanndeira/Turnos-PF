@@ -246,7 +246,7 @@
               <!-- Botón Cobrar Rápido (si está Confirmado o Atendido) -->
               {% if t.estado in ['confirmado', 'pendiente', 'atendido'] and t.estado != 'cobrado' and t.estado != 'cancelado' %}
                 <button type="button" 
-                        onclick="abrirModalCobrar('{{ t.id }}', '{{ t.cliente.nombre if t.cliente else t.cliente_nombre }}', '{{ t.servicio_nombre }}', '{{ t.precio_total or 0 }}')"
+                        onclick="abrirModalCobrar('{{ t.id }}', '{{ t.cliente.nombre if t.cliente else t.cliente_nombre }}', '{{ t.servicio_nombre }}', {{ t.precio_total or 0 }}, {{ t.monto_abonado or 0 }}, {{ t.saldo_pendiente if t.saldo_pendiente is not none else (t.precio_total or 0) }})"
                         class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-sm transition hover:shadow-emerald-500/20">
                   <i data-lucide="dollar-sign" class="w-3.5 h-3.5"></i>
                   <span>Cobrar</span>
@@ -292,17 +292,35 @@
     
     <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
       <div class="flex items-center gap-2">
-        <div class="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
-          <i data-lucide="receipt" class="w-4 h-4"></i>
+        <div class="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+          <i data-lucide="dollar-sign" class="w-4 h-4"></i>
         </div>
         <div>
-          <h3 class="text-base font-bold text-white">Registrar Cobro</h3>
+          <h3 class="text-base font-bold text-white">Cobrar Turno</h3>
           <p class="text-xs text-slate-400" id="modal-subtitulo">Liquidación de turno</p>
         </div>
       </div>
       <button type="button" onclick="cerrarModalCobrar()" class="text-slate-400 hover:text-white p-1">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
+    </div>
+
+    <!-- Desglose de Tarifas y Señas -->
+    <div class="mb-4 bg-slate-950/80 border border-slate-800 rounded-xl p-4 space-y-2">
+      <div class="flex justify-between items-center text-xs text-slate-400">
+        <span>Servicio solicitado:</span>
+        <span class="font-mono font-semibold text-slate-200" id="modal-precio-total">$0</span>
+      </div>
+      <div id="modal-fila-senia" class="flex justify-between items-center text-xs text-emerald-400">
+        <span class="flex items-center gap-1">
+          <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-400"></i> Seña previa abonada:
+        </span>
+        <span class="font-mono font-bold" id="modal-monto-senia">-$0</span>
+      </div>
+      <div class="pt-2 border-t border-slate-800 flex justify-between items-baseline">
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-300">Total a Cobrar:</span>
+        <span class="text-2xl font-mono font-extrabold text-emerald-400 tabular-nums" id="modal-saldo-grande">$0</span>
+      </div>
     </div>
 
     <form method="POST" id="form-cobrar" action="">
@@ -313,33 +331,38 @@
         <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Método de Pago <span class="text-cyan-400">*</span></label>
         <div class="grid grid-cols-2 gap-3">
           <label class="relative flex items-center justify-center gap-2 p-3 rounded-xl border border-slate-700 bg-slate-900/90 cursor-pointer hover:border-emerald-500/50 transition has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-500/10 has-[:checked]:text-emerald-300">
-            <input type="radio" name="metodo" value="efectivo" checked class="peer sr-only" />
+            <input type="radio" name="metodo" value="efectivo" checked class="peer sr-only" onchange="actualizarBotonCobro()" />
             <i data-lucide="banknote" class="w-4 h-4 text-emerald-400 stroke-[1.5]"></i>
             <span class="text-xs font-semibold">Efectivo</span>
           </label>
           <label class="relative flex items-center justify-center gap-2 p-3 rounded-xl border border-slate-700 bg-slate-900/90 cursor-pointer hover:border-blue-500/50 transition has-[:checked]:border-blue-500 has-[:checked]:bg-blue-500/10 has-[:checked]:text-blue-300">
-            <input type="radio" name="metodo" value="transferencia" class="peer sr-only" />
+            <input type="radio" name="metodo" value="transferencia" class="peer sr-only" onchange="actualizarBotonCobro()" />
             <i data-lucide="smartphone" class="w-4 h-4 text-blue-400 stroke-[1.5]"></i>
             <span class="text-xs font-semibold">Transferencia / MP</span>
           </label>
         </div>
       </div>
 
-      <!-- Monto a Recibir -->
+      <!-- Monto a Cobrar (Pre-cargado, con opción de modificarlo) -->
       <div class="mb-4">
-        <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">Monto Recibido ($)</label>
-        <div class="relative">
+        <div class="flex justify-between items-center mb-1.5">
+          <label class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Monto a Registrar ($)</label>
+          <button type="button" onclick="toggleEditarMonto()" class="text-[11px] text-cyan-400 hover:text-cyan-300 underline font-medium">
+            Modificar importe
+          </button>
+        </div>
+        <div class="relative" id="contenedor-input-monto" style="display:none;">
           <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-mono font-bold">$</span>
           <input type="number" step="any" min="0" name="monto" id="modal-monto" required 
-                 class="w-full bg-slate-950 border border-slate-700 rounded-xl pl-8 pr-4 py-2.5 text-base font-mono font-bold text-white focus:outline-none focus:border-cyan-500 transition" />
+                 oninput="onInputMontoManual(this.value)"
+                 class="w-full bg-slate-950 border border-slate-700 rounded-xl pl-8 pr-4 py-2 text-sm font-mono font-bold text-white focus:outline-none focus:border-cyan-500 transition" />
         </div>
-        <p class="text-[11px] text-slate-500 mt-1">Completado automáticamente con la tarifa. Podés editar si hay recargo o descuento.</p>
       </div>
 
       <!-- Detalle / Nota Opcional -->
-      <div class="mb-6">
+      <div class="mb-5">
         <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">Detalle / Nota Opcional</label>
-        <input type="text" name="detalle" placeholder="Ej: Pago con alias, dejó $500 propina..." 
+        <input type="text" name="detalle" placeholder="Ej: Dejó propina, pago exacto..." 
                class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition" />
       </div>
 
@@ -347,9 +370,9 @@
         <button type="button" onclick="cerrarModalCobrar()" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition">
           Cancelar
         </button>
-        <button type="submit" class="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold shadow-lg shadow-emerald-900/40 transition flex items-center gap-1.5">
+        <button type="submit" id="btn-confirmar-cobro" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold shadow-lg shadow-emerald-900/40 transition flex items-center gap-1.5">
           <i data-lucide="check" class="w-4 h-4"></i>
-          <span>Confirmar Cobro</span>
+          <span id="btn-texto-cobrar">Confirmar Cobro</span>
         </button>
       </div>
     </form>
@@ -360,18 +383,72 @@
 
 {% block extra_js %}
 <script>
-  function abrirModalCobrar(turnoId, cliente, servicio, monto) {
+  let currentSaldo = 0;
+
+  function fmtPesos(num) {
+    return '$' + Math.round(Number(num) || 0).toLocaleString('es-AR');
+  }
+
+  function abrirModalCobrar(turnoId, cliente, servicio, precioTotal, montoAbonado, saldoPendiente) {
     const modal = document.getElementById('modal-cobrar');
     const form = document.getElementById('form-cobrar');
     const subtitulo = document.getElementById('modal-subtitulo');
     const inputMonto = document.getElementById('modal-monto');
+    const elPrecioTotal = document.getElementById('modal-precio-total');
+    const filaSenia = document.getElementById('modal-fila-senia');
+    const elMontoSenia = document.getElementById('modal-monto-senia');
+    const elSaldoGrande = document.getElementById('modal-saldo-grande');
+    const contenedorMonto = document.getElementById('contenedor-input-monto');
 
     form.action = `/admin/turnos/${turnoId}/cobrar`;
     subtitulo.textContent = `${cliente || 'Cliente'} — ${servicio || 'Servicio'}`;
-    inputMonto.value = monto || 0;
+    
+    const precio = Number(precioTotal) || 0;
+    const abonado = Number(montoAbonado) || 0;
+    currentSaldo = Number(saldoPendiente);
+    if (isNaN(currentSaldo) || currentSaldo < 0) {
+      currentSaldo = Math.max(0, precio - abonado);
+    }
+
+    elPrecioTotal.textContent = fmtPesos(precio);
+    if (abonado > 0) {
+      filaSenia.style.display = 'flex';
+      elMontoSenia.textContent = '-' + fmtPesos(abonado);
+    } else {
+      filaSenia.style.display = 'none';
+    }
+
+    elSaldoGrande.textContent = fmtPesos(currentSaldo);
+    inputMonto.value = currentSaldo;
+    contenedorMonto.style.display = 'none';
+
+    actualizarBotonCobro();
 
     modal.classList.remove('hidden');
     lucide.createIcons();
+  }
+
+  function toggleEditarMonto() {
+    const contenedor = document.getElementById('contenedor-input-monto');
+    if (contenedor.style.display === 'none') {
+      contenedor.style.display = 'block';
+      document.getElementById('modal-monto').focus();
+    } else {
+      contenedor.style.display = 'none';
+    }
+  }
+
+  function onInputMontoManual(val) {
+    currentSaldo = Number(val) || 0;
+    document.getElementById('modal-saldo-grande').textContent = fmtPesos(currentSaldo);
+    actualizarBotonCobro();
+  }
+
+  function actualizarBotonCobro() {
+    const metodoInput = document.querySelector('input[name="metodo"]:checked');
+    const metodoNom = (metodoInput && metodoInput.value === 'transferencia') ? 'Transferencia' : 'Efectivo';
+    const btnTexto = document.getElementById('btn-texto-cobrar');
+    btnTexto.textContent = `Confirmar Cobro de ${fmtPesos(currentSaldo)} (${metodoNom})`;
   }
 
   function cerrarModalCobrar() {

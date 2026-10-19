@@ -104,15 +104,22 @@
             <span style="color:var(--text-muted); font-size:.875rem;">Total del Servicio:</span>
             <span style="font-weight:600;">{{ (turno.precio_total or turno.precio or 0) | pesos }}</span>
           </div>
+          {% if turno.monto_senia and turno.monto_senia > 0 %}
           <div style="display:flex; justify-content:space-between; margin-bottom:.5rem;">
             <span style="color:var(--text-muted); font-size:.875rem;">Seña Requerida:</span>
-            <span style="font-weight:600;">{{ (turno.monto_senia or 0) | pesos }}</span>
+            <span style="font-weight:600;">{{ turno.monto_senia | pesos }}</span>
           </div>
+          {% endif %}
           <div style="display:flex; justify-content:space-between; margin-bottom:.75rem; padding-bottom:.75rem; border-bottom:1px dashed var(--border);">
             <span style="color:var(--text-muted); font-size:.875rem;">Abonado a la fecha:</span>
             <span style="font-weight:600; color:var(--success-text);">{{ (turno.monto_abonado or 0) | pesos }}</span>
           </div>
           
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; padding:0.6rem 0.85rem; background:rgba(16, 185, 129, 0.08); border:1px solid rgba(16, 185, 129, 0.25); border-radius:8px;">
+            <span style="font-size:0.875rem; font-weight:700; color:var(--text);">Saldo a Cobrar:</span>
+            <span style="font-size:1.2rem; font-weight:800; color:#10b981; font-family:monospace;">{{ (turno.saldo_pendiente or 0) | pesos }}</span>
+          </div>
+
           <div style="display:flex; align-items:center; gap:.5rem; margin-bottom:1rem;">
             <span class="badge badge-{{ turno.estado_pago or 'pendiente' }}">{{ (turno.estado_pago or 'pendiente')|replace('_', ' ') }}</span>
           </div>
@@ -130,19 +137,28 @@
           </div>
           {% endif %}
 
-          <!-- Registrar cobro o pago -->
+          <!-- Registrar cobro con precio precargado y selección simple de método -->
           {% if turno.estado != 'cobrado' and turno.estado != 'cancelado' %}
           <form method="POST" action="{{ url_for('admin.cobrar_turno_view', turno_id=turno.id) }}" style="display:flex; flex-direction:column; gap:.75rem; margin-top:1rem; padding-top:1rem; border-top:1px solid var(--border);">
-            <div style="display:flex; gap:.5rem;">
-              <select name="metodo" class="form-control" style="flex:1; font-size:.85rem;">
-                <option value="efectivo">Efectivo</option>
-                <option value="transferencia">Transferencia / MP</option>
-              </select>
-              <input type="number" step="any" name="monto" class="form-control" value="{{ (turno.precio_total or turno.precio or 0) - (turno.monto_abonado or 0) }}" placeholder="Monto" style="flex:1; font-size:.85rem;" required />
+            <div>
+              <label class="form-label" style="font-size:0.8rem; margin-bottom:0.4rem; display:block;">Método de Pago</label>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem;">
+                <label style="display:flex; align-items:center; justify-content:center; gap:0.4rem; padding:0.6rem; background:var(--bg); border:1px solid var(--border); border-radius:6px; cursor:pointer; font-size:0.85rem; font-weight:600;">
+                  <input type="radio" name="metodo" value="efectivo" checked onchange="document.getElementById('lbl-metodo-cobro').textContent='(Efectivo)'" />
+                  <span>💵 Efectivo</span>
+                </label>
+                <label style="display:flex; align-items:center; justify-content:center; gap:0.4rem; padding:0.6rem; background:var(--bg); border:1px solid var(--border); border-radius:6px; cursor:pointer; font-size:0.85rem; font-weight:600;">
+                  <input type="radio" name="metodo" value="transferencia" onchange="document.getElementById('lbl-metodo-cobro').textContent='(Transferencia)'" />
+                  <span>📱 Transf. / MP</span>
+                </label>
+              </div>
             </div>
+
+            <!-- Saldo a registrar pre-calculado -->
+            <input type="hidden" name="monto" value="{{ turno.saldo_pendiente if turno.saldo_pendiente is not none else ((turno.precio_total or turno.precio or 0) - (turno.monto_abonado or 0)) }}" />
             <input type="text" name="detalle" class="form-control" placeholder="Nota / Detalle opcional" style="font-size:.85rem;" />
-            <button type="submit" class="btn btn-success" style="width:100%; justify-content:center;">
-              <i data-lucide="dollar-sign" style="width:16px;"></i> Confirmar Cobro del Turno
+            <button type="submit" class="btn btn-success" style="width:100%; justify-content:center; font-weight:700; padding:0.65rem;">
+              <i data-lucide="dollar-sign" style="width:16px;"></i> Confirmar Cobro de {{ (turno.saldo_pendiente or 0) | pesos }} <span id="lbl-metodo-cobro" style="font-size:0.75rem; opacity:0.85; margin-left:4px;">(Efectivo)</span>
             </button>
           </form>
           {% elif turno.estado == 'cobrado' %}
