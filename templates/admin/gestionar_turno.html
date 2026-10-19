@@ -43,7 +43,15 @@
       </div>
       <div>
         <div class="form-label">Solicitado el</div>
-        <div style="font-weight:500;">{{ turno.creado_en.split('T')[0] | fecha_es }}</div>
+        <div style="font-weight:500;">
+          {% if turno.creado_en %}
+            {{ turno.creado_en.split('T')[0] | fecha_es }}
+          {% elif turno.creado_el %}
+            {{ turno.creado_el | fecha_es }}
+          {% else %}
+            {{ turno.fecha | fecha_es }}
+          {% endif %}
+        </div>
       </div>
     </div>
 
@@ -94,19 +102,19 @@
         <div style="background:var(--bg-input); padding:1rem; border-radius:var(--radius); border:1px solid var(--border);">
           <div style="display:flex; justify-content:space-between; margin-bottom:.5rem;">
             <span style="color:var(--text-muted); font-size:.875rem;">Total del Servicio:</span>
-            <span style="font-weight:600;">{{ turno.precio_total | pesos }}</span>
+            <span style="font-weight:600;">{{ (turno.precio_total or turno.precio or 0) | pesos }}</span>
           </div>
           <div style="display:flex; justify-content:space-between; margin-bottom:.5rem;">
             <span style="color:var(--text-muted); font-size:.875rem;">Seña Requerida:</span>
-            <span style="font-weight:600;">{{ turno.monto_senia | pesos }}</span>
+            <span style="font-weight:600;">{{ (turno.monto_senia or 0) | pesos }}</span>
           </div>
           <div style="display:flex; justify-content:space-between; margin-bottom:.75rem; padding-bottom:.75rem; border-bottom:1px dashed var(--border);">
             <span style="color:var(--text-muted); font-size:.875rem;">Abonado a la fecha:</span>
-            <span style="font-weight:600; color:var(--success-text);">{{ turno.monto_abonado | pesos }}</span>
+            <span style="font-weight:600; color:var(--success-text);">{{ (turno.monto_abonado or 0) | pesos }}</span>
           </div>
           
           <div style="display:flex; align-items:center; gap:.5rem; margin-bottom:1rem;">
-            <span class="badge badge-{{ turno.estado_pago }}">{{ turno.estado_pago|replace('_', ' ') }}</span>
+            <span class="badge badge-{{ turno.estado_pago or 'pendiente' }}">{{ (turno.estado_pago or 'pendiente')|replace('_', ' ') }}</span>
           </div>
 
           <!-- Comprobante adjunto por el cliente -->
@@ -130,7 +138,7 @@
                 <option value="efectivo">Efectivo</option>
                 <option value="transferencia">Transferencia / MP</option>
               </select>
-              <input type="number" step="any" name="monto" class="form-control" value="{{ (turno.precio_total or 0) - (turno.monto_abonado or 0) }}" placeholder="Monto" style="flex:1; font-size:.85rem;" required />
+              <input type="number" step="any" name="monto" class="form-control" value="{{ (turno.precio_total or turno.precio or 0) - (turno.monto_abonado or 0) }}" placeholder="Monto" style="flex:1; font-size:.85rem;" required />
             </div>
             <input type="text" name="detalle" class="form-control" placeholder="Nota / Detalle opcional" style="font-size:.85rem;" />
             <button type="submit" class="btn btn-success" style="width:100%; justify-content:center;">

@@ -20,9 +20,11 @@ app.register_blueprint(admin_bp)
 @app.template_filter("pesos")
 def pesos_filter(value):
     try:
+        if value is None or str(value).strip() in ("", "None"):
+            return "$0"
         return f"${float(value):,.0f}".replace(",", ".")
-    except (ValueError, TypeError):
-        return value
+    except Exception:
+        return "$0"
 
 # Filtro Jinja2: nombre del día en español
 DIAS_ES = {0:"Lunes",1:"Martes",2:"Miércoles",3:"Jueves",4:"Viernes",5:"Sábado",6:"Domingo"}
