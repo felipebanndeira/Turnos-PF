@@ -222,6 +222,10 @@ def estado_turno(url_id, turno_id):
     if not t:
         return "Turno no encontrado", 404
         
+    c = get_cliente_by_id(t.get("cliente_id"), url_id)
+    if not c:
+        c = {"nombre": t.get("cliente_nombre", "Cliente"), "telefono": ""}
+
     # Verificar si el turno requiere seña y venció el límite de 10 minutos para subir comprobante
     segundos_restantes_senia = 0
     if t["estado"] == "pendiente" and t.get("monto_senia", 0) > 0 and not t.get("comprobante_url"):
